@@ -1,0 +1,61 @@
+<!doctype html>
+<!-- キシドラ！（ブラウザ版）を最新版にするページ（2026-10-27。ユーザー「safariを強制終了して再度立ち上げても駄目だ。反映されない。」）。
+     ゲームのファイルの古い写し（サービスワーカーとその写し）を消して、ゲームを読み直す。記録（セーブ）と設定はブラウザの別の
+     置き場（IndexedDB）にあるので消えない。消すのはこのゲームの場所のものだけ（同じ github.io のほかのページのものは消さない）。
+     tools/publish_web.sh が公開の置き場に update.html として写す。ゲームの中の 設定 →「最新版にする」も同じこと（AppVersion）。 -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>キシドラ！ 最新版にする</title>
+<style>
+	:root { color-scheme: dark; }
+	body { margin: 0; background: #2a1410; color: #fff4e8; font: 16px/1.7 -apple-system, "Hiragino Sans", "Meiryo", sans-serif;
+		padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 24px max(20px, env(safe-area-inset-left)); }
+	h1 { font-size: 22px; color: #ffd870; margin: 0 0 12px; }
+	p { margin: 0 0 12px; }
+	.note { font-size: 14px; color: #f0d8c0; }
+	button { display: block; width: 100%; max-width: 420px; padding: 16px; margin: 20px 0 12px; font: bold 18px -apple-system, "Hiragino Sans", "Meiryo", sans-serif;
+		color: #fff; background: #2c6a3a; border: 2px solid rgba(255, 255, 255, .35); border-radius: 12px; }
+	button:disabled { opacity: .6; }
+	#msg { min-height: 1.7em; color: #90f0a0; }
+</style>
+</head>
+<body>
+<h1>キシドラ！ を最新版にする</h1>
+<p>新しい版が出ているのに、前の版のままのときに使うページです。</p>
+<p>ブラウザが持っているゲームのファイルの古い写しを消して、ゲームを読み直します。</p>
+<p class="note">記録（セーブ）と設定は消えません。</p>
+<button id="go" type="button">最新版にする</button>
+<div id="msg"></div>
+<script>
+(function () {
+	var go = document.getElementById('go');
+	var msg = document.getElementById('msg');
+	var base = location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+	go.onclick = function () {
+		go.disabled = true;
+		msg.textContent = '古い写しを消しています…';
+		var a = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function (rs) {
+			return Promise.all(rs.filter(function (r) { return r.scope.indexOf(location.origin + base) === 0; })
+				.map(function (r) { return r.unregister(); }));
+		}) : Promise.resolve();
+		var b = window.caches ? caches.keys().then(function (ks) {
+			return Promise.all(ks.filter(function (k) { return k.indexOf('キシドラ！-sw-cache-') === 0; })
+				.map(function (k) { return caches.delete(k); }));
+		}) : Promise.resolve();
+		Promise.all([a, b]).then(function () {
+			msg.textContent = '消しました。ゲームを開きます…（タイトルの右上の日時が新しくなっていれば最新版）';
+			setTimeout(function () { location.replace(base + '?r=' + Date.now()); }, 800);
+		}, function (e) {
+			msg.textContent = 'うまくいきませんでした：' + e;
+			go.disabled = false;
+		});
+	};
+	if (location.hash === '#auto') {	// （確かめ用：ボタンを押さずに動く）
+		go.onclick();
+	}
+})();
+</script>
+</body>
+</html>
