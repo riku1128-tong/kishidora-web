@@ -282,7 +282,7 @@ T_GACHA_PULL10	10回ひく（{n} コイン）
 T_GACHA_BACK	もどる
 T_GACHA_GOT	{yellow}ガチャの結果
 T_GACHA_NEWTAG	{yellow}NEW!
-T_GACHA_TKT	{green}+チケット
+T_GACHA_TKT	{yellow}券
 T_GACHA_KEYS	{gray}A:つぎへ
 T_GOODS_LINE	{s}（{n} コイン）
 T_GOODS_HAVE	持っている {n}
@@ -295,8 +295,8 @@ T_FG_MATUP	素材の合成
 T_FG_MATS	素材を見る
 T_FG_ENH	強化する
 T_FG_EVO	進化する
-T_FG_ADD	スロットを増やす（フエルスロット {n}）
-T_FG_RESET	強化を消す（スロットリセット {n}）
+T_FG_ADD	スロットを増やす（{n} 個）
+T_FG_RESET	強化を消す（{n} 個）
 T_FG_SRC_HEAD	強化に使う素材
 T_FG_SRC_ITEM	品を使う
 T_FG_SRC_LINE	{s} ×{n}

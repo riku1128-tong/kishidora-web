@@ -53,7 +53,7 @@ static void show_results(u8 n) {
     say(BX_RES, 44, y, TXT_GRAY_S);
     say(BX_RES, 66, y, ITEMN_0 + g->id);
     if (g->fresh) say(BX_RES, 196, y, T_GACHA_NEWTAG);
-    if (g->ticket) say(BX_RES, 196 - 50, y, T_GACHA_TKT);
+    if (g->ticket) say(BX_RES, 224, y, T_GACHA_TKT);
   }
   say(BX_RES, 10, 152, T_GACHA_KEYS);
   tb_flush(BX_RES);
@@ -63,7 +63,7 @@ static void show_results(u8 n) {
 }
 
 static void gacha_body(void) {
-  win_open(BX_BODY, 2, 4, 28, 11, T_BODY, PAL_W);
+  win_open(BX_BODY, 2, 4, 28, 12, T_BODY, PAL_W);
   say_center(BX_BODY, 4, T_GACHA_DESC);
   say(BX_BODY, 20, 20, T_GACHA_RATES);
   sayn(BX_BODY, 30, 48, T_GACHA_PULL1, GACHA_PRICE);

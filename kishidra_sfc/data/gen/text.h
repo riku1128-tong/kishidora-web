@@ -1277,5 +1277,5 @@
 #define T_MIRAGE_RULES           1273
 #define T_RES_TUT_GIFT           1274
 #define N_TEXT 1275
-#define N_GLYPH 689
+#define N_GLYPH 690
 #endif

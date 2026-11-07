@@ -89,7 +89,8 @@ static void do_evolve(u16 i) {
   u8 id = sv.inv[i].id, to = evolve_target(id), k, e;
   if (to == 255) { mk_notice(T_FG_NO_EVO, 0); return; }
   evolve_need(id);
-  win_open(BX_SUB, 4, 11, 24, (u8)((18 + (need.n + 1) * 14 + 13) >> 3), T_SUB, PAL_W_FRAME);
+  k = (u8)((18 + (need.n + 1) * 14 + 13) >> 3);     /* below the confirm dialog (rows 8-14) */
+  win_open(BX_SUB, 4, k > 13 ? 28 - k : 15, 24, k, T_SUB, PAL_W_FRAME);
   targ_str = ITEMN_0 + to;
   say(BX_SUB, 10, 4, T_FG_TO);
   for (k = 0; k < need.n; ++k) {
