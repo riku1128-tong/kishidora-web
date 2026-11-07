@@ -70,3 +70,76 @@ void box_hide(u8 id) {
   }
   bgmap_dirty |= 4;
 }
+
+/* ---------------------------------------------------------------- windows
+ * Windows use low-priority BG3 tiles so that sprites (cursor) show above them.  Low BG3
+ * is below BG1, so the BG1 picture is cleared under every open window and restored from a
+ * snapshot when it closes.  The BG3 cells a window covers are saved and put back on close,
+ * so a dialog over another window does not erase it. */
+#define WIN_SAVE 2048
+static u16 bg1_base[1024];
+static u16 bg3_save[WIN_SAVE];
+static u16 save_top;
+static u8 wins[12][5];        /* id, x, y, w, h of the open windows (in opening order) */
+static u16 wins_at[12];
+static u8 nwins;
+
+void win_base(void) {
+  memcpy(bg1_base, bg1map, sizeof(bg1_base));
+  nwins = 0;
+  save_top = 0;
+}
+
+/* screen tile rect -> BG1 map rows under it (BG1 may be scrolled vertically) */
+static void bg1_rect(u8 x, u8 y, u8 w, u8 h, u8 clear) {
+  u8 i, r, r0, r1;
+  u16 k, vs = scroll[1];
+  r0 = (u8)((((u16)y << 3) + vs) >> 3);
+  r1 = (u8)((((u16)(y + h) << 3) - 1 + vs) >> 3);
+  for (r = r0; ; ++r) {
+    k = ((u16)(r & 31) << 5) + x;
+    for (i = 0; i < w && x + i < 32; ++i, ++k) bg1map[k] = clear ? 0 : bg1_base[k];
+    if (r == r1) break;
+  }
+  bgmap_dirty |= 1;
+}
+
+static void bg3_rect(u8 x, u8 y, u8 w, u8 h, u16 at, u8 restore) {
+  u8 i, j;
+  u16 k;
+  for (j = 0; j < h; ++j) {
+    k = ((u16)(y + j) << 5) + x;
+    for (i = 0; i < w; ++i, ++k, ++at) {
+      if (at >= WIN_SAVE) return;
+      if (restore) bg3map[k] = bg3_save[at]; else bg3_save[at] = bg3map[k];
+    }
+  }
+  bgmap_dirty |= 4;
+}
+
+void win_open(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal) {
+  u8 i;
+  for (i = 0; i < nwins && wins[i][0] != id; ++i) {}
+  if (i == nwins) {
+    if (nwins == 12) return;
+    ++nwins;
+    wins_at[i] = save_top;
+    bg3_rect(x, y, w, h, save_top, 0);
+    save_top += (u16)w * h;
+  }
+  wins[i][0] = id; wins[i][1] = x; wins[i][2] = y; wins[i][3] = w; wins[i][4] = h;
+  bg1_rect(x, y, w, h, 1);
+  box(id, x, y, w, h, tile, pal, BOX_WINDOW | BOX_LOW);
+}
+
+void win_close(u8 id) {
+  u8 i, j;
+  for (i = 0; i < nwins && wins[i][0] != id; ++i) {}
+  if (i == nwins) { box_hide(id); return; }
+  bg3_rect(wins[i][1], wins[i][2], wins[i][3], wins[i][4], wins_at[i], 1);
+  bg1_rect(wins[i][1], wins[i][2], wins[i][3], wins[i][4], 0);
+  if (i == nwins - 1) save_top = wins_at[i];
+  for (j = i; j + 1 < nwins; ++j) { memcpy(wins[j], wins[j + 1], 5); wins_at[j] = wins_at[j + 1]; }
+  --nwins;
+  for (i = 0; i < nwins; ++i) bg1_rect(wins[i][1], wins[i][2], wins[i][3], wins[i][4], 1);
+}

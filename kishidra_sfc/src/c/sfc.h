@@ -58,5 +58,6 @@ void vram_now(void);          /* ea0=vaddr ea1=src ea2=bank ea3=size ; display b
 u8   vram_queue(void);        /* ea0..ea4 ; returns 1 if queued */
 void force_blank(u8 on);
 void set_vram_layout(void);
+void vram_clear(void);       /* display blanked */
 
 #endif

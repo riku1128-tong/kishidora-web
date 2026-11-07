@@ -38,6 +38,9 @@ void say_center(u8 id, u16 py, u16 msg);
 u16  msg_width(u16 msg);
 void box_pal(u8 id, u8 tx, u8 ty, u8 tw, u8 th, u8 pal);
 void box_hide(u8 id);
+void win_base(void);          /* snapshot BG1 (call after loading the screen picture) */
+void win_open(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal);
+void win_close(u8 id);
 
 /* menu cursor (sprite) */
 void cursor_at(s16 x, s16 y);

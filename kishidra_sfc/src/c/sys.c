@@ -37,6 +37,16 @@ void queue_vram(u16 vaddr, u16 src, u8 bank, u16 size) {
   while (!vram_queue()) wait_frame();
 }
 
+/* large uploads while the display is on: 2KB per queue entry */
+void queue_vram_big(u16 vaddr, u16 src, u8 bank, u16 size) {
+  u16 c;
+  while (size) {
+    c = size > 2048 ? 2048 : size;
+    queue_vram(vaddr, src, bank, c);
+    vaddr += c >> 1; src += c; size -= c;
+  }
+}
+
 void clear_maps(void) {
   u16 i;
   for (i = 0; i < 1024; ++i) { bg1map[i] = 0; bg2map[i] = 0; bg3map[i] = 0; }
@@ -48,7 +58,7 @@ static const u16 bg3pal[32] = {
   0x0000, 0x7fff, 0x0842, 0x7fff,     /* 0 white */
   0x0000, 0x23ff, 0x0842, 0x23ff,     /* 1 yellow */
   0x0000, 0x295f, 0x0842, 0x295f,     /* 2 red */
-  0x0000, 0x5294, 0x0842, 0x5294,     /* 3 gray */
+  0x0000, 0x0421, 0x0866, 0x5294,     /* 3 window gray (shadow, fill, gray) */
   0x0000, 0x0421, 0x0866, 0x7fff,     /* 4 window: shadow, fill, white */
   0x0000, 0x0421, 0x0866, 0x23ff,     /* 5 window yellow */
   0x0000, 0x0421, 0x0866, 0x229b,     /* 6 window frame gold */
@@ -62,6 +72,7 @@ void set_bg3_palettes(void) {
 }
 
 void sys_init(void) {
+  vram_clear();
   set_vram_layout();
   bgmode = 0x09;         /* mode 1, BG3 priority */
   tm_main = 0x17;

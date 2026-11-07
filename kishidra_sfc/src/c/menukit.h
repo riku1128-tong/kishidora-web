@@ -4,6 +4,7 @@
 #define MENUKIT_H
 #include "game.h"
 #include "sound.h"
+#include "save.h"
 
 #define MK_OBJ_VRAM 0x6000
 #define MK_PAL_MENU 0          /* OBJ palette numbers (colours 128 + 16 * n) */
@@ -32,6 +33,7 @@ static void mk_screen(void) {
   bgmode = 0x09;
   tm_main = 0x15;           /* BG1 + BG3 + OBJ */
   oam_clear();
+  win_base();
 }
 
 static void mk_cursor(s16 x, s16 y) {
@@ -49,10 +51,12 @@ typedef struct {
 static void (*mk_draw)(u16 i, u8 y);    /* draw row i at y (box pixels) */
 static void (*mk_moved)(u16 i);         /* cursor moved (may be 0) */
 static void (*mk_sprites)(void);        /* extra sprites every frame (may be 0) */
+static void (*mk_header)(void);         /* fixed text of the list box (may be 0) */
 
 static void list_draw(List *l) {
   u8 r;
   tb_clear(l->box);
+  if (mk_header) mk_header();
   for (r = 0; r < l->rows && l->top + r < l->n; ++r) mk_draw(l->top + r, l->y + r * l->lh);
   if (l->top > 0) say(l->box, l->x + 0, 0, TXT_MORE_UP);
   if (l->top + l->rows < l->n) say(l->box, l->x + 0, l->y + l->rows * l->lh - 2, TXT_MORE_DOWN);
@@ -78,6 +82,8 @@ static void list_fix(List *l) {
 static u16 list_run(List *l, u16 keys) {
   u16 top0 = 0xffff, k, cur0 = 0xffff;
   keys |= BTN_A | BTN_B;
+  l->sx = tb[l->box * 8] * 8;
+  l->sy = tb[l->box * 8 + 1] * 8;
   for (;;) {
     list_fix(l);
     if (l->top != top0) { list_draw(l); top0 = l->top; }
@@ -105,24 +111,24 @@ static u16 list_run(List *l, u16 keys) {
 
 /* ---------------------------------------------------------------- dialogs (box 11) */
 #define MK_BOX_DLG 11
-#define MK_T_DLG 900
+#define MK_T_DLG 865
 
 /* message window with one or two lines; waits for A / B */
 static void mk_notice(u16 l1, u16 l2) {
-  box(MK_BOX_DLG, 3, 9, 26, l2 ? 6 : 4, MK_T_DLG, PAL_W, BOX_WINDOW);
+  win_open(MK_BOX_DLG, 3, 9, 26, l2 ? 6 : 4, MK_T_DLG, PAL_W);
   say_center(MK_BOX_DLG, 6, l1);
   if (l2) say_center(MK_BOX_DLG, 22, l2);
   tb_flush(MK_BOX_DLG);
   do { oam_next = 0; if (mk_sprites) mk_sprites(); oam_finish(); frame_wait(); } while (!(pad_new & (BTN_A | BTN_B)));
   se_play(SE_OK);
-  box_hide(MK_BOX_DLG);
+  win_close(MK_BOX_DLG);
 }
 
 /* yes / no on a question line; returns 1 = yes */
 static u8 mk_confirm(u16 q, u16 q2) {
   u8 sel = 0;
-  u8 h = q2 ? 8 : 6, y0 = q2 ? 34 : 20;
-  box(MK_BOX_DLG, 6, 8, 20, h, MK_T_DLG, PAL_W, BOX_WINDOW);
+  u8 h = q2 ? 7 : 5, y0 = q2 ? 32 : 18;
+  win_open(MK_BOX_DLG, 6, 8, 20, h, MK_T_DLG, PAL_W);
   say_center(MK_BOX_DLG, 4, q);
   if (q2) say_center(MK_BOX_DLG, 18, q2);
   say(MK_BOX_DLG, 40, y0, T_YESNO_Y);
@@ -138,7 +144,7 @@ static u8 mk_confirm(u16 q, u16 q2) {
     if (pad_new & BTN_A) { se_play(SE_OK); break; }
     if (pad_new & BTN_B) { se_play(SE_CANCEL); sel = 1; break; }
   }
-  box_hide(MK_BOX_DLG);
+  win_close(MK_BOX_DLG);
   return sel == 0;
 }
 
@@ -147,6 +153,42 @@ static void mk_item_name(u8 bx, u16 x, u8 y, const Inv *it) {
   u8 n = enh_count(it);
   say(bx, x, y, ITEMN_0 + it->id);
   if (n) sayn(bx, x + msg_width(ITEMN_0 + it->id) + 1, y, TXT_PLUS, n);
+}
+
+/* item card: 5 lines in a box at least 9 tiles tall */
+static void mk_item_detail(u8 bx, const Inv *it) {
+  const Item *r;
+  u16 x;
+  u8 k, n;
+  if (!it) { say(bx, 10, 4, T_SLOT_EMPTY); return; }
+  r = &items[it->id];
+  targ_str = RARN_0 + r->rarity;
+  say(bx, 10, 4, TXT_YELLOW_S);
+  x = 10 + msg_width(RARN_0 + r->rarity) + 8;
+  say(bx, x, 4, WTN_0 + r->type);
+  x += msg_width(WTN_0 + r->type) + 8;
+  if (r->type != WT_SHIELD && r->element != EL_NONE) say(bx, x, 4, ELN_0 + r->element);
+  if (r->type == WT_SHIELD) { sayn(bx, 150, 4, T_ITEM_HP, r->atk); sayn(bx, 200, 4, T_ITEM_DEF, r->def); }
+  else { sayn(bx, 150, 4, T_ITEM_ATK, r->atk); if (enh_sum(it)) sayn(bx, 150 + 52, 4, TXT_PLUS, enh_sum(it)); }
+  n = inv_slots_of(it);
+  targ_num2 = n;
+  sayn(bx, 10, 17, T_ITEM_SLOTS, enh_count(it));
+  for (k = 0; k < n; ++k) say(bx, 96 + k * 12, 17, T_STAR_0 + enh_get(it, k));
+  if (r->type != WT_SHIELD) {
+    sayn(bx, 150, 17, T_ITEM_CRIT, r->crit);
+    say(bx, 10, 30, T_ITEM_SKILLS);
+    x = 46;
+    for (k = 0; k < 3; ++k) {
+      if (it->sk[k] == 255) continue;
+      say(bx, x, 30, SKILLN_0 + it->sk[k]);
+      x += msg_width(SKILLN_0 + it->sk[k]) + 10;
+    }
+  }
+  if (r->effect != FX_NONE) {
+    targ_str = FXN_0 + r->effect;
+    say(bx, 10, 43, T_ITEM_FX);
+    say(bx, 18, 56, FXD_0 + r->effect);
+  }
 }
 
 static void mk_wait_release(void) {

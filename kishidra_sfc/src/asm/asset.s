@@ -174,6 +174,32 @@ CFUNC asset_vram
   A16
   lda _ea+0
   jsr asset_find
+  lda asset_flags
+  and #1
+  bne @packed
+  ; stored raw: DMA straight from ROM
+  A8
+  lda #$80
+  sta VMAIN
+  A16
+  lda _ea+2
+  sta VMADDL
+  lda #$1801
+  sta DMAP0+$10
+  lda lz_src
+  sta A1T0L+$10
+  lda asset_size
+  sta DAS0L+$10
+  A8
+  lda lz_src+2
+  sta A1B0+$10
+  lda #$02
+  sta MDMAEN
+  plb
+  plp
+  rtl
+@packed:
+  .a16
   ldx #$8000
   jsr unpack7f
   tay                  ; size

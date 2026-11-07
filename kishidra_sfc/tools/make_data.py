@@ -574,6 +574,15 @@ class Gen:
         'ABCDEFGHIJ' 'KLMNOPQRST' 'UVWXYZ.-!?' 'abcdefghij' 'klmnopqrst' 'uvwxyz&+*/' '0123456789' '          ' '          ',
     ]
 
+    def build_difficulty_text(self):
+        def mult(v):
+            x = v / 100
+            return ('%g' % x)
+        for i, k in enumerate(['easy', 'normal', 'hard', 'extra', 'lunatic']):
+            r = self.T['DIFFICULTY_RULES'][k]
+            self.text('DIFFD1_%d' % i, '被ダメージ %s 倍・ミラクルの回復 %s 倍' % (mult(r['atk']), mult(r['heal'])))
+            self.text('DIFFD2_%d' % i, 'ガード%d・ジャスト%d・ミラクル%dフレーム' % (r['guard'], r['just'], r['miracle']))
+
     def build_name_grid(self):
         rows = []
         for page in self.NAME_PAGES:
@@ -675,6 +684,7 @@ def main():
     g.build_estats()
     g.build_story()
     g.build_name_grid()
+    g.build_difficulty_text()
     g.build_ui_text()
     g.write_text()
     g.write()

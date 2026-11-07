@@ -193,3 +193,155 @@ TXT_HELP_MEAT	{yellow}R:肉でガードしてあげよう！
 TXT_CURSOR	{yellow}▶
 TXT_SPACE	 
 TXT_MIRAGE_ITEM	{s} {yellow}+{n}
+# menu kit
+TXT_MORE_UP	{gray}▲
+TXT_MORE_DOWN	{gray}▼
+TXT_PLUS	{yellow}+{n}
+TXT_SPEAKER	{yellow}{s}
+TXT_S	{s}
+TXT_N	{n}
+TXT_YELLOW_S	{yellow}{s}
+TXT_GRAY_S	{gray}{s}
+TXT_RED_S	{red}{s}
+# new game
+T_DIFF_NOTE	{gray}あとから「その他」→「難易度」で変えられる
+T_NAME_KEYS	{gray}A:入力 B:1字けす L/R:文字の種類 START:けってい
+T_OPENED	新しい場所に行けるようになった！
+T_ORB_GET	{yellow}{s}{c0}を取り戻した！
+T_THE_END	{yellow}Thank you for playing!
+TXT_NAME	{name}
+# map
+T_MAP_TICKET2	チケット {n}
+T_MAP_CLEAR2	クリア {n}/{m}
+T_MAP_KEYS	{gray}A:えらぶ  Y:メニュー  ←→:いどう
+T_WIN_KEYS	{gray}A:けってい B:もどる
+T_ROW_TREASURE	宝の部屋
+T_ROW_GACHA	ガチャ
+T_ROW_GOODS	道具屋
+T_ROW_MONEY	金策
+T_ROW_TUTORIAL	チュートリアル
+T_ROW_TRAINING	カカシ（ガードの練習）
+T_LBL_CLEAR	{yellow}クリア
+T_LBL_MID	{red}中ボス
+T_LBL_BOSS	{red}ボス
+T_LBL_MAOU	{red}魔王
+T_LBL_SECRET	{red}裏ボス
+T_LBL_TICKET	{yellow}チケット {n}
+T_LBL_NOTICKET	{gray}チケット 0
+T_LBL_WAVE	{gray}WAVE {n}
+T_SORTIE_GO	出撃する
+T_SORTIE_EQUIP	装備をかえる
+T_SORTIE_BACK	もどる
+T_INV_FULL	持ち物がいっぱい
+T_INV_FULL2	売るか強化に使って、あけよう
+T_LOCKED_ROW	まだ行けない
+T_MEN_GRAY	{gray}{s} {n}
+T_ROW_TREASURE_GRAY	{gray}宝の部屋
+T_NEED_MAIN	MAIN の武器を装備しよう
+T_MIRAGE_RULE2	{gray}難易度はルナティック。ガードでも\nダメージを受ける。クリアで 500000 コイン
+T_MIRAGE_ASK	蜃気楼の斜塔に挑む？
+# menus
+T_ITEM_SLOTS	強化 {n}/{m}
+T_STAR_0	{gray}☆
+T_STAR_1	★
+T_STAR_2	{yellow}★
+T_STAR_3	{red}◆
+T_MENU_STATUS	必殺技
+T_MENU_DIFF	難易度
+T_MENU_TITLE	タイトルへ
+T_MENU_SHOP	ショップ
+T_MENU_HEAD	メニュー
+T_TAG_MAIN	{yellow}M
+T_TAG_SUB	{yellow}S
+T_TAG_THIRD	{yellow}T
+T_TAG_SHIELD	{yellow}盾
+T_TAG_FAV	{red}♥
+T_LIST_KEYS	{gray}A:えらぶ B:もどる SELECT:ならび {s}
+T_EQ_KEYS	{gray}A:かえる X:はずす B:もどる
+T_ITEMS_HEAD	持ち物 {n}/{m}
+T_ACT_FAV	お気に入り（売れなくなる）
+T_ACT_UNFAV	お気に入りをやめる
+T_ACT_SELL	売る（{n} コイン）
+T_ACT_FORGE	鍛冶屋で強化・進化
+T_ACT_BACK	もどる
+T_SOLD	{n} コインで売った
+T_CANT_SELL	装備中・お気に入りは売れない
+T_NO_SHOP	店のある町に、まだ行けない
+T_SHIELD_KEEP	盾ははずせない
+T_MAIN_KEEP	MAIN ははずせない
+T_SP_HEAD	必殺技（スキルの順番）
+T_SP_NONE	{gray}？？？
+T_OPT_GUARD	ガードの遅れ補正 {n} フレーム
+T_OPT_BACK	もどる
+T_TO_TITLE	タイトルにもどる？
+# shop
+T_SHOP_HEAD	{s}のショップ
+T_GACHA_RATES	N 70%・R 27%・SR 3%\n剣 30%・槍 30%・槌 30%・盾 10%
+T_GACHA_PULL1	1回ひく（{n} コイン）
+T_GACHA_PULL10	10回ひく（{n} コイン）
+T_GACHA_BACK	もどる
+T_GACHA_GOT	{yellow}ガチャの結果
+T_GACHA_NEWTAG	{yellow}NEW!
+T_GACHA_TKT	{green}+チケット
+T_GACHA_KEYS	{gray}A:つぎへ
+T_GOODS_LINE	{s}（{n} コイン）
+T_GOODS_HAVE	持っている {n}
+T_GOODS_BOUGHT	買った！
+T_GOODS_LIMIT	これ以上持てない
+T_BUY_ASK	買いますか？
+# forge
+T_FG_PICK	強化・進化する品を選ぶ
+T_FG_MATUP	素材の合成
+T_FG_MATS	素材を見る
+T_FG_ENH	強化する
+T_FG_EVO	進化する
+T_FG_ADD	スロットを増やす（フエルスロット {n}）
+T_FG_RESET	強化を消す（スロットリセット {n}）
+T_FG_SRC_HEAD	強化に使う素材
+T_FG_SRC_ITEM	品を使う
+T_FG_SRC_LINE	{s} ×{n}
+T_FG_PICK_SRC	強化に使う品は？
+T_FG_RESULT0	{gray}失敗…
+T_FG_RESULT1	{yellow}成功！
+T_FG_RESULT2	{green}大成功！
+T_FG_RESULT3	{blue}奇跡！！
+T_FG_TO	{s} に進化
+T_FG_NEED	{s} {n}/{m}
+T_FG_NEED_RED	{red}{s} {n}/{m}
+T_FG_COINS	コイン {n}
+T_FG_COINS_RED	{red}コイン {n}
+T_FG_EVOLVED	{yellow}{s}{c0} に進化した！
+T_FG_NO_EVO	これ以上進化しない
+T_FG_NO_FUERU	フエルスロットがない
+T_FG_NO_RESET	スロットリセットがない
+T_FG_SLOT_MAX	スロットはもう増やせない
+T_FG_NOTHING	消す強化がない
+T_FG_WHICH	どのマスを消す？
+T_FG_UP_LINE	{s} ×{n}
+T_FG_UP_TO	{gray}3 個 → {s} 1 個（200 コイン）
+T_FG_UP_DONE	合成した！
+T_FG_KEYS	{gray}A:1 回 X:まとめて B:もどる
+T_FG_MATS_HEAD	素材
+T_FG_ODDS	{gray}失敗 {n}% 成功 {m}%
+T_FG_NO_SLOT0	この品には強化のスロットがない
+# result
+T_RES_WIN	{yellow}勝った！
+T_RES_LOSE	{red}負けた…
+T_RES_LEFT	{gray}離脱した
+T_RES_GOT	手に入れた報酬
+T_RES_LOST	{gray}失った報酬
+T_RES_COINS	{yellow}コイン {n}
+T_RES_COINS_GRAY	{gray}コイン {n}
+T_RES_BAGS	素材の袋 ×{n}
+T_RES_NONE	{gray}宝箱なし
+T_RES_MORE	{gray}ほか {n} 個
+T_RES_OVER	{yellow}持ち物がいっぱい：コイン {n} に
+T_RES_WAVE	到達 WAVE {n} / {m}
+T_RES_CLEARED	{yellow}蜃気楼の斜塔を制覇した！
+T_RES_BEST	{yellow}最高記録を更新！
+T_RES_NOREC	{gray}記録の更新なし
+T_RES_FIRSTMAT	{s} ×{n}（初めてのクリア）
+T_RES_KEYS	{gray}A:マップへ
+T_CONTINUE_GRAY	{gray}つづきから
+T_NEW_ASK	はじめからにする？
+T_NEW_ASK2	{red}今の記録は消える

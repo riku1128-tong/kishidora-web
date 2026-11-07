@@ -13,7 +13,7 @@
 .import RODATA_LOAD_BANK
 
 .export __STARTUP__ : absolute = 1
-.export _pad_lat, _rep_lat, _bg3_vram
+.export _pad_lat, _rep_lat, _bg3_vram, _nmi_pc, _brk_info
 .export _ea, _oam, _cgram, _cgram_dirty, _scroll, _tm_main, _tm_sub, _bright, _joy, _joy_new, _joy_rep
 .export _frame, _bgmap_dirty, _nmi_ready, _vq_count, _vq, _bgmode, _cgadsub, _cgwsel, _coldata, _hdma_on
 .export _bg1map, _bg2map, _bg3map, _oam_hide, _lag
@@ -74,6 +74,8 @@ _hdma_on:     .res 1       ; HDMAEN mask for channels 6/7
 _joy:         .res 2
 _joy_new:     .res 2
 _joy_rep:     .res 2
+_nmi_pc:      .res 4
+_brk_info:    .res 8       ; debug: P, PC, PB, S, A of the last BRK/COP       ; debug: where the last NMI interrupted the main program
 _bg3_vram:    .res 2       ; BG3 tile base (word address) used by the text renderer
 _pad_lat:     .res 2       ; edges latched by wait_frame, consumed by frame_wait
 _rep_lat:     .res 2
@@ -234,6 +236,10 @@ nmi_fast:
   phy
   phb
   phd
+  lda 10,s             ; debug: P / PC / PB of the interrupted code
+  sta f:_nmi_pc
+  lda 12,s
+  sta f:_nmi_pc+2
   lda #$0000
   tcd
   A8
@@ -726,6 +732,33 @@ CFUNC set_vram_layout
   plp
   rtl
 
+; void vram_clear(void): zero all 64KB of VRAM (display must be blanked)
+CFUNC vram_clear
+  php
+  phb
+  A8
+  I16
+  lda #$80
+  pha
+  plb
+  lda #$80
+  sta VMAIN
+  ldx #$0000
+  stx VMADDL
+  ldx #$1809
+  stx DMAP0
+  ldx #.loword(zero_byte)
+  stx A1T0L
+  lda #^zero_byte
+  sta A1B0
+  ldx #$0000
+  stx DAS0L
+  lda #$01
+  sta MDMAEN
+  plb
+  plp
+  rtl
+
 ; void menu_layout(void): BG3 tiles at $4000 (1024 text tiles), OBJ at $6000 (256 tiles)
 CFUNC menu_layout
   php
@@ -739,6 +772,14 @@ CFUNC menu_layout
   sta f:_bg3_vram
   plp
   rtl
+
+; cc65 calls function pointers through jmpvec (a patched "jmp abs").  The runtime keeps it in
+; DATA ($7E:xxxx), which code banks cannot reach; this copy lives in the low WRAM CODE copy
+; that every bank mirrors at $0000-$1FFF.  The jmp stays inside the caller's bank.
+.export jmpvec
+.segment "CODE"
+jmpvec:
+  jmp $ffff
 
 .segment "CODE1"
 c_main_tramp:
@@ -760,6 +801,16 @@ irq_dummy:
 ; BRK/COP: a crash. Red backdrop and stop (the stack keeps the address for debugging)
 brk_trap:
   sei
+  rep #$30
+  .a16
+  .i16
+  sta f:_brk_info+6    ; A
+  lda 1,s              ; P, PCL
+  sta f:_brk_info
+  lda 3,s              ; PCH, PB
+  sta f:_brk_info+2
+  tsc
+  sta f:_brk_info+4
   sep #$20
   .a8
   lda #$0f

@@ -50,6 +50,13 @@ t_fx:     .res 2
 t_fy:     .res 2
 m_a:      .res 2
 m_b:      .res 2
+g_w16:    .res 2             ; fast blit: box width * 16
+g_sl:     .res 2
+g_suby:   .res 2
+g_ty:     .res 2
+g_b:      .res 1
+g_c:      .res 1
+g_op:     .res 1
 
 .segment "ENGINE"
 
@@ -269,67 +276,156 @@ box_clear:
   bne :+
   rts
 :
-  ; horizontal lines: y = 0 (colour 1), y = 1 (colour 3) ; bottom: y = h*8-1 (1), h*8-2 (3)
-  lda #0
-  sta t_fy
-  lda #1
-  jsr hline
-  lda #1
-  sta t_fy
-  lda #3
-  jsr hline
+  ; frame written byte-wise: outer line colour 1, inner line colour 3, round corners (colour 0)
+  ; top tile row: rows 0 (c1) and 1 (c3); bottom tile row: rows 7 (c1) and 6 (c3)
+  lda t_base
+  asl
+  asl
+  asl
+  asl
+  tax                  ; canvas offset of tile (0,0)
+  lda t_w
+  sta t_tmp
+@top:
+  lda #$00ff           ; plane0 ff, plane1 00 = colour 1
+  sta f:$7f0000,x
+  lda #$ffff           ; colour 3
+  sta f:$7f0002,x
+  txa
+  clc
+  adc #16
+  tax
+  dec t_tmp
+  bne @top
+  ; bottom tile row starts at base + (h-1)*w
+  lda t_h
+  dec a
+  tax
+  lda t_w
+  jsr mul16x8
+  clc
+  adc t_base
+  asl
+  asl
+  asl
+  asl
+  tax
+  lda t_w
+  sta t_tmp
+@bot:
+  lda #$ffff
+  sta f:$7f000c,x
+  lda #$00ff
+  sta f:$7f000e,x
+  txa
+  clc
+  adc #16
+  tax
+  dec t_tmp
+  bne @bot
+  ; side columns, pixel row by pixel row
+  lda t_w
+  asl
+  asl
+  asl
+  asl
+  sta g_w16
   lda t_h
   asl
   asl
   asl
   dec a
-  sta t_fy
-  lda #1
-  jsr hline
-  dec t_fy
-  lda #3
-  jsr hline
-  ; vertical lines
-  lda #0
-  sta t_fx
-  lda #1
-  jsr vline
-  lda #1
-  sta t_fx
-  lda #3
-  jsr vline
+  sta t_ty1            ; last pixel row
+  lda t_base
+  asl
+  asl
+  asl
+  asl
+  sta t_off            ; left tile, row 0
   lda t_w
-  asl
-  asl
-  asl
   dec a
-  sta t_fx
-  lda #1
-  jsr vline
-  dec t_fx
-  lda #3
-  jsr vline
-  ; round the corners: clear the 4 outer corner pixels
-  stz t_fx
+  asl
+  asl
+  asl
+  asl
+  sta t_tx1            ; offset from the left tile to the right tile
   stz t_fy
-  jsr pclear
-  lda t_w
-  asl
-  asl
-  asl
-  dec a
-  sta t_fx
-  jsr pclear
-  lda t_h
-  asl
-  asl
-  asl
-  dec a
-  sta t_fy
-  jsr pclear
-  stz t_fx
-  jsr pclear
+  stz g_suby
+@side:
+  ldx t_off
+  lda t_fy
+  beq @corner
+  cmp t_ty1
+  beq @corner
+  A8
+  lda f:$7f0000,x      ; left: x0 = c1, x1 = c3
+  ora #$c0
+  sta f:$7f0000,x
+  lda f:$7f0001,x
+  and #$7f
+  ora #$40
+  sta f:$7f0001,x
+  A16
+  txa
+  clc
+  adc t_tx1
+  tax
+  A8
+  lda f:$7f0000,x      ; right: x = w-1 c1 (bit 0), w-2 c3 (bit 1)
+  ora #$03
+  sta f:$7f0000,x
+  lda f:$7f0001,x
+  and #$fe
+  ora #$02
+  sta f:$7f0001,x
+  A16
+  bra @next
+@corner:
+  A8
+  lda f:$7f0000,x
+  and #$7f
+  sta f:$7f0000,x
+  lda f:$7f0001,x
+  and #$7f
+  sta f:$7f0001,x
+  A16
+  txa
+  clc
+  adc t_tx1
+  tax
+  A8
+  lda f:$7f0000,x
+  and #$fe
+  sta f:$7f0000,x
+  lda f:$7f0001,x
+  and #$fe
+  sta f:$7f0001,x
+  A16
+@next:
+  lda t_fy
+  cmp t_ty1
+  bne :+
   rts
+:
+  inc t_fy
+  lda t_off
+  clc
+  adc #2
+  sta t_off
+  inc g_suby
+  lda g_suby
+  cmp #8
+  bcs :+
+  jmp @side
+:
+  stz g_suby
+  lda t_off
+  clc
+  adc g_w16
+  sec
+  sbc #16
+  sta t_off
+  jmp @side
 
 ; set pixel (t_fx, t_fy) to colour A (0..3)
 pset:
@@ -462,10 +558,26 @@ vline:
   rts
 zero2: .word 0
 
-; A(16) = A * X (X < 256)
+; A(16) = A * X (X < 256); hardware multiplier when A < 256
 mul16x8:
   .a16
   .i16
+  cmp #256
+  bcs @slow
+  sep #$20
+  .a8
+  sta f:$004202        ; WRMPYA
+  txa
+  sta f:$004203        ; WRMPYB: starts the 8-cycle multiply
+  nop
+  nop
+  nop
+  nop
+  rep #$20
+  .a16
+  lda f:$004216        ; RDMPYL/H
+  rts
+@slow:
   sta m_a
   stx m_b
   lda #0
@@ -704,7 +816,7 @@ draw_string:
 @out:
   rts
 
-colour_pal: .byte 0, 1, 2, 3, 1, 1, 0, 0,  4, 5, 7, 4, 5, 5, 4, 4
+colour_pal: .byte 0, 1, 2, 0, 1, 1, 0, 0,  4, 5, 7, 3, 5, 5, 4, 4   ; window gray = palette 3
 
 push_src:
   .a16
@@ -806,36 +918,208 @@ draw_glyph:
   A16
   ; colour: set palette of the tiles touched when the colour is not the box default
   jsr glyph_pal
-  ; shadow at +1,+1, then text
+  ; text and its +1,+1 shadow in one pass
+  A8
   lda t_flags
   and #1
-  bne @opaque
-  lda #1
-  sta t_plane          ; transparent shadow: plane 1
-  inc t_px
-  inc t_py
-  jsr blit
-  dec t_px
-  dec t_py
-  stz t_plane          ; text: plane 0
-  jsr blit
-  bra @adv
-@opaque:
-  lda #2               ; shadow: plane 0 set, plane 1 cleared
-  sta t_plane
-  inc t_px
-  inc t_py
-  jsr blit
-  dec t_px
-  dec t_py
-  lda #3               ; text: both planes
-  sta t_plane
-  jsr blit
+  sta g_op
+  A16
+  jsr gblit
 @adv:
   lda t_px
   clc
   adc t_gw
   sta t_px
+  rts
+
+; one-pass glyph blit at (t_px, t_py): rows of t_glyph plus the shadow (previous row >> 1).
+; transparent boxes: text plane 0, shadow plane 1; opaque: shadow = colour 1, text = colour 3.
+gblit:
+  .a16
+  .i16
+  lda t_px
+  and #7
+  sta t_ty1            ; sub-tile shift
+  lda t_px
+  lsr
+  lsr
+  lsr
+  sta t_tx
+  lda t_w
+  asl
+  asl
+  asl
+  asl
+  sta g_w16
+  lda t_py
+  lsr
+  lsr
+  lsr
+  sta g_ty
+  tax
+  lda t_w
+  jsr mul16x8
+  clc
+  adc t_tx
+  clc
+  adc t_base
+  asl
+  asl
+  asl
+  asl
+  sta t_off
+  lda t_py
+  and #7
+  sta g_suby
+  asl
+  clc
+  adc t_off
+  sta t_off
+  stz t_fy             ; previous row
+  stz t_row
+@row:
+  lda t_row
+  cmp #12
+  bcs @past
+  asl
+  tay
+  lda [t_glyph],y
+  xba                  ; font rows are big-endian
+  bra @have
+@past:
+  lda #0
+@have:
+  sta t_bits
+  lda t_fy
+  lsr
+  sta t_tmp2           ; shadow
+  lda t_bits
+  sta t_fy
+  ora t_tmp2
+  bne :+
+  jmp @adv
+:
+  lda g_ty
+  cmp t_h
+  bcc :+
+  rts                  ; below the box
+:
+  ; shift text and shadow right by the sub-tile offset into 24 bits
+  stz t_tmp
+  stz g_sl
+  ldx t_ty1
+  beq @shifted
+  lda t_bits
+@s1:
+  lsr a
+  ror t_tmp
+  dex
+  bne @s1
+  sta t_bits
+  ldx t_ty1
+  lda t_tmp2
+@s2:
+  lsr a
+  ror g_sl
+  dex
+  bne @s2
+  sta t_tmp2
+@shifted:
+  ldx t_off
+  A8
+  lda t_tx
+  cmp t_w
+  bcs @skip
+  lda t_bits+1
+  sta g_b
+  lda t_tmp2+1
+  sta g_c
+  jsr gput
+  lda t_tx
+  inc a
+  cmp t_w
+  bcs @skip
+  A16
+  txa
+  clc
+  adc #16
+  tax
+  A8
+  lda t_bits
+  sta g_b
+  lda t_tmp2
+  sta g_c
+  jsr gput
+  lda t_tx
+  inc a
+  inc a
+  cmp t_w
+  bcs @skip
+  A16
+  txa
+  clc
+  adc #16
+  tax
+  A8
+  lda t_tmp+1
+  sta g_b
+  lda g_sl+1
+  sta g_c
+  jsr gput
+@skip:
+  A16
+@adv:
+  inc t_row
+  lda t_row
+  cmp #13
+  bcc :+
+  rts
+:
+  lda t_off
+  clc
+  adc #2
+  sta t_off
+  inc g_suby
+  lda g_suby
+  cmp #8
+  bcs :+
+  jmp @row
+:
+  stz g_suby
+  inc g_ty
+  lda t_off
+  clc
+  adc g_w16
+  sec
+  sbc #16
+  sta t_off
+  jmp @row
+
+; g_b = text bits, g_c = shadow bits at canvas X (plane 0 byte)
+gput:
+  .a8
+  .i16
+  lda g_op
+  bne @op
+  lda g_b
+  ora f:$7f0000,x
+  sta f:$7f0000,x
+  lda g_c
+  ora f:$7f0001,x
+  sta f:$7f0001,x
+  rts
+@op:
+  lda g_b
+  ora g_c
+  ora f:$7f0000,x
+  sta f:$7f0000,x
+  lda g_b              ; plane 1: clear under shadow-only pixels, set under text
+  eor #$ff
+  and g_c
+  eor #$ff
+  and f:$7f0001,x
+  ora g_b
+  sta f:$7f0001,x
   rts
 
 ; OR the glyph rows into the canvas plane t_plane at (t_px, t_py)

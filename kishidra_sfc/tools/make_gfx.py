@@ -88,8 +88,9 @@ class Gfx:
         data, words, pal, n, size = G.bg_image(im, npal=npal, pal_base=pal_base, tile_base=tile_base, max_tiles=max_tiles)
         if n > max_tiles:
             raise SystemExit('%s: %d tiles (max %d)' % (name, n, max_tiles))
-        self.a.add(name + '_TILES', data)
-        self.a.add(name + '_MAP', b''.join(struct.pack('<H', w) for w in words))
+        # backgrounds are stored raw: DMA from ROM is much faster than unpacking (ROM space is plentiful)
+        self.a.add(name + '_TILES', data, compress=False)
+        self.a.add(name + '_MAP', b''.join(struct.pack('<H', w) for w in words), compress=False)
         self.a.add(name + '_PAL', pal, compress=False)
         self.a.const('%s_NTILES' % name, n)
         self.a.const('%s_W' % name, size[0])
