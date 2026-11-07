@@ -132,7 +132,7 @@ static void map_setup(void) {
 }
 
 /* ---------------------------------------------------------------- stage list */
-enum { RK_MEN, RK_TREASURE, RK_GACHA, RK_GOODS, RK_TUT, RK_TRAIN };
+enum { RK_MEN, RK_TREASURE, RK_GACHA, RK_GOODS, RK_TUT, RK_TRAIN, RK_MONEY };
 typedef struct { u8 kind, men, open; } Row;
 static Row rows[16];
 static u8 nrows;
@@ -151,6 +151,9 @@ static void make_rows(u8 a) {
   if (areas[a].treasure) {
     rows[nrows].kind = RK_TREASURE; rows[nrows].men = D_TREASURE_MEN; rows[nrows].open = sv.tickets > 0;
     ++nrows;
+  }
+  if (a == AR_CASTLE && area_done(AR_CASTLE)) {    /* 金策: after the demon king */
+    rows[nrows].kind = RK_MONEY; rows[nrows].men = T_MONEY_MEN; rows[nrows].open = 1; ++nrows;
   }
   if (area_has_shop(a)) {
     rows[nrows].kind = RK_GACHA; rows[nrows].men = 0; rows[nrows].open = 1; ++nrows;
@@ -184,6 +187,11 @@ static void row_draw(u16 i, u8 y) {
     break;
   case RK_GACHA:
     say(BX_WIN, 14, y, T_ROW_GACHA);
+    break;
+  case RK_MONEY:
+    say(BX_WIN, 14, y, T_ROW_MONEY);
+    say(BX_WIN, 124, y, is_cleared(AR_CASTLE, T_MONEY_MEN) ? T_LBL_CLEAR : T_LBL_MONEY);
+    sayn(BX_WIN, 166, y, T_LBL_WAVE, T_MONEY_STAGES);
     break;
   case RK_TUT:
     say(BX_WIN, 14, y, T_ROW_TUTORIAL);

@@ -440,6 +440,8 @@ class Gen:
             mens = list(range(1, s.num('CASTLE_MEN') + 1)) if area == castle else ([1] if area == secret else list(range(1, s.num('AREA_MEN') + 1)))
             if core.treasure_row(area):
                 mens.append(s.num('TREASURE_MEN'))
+            if area == castle:
+                mens.append(self.T['MONEY_MEN'])
             for men in mens:
                 core.start_men(area, men)
                 out = []
@@ -457,7 +459,7 @@ class Gen:
                     a = s.areas[area]
                     if core.is_castle():
                         boss = s.num('CASTLE_FINAL')[st - 1] if men == s.num('CASTLE_MEN') else s.num('CASTLE_BOSSES')[men - 1]
-                    elif core.is_treasure():
+                    elif core.is_treasure() or core.is_money():
                         boss = s.num('TREASURE_GUARD')
                     else:
                         boss = a['boss'] if k == 2 else a['mid']

@@ -139,6 +139,7 @@ u16  combo_pct(u16 c);
 u8   is_castle(void);
 u8   is_secret(void);
 u8   is_treasure(void);
+u8   is_money(void);
 const DiffRule *rules(void);
 u8   fx_has(u8 kind);
 s16  fx_sum(u8 kind, u8 which);

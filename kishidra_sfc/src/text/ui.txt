@@ -218,7 +218,7 @@ T_WIN_KEYS	{gray}A:けってい B:もどる
 T_ROW_TREASURE	宝の部屋
 T_ROW_GACHA	ガチャ
 T_ROW_GOODS	道具屋
-T_ROW_MONEY	金策
+T_ROW_MONEY	魔王城の地下
 T_ROW_TUTORIAL	チュートリアル
 T_ROW_TRAINING	カカシ（ガードの練習）
 T_LBL_CLEAR	{yellow}クリア
@@ -229,6 +229,7 @@ T_LBL_SECRET	{red}裏ボス
 T_LBL_TICKET	{yellow}チケット {n}
 T_LBL_NOTICKET	{gray}チケット 0
 T_LBL_WAVE	{gray}WAVE {n}
+T_LBL_MONEY	{yellow}金策
 T_SORTIE_GO	出撃する
 T_SORTIE_EQUIP	装備をかえる
 T_SORTIE_BACK	もどる

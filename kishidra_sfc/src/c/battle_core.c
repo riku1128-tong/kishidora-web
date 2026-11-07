@@ -80,7 +80,8 @@ u8 ev_pop(Ev *out) {
 /* ------------------------------------------------------------------ helpers */
 const DiffRule *rules(void) { return &diff_rules[b_difficulty]; }
 
-u8 is_castle(void) { return b_area == AR_CASTLE; }
+u8 is_castle(void) { return b_area == AR_CASTLE && b_men != T_MONEY_MEN; }
+u8 is_money(void) { return b_area == AR_CASTLE && b_men == T_MONEY_MEN; }   /* 金策: 魔王城の地下 */
 u8 is_secret(void) { return b_area == AR_SECRET; }
 u8 is_treasure(void) { return b_men == D_TREASURE_MEN && areas[b_area].treasure; }
 
@@ -257,7 +258,7 @@ u8 stage_boss_kind(void) {
   if (b_mirage) return 2;
   if (b_stage != b_stage_count && !(is_castle() && b_men == D_CASTLE_MEN)) return 0;
   if (is_castle() || is_secret() || b_men == D_AREA_MEN) return 2;
-  if (is_treasure()) return 2;
+  if (is_treasure() || is_money()) return 2;
   return b_men == D_AREA_MEN - 1 ? 1 : 0;
 }
 
@@ -276,6 +277,14 @@ static u8 pick_formation(u8 *ids) {
     if (b_stage == b_stage_count) ids[n++] = MON_115;
     for (k = 0; k < tl[s] && n < ENEMY_MAX; ++k) ids[n++] = lucky_mons[pick(N_LUCKY)];
     for (k = 0; k < tz[s] && n < ENEMY_MAX; ++k) ids[n++] = a->pool[pick(a->pool_n)];
+    return n;
+  }
+  if (is_money()) {
+    static const u8 ml[5] = { T_MONEY_LUCKY_0, T_MONEY_LUCKY_1, T_MONEY_LUCKY_2, T_MONEY_LUCKY_3, T_MONEY_LUCKY_4 };
+    static const u8 mz[5] = { T_MONEY_ZAKO_0, T_MONEY_ZAKO_1, T_MONEY_ZAKO_2, T_MONEY_ZAKO_3, T_MONEY_ZAKO_4 };
+    if (b_stage == b_stage_count) ids[n++] = MON_115;          /* the guard: ミミッくん */
+    for (k = 0; k < ml[s] && n < ENEMY_MAX; ++k) ids[n++] = lucky_mons[pick(N_LUCKY)];
+    for (k = 0; k < mz[s] && n < ENEMY_MAX; ++k) ids[n++] = a->pool[pick(a->pool_n)];
     return n;
   }
   kind = stage_boss_kind();
@@ -466,6 +475,7 @@ void battle_start(u8 area, u8 men, const Loadout *lo) {
   if (b_mode == BM_TUTORIAL) b_stage_count = D_TUTORIAL_STAGES;
   else if (b_mode == BM_TRAINING) b_stage_count = 1;
   else if (b_mirage) b_stage_count = MIRAGE_WAVES;
+  else if (is_money()) b_stage_count = T_MONEY_STAGES;
   else if (is_castle()) b_stage_count = D_CASTLE_STAGES;
   else if (is_secret()) b_stage_count = D_SECRET_STAGES;
   else if (is_treasure()) b_stage_count = D_TREASURE_STAGES;

@@ -40,6 +40,8 @@ class Core:
 
     # ------------------------------------------------------------ area / 面
     def stage_count_for(self, area, men):
+        if men == self.T['MONEY_MEN'] and area == self.num('AREA_CASTLE'):
+            return self.T['MONEY_STAGES']
         if area == self.num('AREA_CASTLE'):
             return self.num('CASTLE_STAGES')
         if area == self.num('AREA_SECRET'):
@@ -64,7 +66,11 @@ class Core:
         self.mid_placed = False
 
     def is_castle(self):
-        return self.area == self.num('AREA_CASTLE')
+        return self.area == self.num('AREA_CASTLE') and self.men != self.T['MONEY_MEN']
+
+    def is_money(self):
+        """魔王の城の「金策」(魔王城の地下): lucky characters, weak castle soldiers, ミミッくん last"""
+        return self.men == self.T['MONEY_MEN'] and self.area == self.num('AREA_CASTLE')
 
     def is_secret(self):
         return self.area == self.num('AREA_SECRET')
@@ -74,21 +80,21 @@ class Core:
 
     def area_pcts(self):
         a = self.s.areas[self.area]
-        lv = self.num('AREA_MEN') if self.is_treasure() else self.men
-        step = (lv - 1) * (self.num('CASTLE_STEP_PCT') if self.is_castle() else self.num('MEN_STEP_PCT'))
+        lv = self.num('AREA_MEN') if self.is_treasure() else (self.T['MONEY_LV'] if self.is_money() else self.men)
+        step = (lv - 1) * (self.num('CASTLE_STEP_PCT') if self.area == self.num('AREA_CASTLE') else self.num('MEN_STEP_PCT'))
         self.hp_pct = self.scale_pct(a['hp_pct'], 100 + step)
         self.atk_pct = self.scale_pct(a['atk_pct'], 100 + step)
         self.boss_pct = a['boss_pct']
 
     def boss_hp_up(self):
-        return not self.is_treasure() and not self.is_secret()
+        return not self.is_treasure() and not self.is_money() and not self.is_secret()
 
     def stage_boss_kind(self):
         if self.stage != self.stage_count and not (self.is_castle() and self.men == self.num('CASTLE_MEN')):
             return 0
         if self.is_castle() or self.is_secret() or self.men == self.num('AREA_MEN'):
             return 2
-        if self.is_treasure():
+        if self.is_treasure() or self.is_money():
             return 2
         return 1 if self.men == self.num('AREA_MEN') - 1 else 0
 
@@ -162,7 +168,7 @@ class Core:
             return max(1, idiv(zako_base * pct, 100)) if pct > 0 else -1
         if e['mid']:
             return t['mid'].get(self.area, -1)
-        if self.is_treasure():
+        if self.is_treasure() or self.is_money():
             return -1
         if self.is_castle():
             last = self.num('CASTLE_MEN')
@@ -196,7 +202,7 @@ class Core:
             return [max(1, idiv(zako_atk * pct, 100)), max(1, idiv(zako_sp * pct, 100))] if pct > 0 else []
         if e['mid']:
             return t['mid'].get(self.area, [])
-        if self.is_treasure():
+        if self.is_treasure() or self.is_money():
             return []
         if self.is_castle():
             last = self.num('CASTLE_MEN')
@@ -311,6 +317,10 @@ class Core:
             atk_v = T['SECRET_ATK']
             sp_v = T['SECRET_SP_ATK']
             lock_v = T['SECRET_LOCK_ATK']
+        if self.is_money():
+            hp_max = max(1, idiv(hp_max * T['MONEY_HP_PCT'], 100))
+            atk_v = idiv(atk_v * T['MONEY_ATK_PCT'], 100)
+            sp_v = idiv(sp_v * T['MONEY_ATK_PCT'], 100)
         e['hp_max'] = hp_max
         e['atk'] = atk_v
         e['sp_atk'] = sp_v

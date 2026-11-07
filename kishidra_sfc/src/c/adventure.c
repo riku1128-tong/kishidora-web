@@ -87,6 +87,8 @@ void commit_win(void) {
   if (is_treasure()) {
     if (sv.tickets) --sv.tickets;
     men_clear(b_area, b_men);
+  } else if (is_money()) {
+    men_clear(b_area, b_men);
   } else {
     if (!is_cleared(b_area, b_men)) {
       res.first = 1;

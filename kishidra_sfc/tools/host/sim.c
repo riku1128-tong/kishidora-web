@@ -43,7 +43,7 @@ static int run(u8 area, u8 men, int guard_skill, int verbose, u32 seed) {
       }
     }
     if (guard_at >= 0 && frames >= guard_at) { battle_press_guard(); guard_at = -1; }
-    if (b_phase == PH_VICTORY) return 1;
+    if (b_phase == PH_VICTORY) { if (verbose) printf("coins %lu items %d\n", (unsigned long)b_coins, b_nitems); return 1; }
     if (b_phase == PH_GAMEOVER) return 0;
     ++frames;
   }

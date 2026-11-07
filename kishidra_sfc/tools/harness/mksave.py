@@ -28,6 +28,8 @@ def main():
     ap.add_argument('--clear-all', action='store_true')
     ap.add_argument('--coins', type=int, default=1000)
     ap.add_argument('--tickets', type=int, default=0)
+    ap.add_argument('--ending', action='store_true', help='the ending has been seen')
+    ap.add_argument('--main', type=int, default=0, help='inventory index equipped as MAIN')
     ap.add_argument('--mats', type=int, default=0)
     ap.add_argument('--items', nargs='*', default=[])
     ap.add_argument('--clear', nargs='*', default=[], help='AREA:MASK (stage bits)')
@@ -59,8 +61,8 @@ def main():
     body += struct.pack('<I', a.coins)
     body += b''.join(struct.pack('<I', c) for c in cleared)
     body += b'\0' * 14                                # name (default name is used)
-    body += struct.pack('<8B', 0, 1, 1, 0, 6, 1, 8, 8)  # ending, tut, tut_clears, sort, guard_late, story, vols
-    body += struct.pack('<4H', 0, 0xffff, 0xffff, 1)
+    body += struct.pack('<8B', 1 if a.ending else 0, 1, 1, 0, 6, 1, 8, 8)  # ending, tut, tut_clears, sort, guard_late, story, vols
+    body += struct.pack('<4H', a.main, 0xffff, 0xffff, 1)
     body += b''.join(struct.pack('<H', a.mats) for _ in range(n_mat))
     body += b'\0' * (32 + (n_sp + 7) // 8 + (n_mon + 7) // 8)
     body += b'\0' * (2 * n_mon)

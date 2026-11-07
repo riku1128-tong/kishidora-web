@@ -473,6 +473,7 @@ u8 surface_pick(u8 boss_like, u8 lucky, u8 sure, u8 *type) {
   if (b_area <= AR_RUINS && r > 1) r = 1;
   if (ls == 0 && r > 1) r = 1;
   if (is_treasure()) t = rnd_pct(T_TREASURE_SHIELD_PCT) ? WT_SHIELD : wtypes[rnd_range(0, 2)];
+  else if (is_money()) t = rnd_pct(T_MONEY_SHIELD_PCT) ? WT_SHIELD : wtypes[rnd_range(0, 2)];
   else t = wtypes[rnd_range(0, 3)];
   if (sure) {
     r = 2;   /* SECRET_REPEAT_RARITY = SR */
@@ -618,6 +619,7 @@ static void give_reward_main(Foe *e) {
   peko = is_secret() && e->mon == MON_117;
   if (peko) c = T_SECRET_COINS * (u32)b_coin_pct / 100;
   else c = mul_pct(c, b_coin_pct);
+  if (is_money()) c = mul_pct(c, T_MONEY_COIN_PCT);
   b_coins += c;
   sure = peko && b_men_cleared;
   if (reward_first(e, &rid) == 1 || sure || rnd_pct(MIN(mul_pct16(pct, b_drop_pct), 100)))
