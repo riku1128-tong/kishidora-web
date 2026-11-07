@@ -4,7 +4,7 @@
 .import text_table, font_glyphs, font_width, vq_push
 .importzp FONT_DIGIT0
 .import _ea, _bg3map, _bgmap_dirty
-.export _targ_num, _targ_num2, _targ_str, _hero_name, _tb
+.export _targ_num, _targ_num2, _targ_str, _hero_name, _tb, _text_wrap
 .import _bg3_vram
 
 CANVAS_BANK = $7f
@@ -13,6 +13,11 @@ NBOX = 12
 
 .segment "LOWBSS"
 t_numbuf: .res 24         ; decimal digits (2 bytes each, up to 10) + end
+t_dry:    .res 2          ; 1 = measure only (draw nothing)
+t_drawn:  .res 2          ; a glyph was drawn on this line since the last colour change
+t_maxx:   .res 2          ; widest x reached (measure)
+_text_wrap: .res 2        ; > 0: a glyph that would reach this x starts a new line (C sets it)
+t_msg:    .res 2          ; text id being drawn (text check log)
 t_minw:   .res 2          ; minimum digits ({n3}: 3, zero padded)
 _tb:        .res NBOX*8      ; x, y, w, h, tile lo, tile hi, pal, flags (bit0 opaque, bit1 frame)
 _targ_num:  .res 4           ; {n}
@@ -246,6 +251,9 @@ ring_pal:
 box_clear:
   .a16
   .i16
+.ifdef PROFILE
+  jsr tc_clear
+.endif
   lda t_w
   ldx t_h
   jsr mul16x8
@@ -635,8 +643,8 @@ mul16x8:
 @e:
   rts
 
-; void tb_clear(u8 box)
-CFUNC tb_clear
+; void tb_clear_now(u8 box) (C: tb_clear waits for the box's pending uploads first)
+CFUNC tb_clear_now
   php
   phb
   AXY16
@@ -671,6 +679,7 @@ CFUNC tb_text
   pla
   jsr box_load
   lda _ea+4
+  sta t_msg
   jsr text_ptr
   jsr draw_string
   plb
@@ -690,6 +699,8 @@ CFUNC tb_codes
   A16
   pla
   jsr box_load
+  lda #$ffff
+  sta t_msg
   lda _ea+4
   sta t_src
   A8
@@ -738,33 +749,21 @@ text_ptr:
   A16
   rts
 
-; measure the first line of t_src -> A
+; measure the first line of t_src -> A: the drawing loop without drawing, so {s} / {n}
+; expansions and colour runs (which start on a tile) count exactly as when drawn
 measure:
   .a16
   .i16
-  stz t_tmp2
-  ldy #0
-@l:
-  lda [t_src],y
-  beq @done
-  cmp #1
-  beq @done
-  cmp #16
-  bcc @next
-  sec
-  sbc #16
-  tax
-  lda f:font_width,x
-  and #$00ff
-  clc
-  adc t_tmp2
-  sta t_tmp2
-@next:
-  iny
-  iny
-  bra @l
-@done:
-  lda t_tmp2
+  lda #1
+  sta t_dry
+  stz t_px
+  stz t_x0
+  stz t_py
+  stz t_pal            ; assume the box colour is white
+  stz t_maxx
+  jsr draw_run
+  stz t_dry
+  lda t_maxx
   rts
 
 ; draw the string at t_src into the loaded box at (ea0, ea1)
@@ -776,7 +775,10 @@ draw_string:
   sta t_x0
   lda _ea+2
   sta t_py
+  stz t_maxx
+draw_run:
   stz t_nest
+  stz t_drawn
 @loop:
   lda [t_src]
   inc t_src
@@ -787,8 +789,17 @@ draw_string:
 :
   cmp #1
   bne @not_nl
+  lda t_dry
+  beq :+
+  jmp @out             ; measuring: the first line only
+:
+.ifdef PROFILE
+  jsr tc_extent
+.endif
   lda t_x0
   sta t_px
+  stz t_drawn
+  stz t_maxx
   lda t_py
   clc
   adc #14
@@ -842,25 +853,43 @@ draw_string:
 @not_str:
   cmp #16
   bcs @glyph
-  ; colour code 5..10 -> palette (transparent boxes 0..3, opaque boxes 4,5,7)
+  ; colour code 5..10 -> palette (the same palettes in every box); {c0} = the box's own colour
   sec
   sbc #5
   and #$0007
+  bne @col
+  lda t_box
+  asl
+  asl
+  asl
   tax
-  lda t_flags
-  and #1
-  beq :+
-  txa
-  clc
-  adc #8
+  lda _tb+6,x
+  and #$0007
+  bra @setpal
+@col:
   tax
-:
   lda f:colour_pal,x
   and #$00ff
+@setpal:
+  cmp t_pal
+  beq @samepal
   sta t_pal
+  lda t_drawn          ; a colour change after text on this line: start on the next tile
+  beq @samepal         ; (an 8x8 tile has one palette, so two colours must not share one)
+  lda t_px
+  and #7
+  beq @samepal
+  lda t_px
+  ora #7
+  inc a
+  sta t_px
+  stz t_drawn
+@samepal:
   jmp @loop
 @glyph:
   jsr draw_glyph
+  lda #1
+  sta t_drawn
   jmp @loop
 @end:
   lda t_nest
@@ -868,9 +897,15 @@ draw_string:
   jsr pop_src
   jmp @loop
 @out:
+.ifdef PROFILE
+  lda t_dry
+  bne :+
+  jsr tc_extent
+:
+.endif
   rts
 
-colour_pal: .byte 0, 1, 2, 0, 1, 1, 0, 0,  4, 5, 7, 3, 5, 5, 4, 4   ; window gray = palette 3
+colour_pal: .byte 0, 1, 2, 3, 5, 4, 0, 0   ; c0 (box), yellow, red, gray, blue, green (BG3 palettes, see bg3pal in sys.c)
 
 push_src:
   .a16
@@ -978,20 +1013,47 @@ draw_glyph:
   lda #^font_glyphs
   sta t_glyph+2
   A16
+  lda t_dry
+  bne @adv
+  lda _text_wrap       ; wrapping: the glyph's last column past the limit -> next line
+  beq @nowrap
+  lda t_px
+  clc
+  adc t_gw
+  dec a
+  dec a
+  cmp _text_wrap
+  bcc @nowrap
+  lda t_px
+  cmp t_x0
+  beq @nowrap          ; (a glyph wider than the whole line stays)
+.ifdef PROFILE
+  jsr tc_extent
+.endif
+  lda t_x0
+  sta t_px
+  stz t_maxx
+  lda t_py
+  clc
+  adc #14
+  sta t_py
+@nowrap:
+.ifdef PROFILE
+  jsr text_check
+.endif
   ; colour: set palette of the tiles touched when the colour is not the box default
   jsr glyph_pal
   ; text and its +1,+1 shadow in one pass
-  A8
-  lda t_flags
-  and #1
-  sta g_op
-  A16
   jsr gblit
 @adv:
   lda t_px
   clc
   adc t_gw
   sta t_px
+  cmp t_maxx
+  bcc :+
+  sta t_maxx
+:
   rts
 
 ; one-pass glyph blit at (t_px, t_py): rows of t_glyph plus the shadow (the previous row
@@ -1112,9 +1174,7 @@ gblit:
   cmp t_h
   bcs @ret             ; below the box
   ldx t_off
-  lda g_op
-  and #$00ff
-  bne @opaque
+  jmp @opaque          ; one rule for every box (text colour 3, shadow 1; see bg3pal)
   lda G_P0
   beq :+
   ora f:$7f0000,x
@@ -1164,8 +1224,8 @@ gblit:
   jmp @row
 @ret:
   rts
-@opaque:               ; colour rules of gput, inline: p0 |= text | shadow,
-  sep #$20             ; p1 = (p1 & (text | ~shadow)) | text
+@opaque:               ; p0 |= text | shadow, p1 = (p1 & (text | ~shadow)) | text:
+  sep #$20             ; text = colour 3, shadow = colour 1, the rest is left (0 or the fill, 2)
   .a8
   lda G_P0
   ora G_P0+1
@@ -1528,3 +1588,261 @@ shl_tab:
       .byte (xx << (8 - sh)) & $ff
     .endrep
   .endrep
+
+.ifdef PROFILE
+; ---------------------------------------------------------------- text check (PROFILE=1 builds)
+; Logs glyphs that leave their box and glyphs whose 8x8 tiles already hold text of another colour
+; (a tile has one palette).  Entries of 8 bytes at $7F:E000 (512; bytes written at $7F:DBFE):
+;   type (1 right, 2 bottom, 3 colour, 4 left, 5 top), box, text id (2), x (2), y, old pal << 4 | new pal
+;   type 6: a line drawn (x = its start, extra = width), type 7: the box was cleared
+; $7F:DC00 + tile = palette of the text already in that tile ($FF none); box_clear resets it.
+.segment "ENGINE"
+TC_INK = $7fdc00       ; 1024 tiles
+TC_LOG = $7fe000       ; 512 entries
+TC_IDX = $7fdbfe       ; bytes written (free running; the entry is at TC_IDX & $0ff8)
+
+tc_log:                ; A8 = type, t_tmp2 = extra byte
+  .a16
+  .i16
+  pha
+  lda f:TC_IDX
+  and #$0ff8
+  tax
+  pla
+  sep #$20
+  .a8
+  sta f:TC_LOG,x
+  lda t_box
+  sta f:TC_LOG+1,x
+  lda t_tmp2
+  sta f:TC_LOG+7,x
+  rep #$20
+  .a16
+  lda t_msg
+  sta f:TC_LOG+2,x
+  lda t_px
+  sta f:TC_LOG+4,x
+  sep #$20
+  .a8
+  lda t_py
+  sta f:TC_LOG+6,x
+  rep #$20
+  .a16
+  lda f:TC_IDX
+  clc
+  adc #8
+  sta f:TC_IDX
+  rts
+
+text_check:
+  .a16
+  .i16
+  lda t_tmp2
+  pha
+  ; bounds: the glyph's pixels (columns px..px+gw-2, rows py..py+11) must stay in the box, and in a
+  ; framed box off the frame's tiles (those use the gold palette: text there turns gold)
+  lda t_flags
+  and #2
+  beq :+
+  lda #8
+:
+  sta g_suby           ; margin (temp)
+  lda t_px
+  cmp g_suby
+  bcs :+
+  stz t_tmp2
+  lda #4               ; 4: left
+  jsr tc_log
+:
+  lda t_py
+  cmp g_suby
+  bcs :+
+  stz t_tmp2
+  lda #5               ; 5: top
+  jsr tc_log
+:
+  lda t_w
+  asl
+  asl
+  asl
+  sec
+  sbc g_suby
+  sta t_tmp2           ; first column outside
+  lda t_px
+  clc
+  adc t_gw
+  dec a
+  dec a                ; last column of the glyph
+  cmp t_tmp2
+  bcc :+
+  stz t_tmp2
+  lda #1               ; 1: right
+  jsr tc_log
+:
+  lda t_h
+  asl
+  asl
+  asl
+  sec
+  sbc g_suby
+  sta t_tmp2
+  lda t_py
+  clc
+  adc #11
+  cmp t_tmp2
+  bcc :+
+  stz t_tmp2
+  lda #2               ; 2: bottom
+  jsr tc_log
+:
+  ; colour: every tile under the glyph (rows py..py+11, columns px..px+gw-2)
+  lda t_gw
+  cmp #2
+  bcs :+
+  jmp @done
+:
+  lda t_py
+  clc
+  adc #11
+  lsr
+  lsr
+  lsr
+  cmp t_h
+  bcc :+
+  lda t_h
+  dec a
+:
+  sta t_ty1
+  lda t_px
+  clc
+  adc t_gw
+  dec a
+  dec a
+  lsr
+  lsr
+  lsr
+  cmp t_w
+  bcc :+
+  lda t_w
+  dec a
+:
+  sta t_tx1
+  lda t_py
+  lsr
+  lsr
+  lsr
+  sta g_ty
+@ty:
+  lda g_ty
+  cmp t_ty1
+  beq :+
+  bcc :+
+  jmp @done
+:
+  lda t_px
+  lsr
+  lsr
+  lsr
+  sta t_tx
+@tx:
+  lda t_tx
+  cmp t_tx1
+  beq :+
+  bcs @nrow
+:
+  lda g_ty             ; tile = base + ty * w + tx
+  tax
+  lda t_w
+  jsr mul16x8
+  clc
+  adc t_tx
+  clc
+  adc t_base
+  tax
+  sep #$20
+  .a8
+  lda f:TC_INK,x
+  cmp #$ff
+  beq @set
+  cmp t_pal
+  beq @set
+  asl
+  asl
+  asl
+  asl
+  ora t_pal
+  sta t_tmp2
+  rep #$20
+  .a16
+  phx
+  lda #3
+  jsr tc_log
+  plx
+  sep #$20
+  .a8
+@set:
+  lda t_pal
+  sta f:TC_INK,x
+  rep #$20
+  .a16
+  inc t_tx
+  bra @tx
+@nrow:
+  inc g_ty
+  bra @ty
+@done:
+  pla
+  sta t_tmp2
+  rts
+
+; the line just drawn: type 6, x = line start, y, extra byte = width (for overlap checks)
+tc_extent:
+  .a16
+  .i16
+  lda t_maxx
+  sec
+  sbc t_x0
+  beq @r
+  bcc @r
+  cmp #256
+  bcc :+
+  lda #255
+:
+  sta t_tmp2
+  lda t_px
+  pha
+  lda t_x0
+  sta t_px
+  lda #6
+  jsr tc_log
+  pla
+  sta t_px
+@r:
+  rts
+
+; box_clear: no text in the box's tiles any more (logged as type 7)
+tc_clear:
+  .a16
+  .i16
+  stz t_tmp2
+  lda #7
+  jsr tc_log
+  lda t_w
+  ldx t_h
+  jsr mul16x8
+  beq @r
+  tay
+  ldx t_base
+  sep #$20
+  .a8
+  lda #$ff
+@l:
+  sta f:TC_INK,x
+  inx
+  dey
+  bne @l
+  rep #$20
+  .a16
+@r:
+  rts
+.endif

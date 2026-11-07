@@ -10,8 +10,8 @@ u8 title_scene(u8 has_save) {
   load_map(ASSET_TITLE_MAP, 0, 0, 0);
   win_base();
   box(0, 9, 17, 14, 6, 1, PAL_W, BOX_WINDOW);
-  say_center(0, 6, has_save ? T_CONTINUE : T_CONTINUE_GRAY);
-  say_center(0, 26, T_NEWGAME);
+  say_center(0, 9, has_save ? T_CONTINUE : T_CONTINUE_GRAY);     /* tile rows 1-2 */
+  say_center(0, 25, T_NEWGAME);                                   /* tile rows 3-4 */
   tb_flush(0);
   box(1, 6, 25, 20, 2, 1 + 14 * 6, PAL_T_WHITE, 0);
   say_center(1, 2, T_COPYRIGHT);
@@ -21,7 +21,7 @@ u8 title_scene(u8 has_save) {
   bgm_play(BGM_OPENING);
   for (;;) {
     if (sel != shown) {
-      for (i = 0; i < 2; ++i) box_pal(0, 1, (u8)(i * 2 + 1 + (i ? 1 : 0)), 12, 2, i == sel ? PAL_W_YELLOW : PAL_W);
+      for (i = 0; i < 2; ++i) box_pal(0, 1, (u8)(1 + i * 2), 12, 2, i == sel ? PAL_W_YELLOW : (i || has_save ? PAL_W : PAL_GRAY));
       shown = sel;
     }
     frame_wait();

@@ -1371,5 +1371,5 @@
 #define T_DBG_NEED_SKILL         1367
 #define T_DBG_SK_NONE            1368
 #define N_TEXT 1369
-#define N_GLYPH 702
+#define N_GLYPH 703
 #endif

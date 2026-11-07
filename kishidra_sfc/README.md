@@ -65,6 +65,7 @@ python build.py rom
   `map.c` `menu.c` `gacha.c` `forge.c` `story.c` `rewards.c` が冒険部分、`save.c` `adventure.c` がセーブとルール
 - `tools/make_data.py` `tools/make_gfx.py` `tools/make_audio.py` 変換スクリプト、`tools/audio/` SPC700 ドライバとアセンブラ・BRR 変換
 - `tools/harness/` テスト用（libretro コアで ROM を動かしてスクリーンショット・メモリ・音を保存する `runrom`、セーブ作成 `mksave.py`、
-  処理時間の内訳 `prof.py`〈`PROFILE=1 python build.py rom` で作る計測用 ROM が必要〉など）
+  処理時間の内訳 `prof.py`、文字のはみ出し・枠かぶり・色の混ざり・重なりの検査 `textcheck.py`
+  〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要〉、文字列の幅 `textwidth.py` など）
 
 フォントは東雲フォント（パブリックドメイン、`tools/font/SHINONOME_COPYRIGHT.txt`）を使っています。

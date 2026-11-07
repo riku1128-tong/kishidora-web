@@ -6,7 +6,7 @@
 #define BX_TALK 10
 #define T_TALK 625
 #define KING_X 96
-#define KING_Y 46           /* feet just above the message window (row 18) */
+#define KING_Y 38           /* feet just above the message window (row 17) */
 
 static u8 king_on;
 
@@ -40,9 +40,10 @@ void talk(u16 first, u8 n, u16 speaker, u8 king) {
   if (king) king_load();
   mk_sprites = king_sprites;
   for (i = 0; i < n && !skip; ++i) {
-    win_open(BX_TALK, 1, 18, 30, 8, T_TALK, PAL_W);   /* rows 18-25: the map's key help (26-27) stays whole */
-    if (speaker) says(BX_TALK, 10, 5, TXT_SPEAKER, speaker);
-    say(BX_TALK, 14, speaker ? 20 : 10, first + i);
+    /* rows 17-25 (the map's key help, 26-27, stays whole): speaker, then up to 3 lines */
+    win_open(BX_TALK, 1, 17, 30, 9, T_TALK, PAL_W);
+    if (speaker) says(BX_TALK, 10, TOP_Y, TXT_SPEAKER, speaker);
+    say(BX_TALK, 14, speaker ? TOP_Y + LINE_C : TOP_Y + 6, first + i);
     tb_flush(BX_TALK);
     for (;;) {
       oam_next = 0;
@@ -62,29 +63,36 @@ void talk(u16 first, u8 n, u16 speaker, u8 king) {
 }
 
 /* ---------------------------------------------------------------- difficulty */
-/* Safari order on screen: lunatic .. easy */
+/* Safari order on screen: lunatic .. easy.  The five names, and the rules of the one under the
+ * cursor in a box below them (all five with their rules do not fit in the frame). */
+#define BX_DDESC 1
+#define DIFF_X 48
+#define DIFF_Y 48
+
+static void diff_desc(u8 d) {
+  box(BX_DDESC, 1, 18, 30, 5, 833, PAL_W, BOX_OPAQUE);   /* tiles after the window's 832 */
+  say(BX_DDESC, 4, 2, DIFFD1_0 + d);
+  say(BX_DDESC, 4, 18, DIFFD2_0 + d);
+  tb_flush(BX_DDESC);
+}
+
 u8 difficulty_select(u8 cur, u8 cancel) {
-  u8 sel = 4 - cur, i, d, y;
+  u8 sel = 4 - cur, i, shown = 255;
   mk_screen();
   load_vram(ASSET_TITLE_TILES, VRAM_BG1_TILES);
   load_pal(ASSET_TITLE_PAL, 32);
   load_map(ASSET_TITLE_MAP, 0, 0, 0);
   win_base();
-  win_open(0, 0, 0, 32, 28, 1, PAL_W);
-  say_center(0, 4, T_DIFF_TITLE);
-  say_center(0, 17, T_DIFF_NOTE);
-  for (i = 0; i < 5; ++i) {
-    d = 4 - i;
-    y = 34 + i * 37;
-    say(0, 18, y, T_DIFF_0 + d);
-    say(0, 18, y + 12, DIFFD1_0 + d);
-    say(0, 18, y + 24, DIFFD2_0 + d);
-  }
+  win_open(0, 0, 1, 32, 26, 1, PAL_W);
+  say_center(0, TOP_Y, T_DIFF_TITLE);
+  say_center(0, TOP_Y + LINE_C, T_DIFF_NOTE);
+  for (i = 0; i < 5; ++i) say(0, DIFF_X, DIFF_Y + i * LINE_C, T_DIFF_0 + 4 - i);
   tb_flush(0);
   screen_on();
   for (;;) {
+    if (sel != shown) { diff_desc(4 - sel); shown = sel; }
     oam_next = 0;
-    mk_cursor(6, 34 + sel * 37 + 2);
+    mk_cursor(DIFF_X - 11, 8 + DIFF_Y + sel * LINE_C + 2);
     oam_finish();
     frame_wait();
     if (pad_rep & BTN_UP) { sel = sel ? sel - 1 : 4; se_play(SE_CURSOR); }
@@ -100,10 +108,13 @@ u8 difficulty_select(u8 cur, u8 cancel) {
 #define BX_NTITLE 0
 #define BX_NAME 1
 #define BX_GRID 2
+#define BX_NKEYS 3
 #define CELL_W 16
-#define CELL_H 14
-#define GRID_X 24        /* screen pixels of the grid box */
-#define GRID_Y 64
+#define CELL_H 13        /* one colour: lines may be this close */
+#define GRID_X 16        /* screen pixels of the grid box */
+#define GRID_Y 48
+#define NAME_X 96        /* screen pixels of the name */
+#define NAME_Y 26
 
 static u16 nbuf[NAME_MAX + 1];
 static u8 nlen, npage;
@@ -113,7 +124,7 @@ static void name_draw(void) {
   tb_clear(BX_NAME);
   for (i = 0; i < 7; ++i) hero_name[i] = nbuf[i];
   hero_name[7] = 0;
-  say(BX_NAME, 8, 4, TXT_NAME);
+  say(BX_NAME, 0, 2, TXT_NAME);
   tb_flush(BX_NAME);
 }
 
@@ -127,12 +138,12 @@ static void grid_draw(void) {
       one[0] = name_grid[npage][r * NAME_GRID_W + c];
       one[1] = 0;
       if (!one[0]) continue;
-      ea[0] = 8 + c * CELL_W + (c >= 5 ? 6 : 0); ea[1] = 4 + r * CELL_H; ea[2] = (u16)one;
+      ea[0] = 8 + c * CELL_W + (c >= 5 ? 6 : 0); ea[1] = TOP_Y + r * CELL_H; ea[2] = (u16)one;
       tb_codes(BX_GRID);
     }
   for (c = 0; c < 3; ++c) {
     targ_str = T_NAME_KANA + c;
-    say(BX_GRID, 8 + c * 60, 4 + NAME_GRID_H * CELL_H + 2, c == npage ? TXT_YELLOW_S : TXT_GRAY_S);
+    say(BX_GRID, 8 + c * 64, 128, c == npage ? TXT_YELLOW_S : TXT_GRAY_S);   /* own tile rows, own tiles */
   }
   tb_flush(BX_GRID);
 }
@@ -144,19 +155,23 @@ void name_entry(void) {
   memset(nbuf, 0, sizeof(nbuf));
   for (nlen = 0; nlen < NAME_MAX && sv.name[nlen]; ++nlen) nbuf[nlen] = sv.name[nlen];
   npage = 0;
-  win_open(BX_NTITLE, 2, 1, 28, 4, 1, PAL_W);
-  say_center(BX_NTITLE, 4, T_NAME_TITLE);
-  say_center(BX_NTITLE, 18, T_NAME_KEYS);
+  /* title window (rows 0-5) with the name in a box of its own inside, the grid (rows 6-24),
+   * the key help on a bar at the bottom */
+  win_open(BX_NTITLE, 2, 0, 28, 6, 1, PAL_W);
+  say_center(BX_NTITLE, TOP_Y, T_NAME_TITLE);
   tb_flush(BX_NTITLE);
-  win_open(BX_NAME, 9, 5, 14, 3, 120, PAL_W);
-  win_open(BX_GRID, 2, 8, 28, 19, 170, PAL_W);
+  box(BX_NAME, NAME_X / 8, NAME_Y / 8, 12, 2, 170, PAL_W, BOX_OPAQUE);
+  win_open(BX_GRID, 2, 6, 28, 19, 200, PAL_W);
+  box(BX_NKEYS, 0, 26, 32, 2, 740, PAL_W, BOX_OPAQUE);
+  say_center(BX_NKEYS, 2, T_NAME_KEYS);
+  tb_flush(BX_NKEYS);
   name_draw();
   grid_draw();
   screen_on();
   for (;;) {
     oam_next = 0;
-    mk_cursor(16 + 8 + cx * CELL_W + (cx >= 5 ? 6 : 0) - 9, GRID_Y + 4 + cy * CELL_H + 2);
-    if (nlen < NAME_MAX && ((frame >> 4) & 1)) spr_add(72 + 8 + msg_width(TXT_NAME), 40 + 14, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 3), 0);
+    mk_cursor(GRID_X + 8 + cx * CELL_W + (cx >= 5 ? 6 : 0) - 9, GRID_Y + TOP_Y + cy * CELL_H + 2);
+    if (nlen < NAME_MAX && ((frame >> 4) & 1)) spr_add(NAME_X + msg_width(TXT_NAME), NAME_Y + 2 + 10, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 3), 0);
     oam_finish();
     frame_wait();
     if (pad_rep & BTN_LEFT) { cx = cx ? cx - 1 : NAME_GRID_W - 1; se_play(SE_CURSOR); }
@@ -187,10 +202,10 @@ void name_entry(void) {
 void orb_scene(u8 orb) {
   void (*old)(void) = mk_sprites;
   mk_sprites = 0;
-  win_open(MK_BOX_DLG, 2, 8, 28, 8, MK_T_DLG, PAL_W_FRAME);
+  win_open(MK_BOX_DLG, 1, 8, 30, 7, MK_DLG_TILE(30, 7), PAL_W_FRAME);
   targ_str = ORBN_0 + orb;
-  say_center(MK_BOX_DLG, 8, T_ORB_GET);
-  say(MK_BOX_DLG, 14, 28, ORBD_0 + orb);
+  say_center(MK_BOX_DLG, TOP_Y, T_ORB_GET);
+  say_center(MK_BOX_DLG, TOP_Y + 2 * LINE_C, ORBD_0 + orb);
   tb_flush(MK_BOX_DLG);
   se_play(SE_MIRACLE);
   do { oam_next = 0; oam_finish(); frame_wait(); } while (!(pad_new & (BTN_A | BTN_B)));
@@ -225,9 +240,10 @@ void ending(void) {
   mk_screen();
   screen_on();
   talk(EPI_0, N_EPI, 0, 0);
-  win_open(0, 4, 8, 24, 10, 1, PAL_W);
-  for (i = 0; i < N_CREDIT; ++i) say_center(0, 8 + i * 16, CREDIT_0 + i);
-  say_center(0, 56, T_THE_END);
+  /* the credits are wider than a framed window: a plain screen */
+  box(0, 0, 0, 32, 28, 1, PAL_W, BOX_OPAQUE);
+  for (i = 0; i < N_CREDIT; ++i) say(0, 6, 40 + i * 56, CREDIT_0 + i);
+  say_center(0, 168, T_THE_END);
   tb_flush(0);
   do { frame_wait(); } while (!(pad_new & (BTN_A | BTN_START)));
   sv.ending_seen = 1;

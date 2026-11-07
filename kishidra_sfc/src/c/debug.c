@@ -54,15 +54,15 @@ static void cat_row(u16 i, u8 y) {
   say(BX_LIST, 40, y, ITEMN_0 + it);
   if (r->type == WT_SHIELD) sayn(BX_LIST, 150, y, T_ITEM_DEF, r->def);
   else sayn(BX_LIST, 150, y, T_ITEM_ATK, r->atk);
-  if (owned[it]) sayn(BX_LIST, 214, y, T_DBG_HAVE, owned[it]);
+  if (owned[it]) sayn(BX_LIST, 200, y, T_DBG_HAVE, owned[it]);
 }
 
 static void cat_header(void) {
   targ_num2 = D_INV_MAX;
-  sayn(BX_LIST, 10, 4, sv.ninv >= D_INV_MAX ? T_DBG_PICK_FULL : T_DBG_PICK_HEAD, sv.ninv);
+  sayn(BX_LIST, 10, TOP_Y, sv.ninv >= D_INV_MAX ? T_DBG_PICK_FULL : T_DBG_PICK_HEAD, sv.ninv);
   targ_str = cat_filter_name();
-  say(BX_LIST, 168, 4, T_DEX_FILTER);
-  say(BX_LIST, 10, 174, T_DBG_PICK_KEYS);
+  say(BX_LIST, 168, TOP_Y, T_DEX_FILTER);
+  say(BX_LIST, 10, 168, T_DBG_PICK_KEYS);
 }
 
 /* skill editor: three slots, おまかせ, もらう, やめる */
@@ -87,6 +87,7 @@ static u8 pick_skill(void) {
   sk_list[nsk_list++] = 255;
   for (s = 0; s < N_SKILL; ++s) if (skills[s].wtype == t || skills[s].wtype > 2) sk_list[nsk_list++] = s;
   list_init(&l, BX_SUB, 7, nsk_list);
+  l.lh = LINE_C;
   mk_draw = sk_row; mk_moved = 0; mk_header = 0; mk_sprites = 0;
   win_open(BX_SUB, 5, 6, 22, 16, T_SUB, PAL_W_FRAME);
   k = list_run(&l, 0);
@@ -107,21 +108,21 @@ static void ed_draw(void) {
   win_open(BX_INFO, 2, 4, 28, 16, T_ED, PAL_W);
   tb_clear(BX_INFO);
   targ_str = RARN_0 + r->rarity;
-  say(BX_INFO, 10, 4, TXT_YELLOW_S);
-  say(BX_INFO, 36, 4, ITEMN_0 + ed_item);
-  sayn(BX_INFO, 150, 4, T_ITEM_ATK, r->atk);
+  say(BX_INFO, 10, TOP_Y, TXT_YELLOW_S);
+  say(BX_INFO, 40, TOP_Y, ITEMN_0 + ed_item);
+  sayn(BX_INFO, 156, TOP_Y, T_ITEM_ATK, r->atk);
   for (k = 0; k < 3; ++k) {
     sayn(BX_INFO, 24, 24 + k * 16, T_DBG_SLOT, k + 1);
     say(BX_INFO, 80, 24 + k * 16, ed_sk[k] == 255 ? T_DBG_NONE : SKILLN_0 + ed_sk[k]);
   }
-  say(BX_INFO, 24, 80, T_DBG_AUTO);
-  say(BX_INFO, 24, 96, T_DBG_TAKE);
-  say(BX_INFO, 24, 112, T_DBG_CANCEL);
+  say(BX_INFO, 24, 72, T_DBG_AUTO);
+  say(BX_INFO, 24, 88, T_DBG_TAKE);
+  say(BX_INFO, 24, 104, T_DBG_CANCEL);
   tb_flush(BX_INFO);
 }
 
 static void editor(u8 it) {
-  static const u8 row_y[6] = { 24, 40, 56, 80, 96, 112 };
+  static const u8 row_y[6] = { 24, 40, 56, 72, 88, 104 };
   u8 sel = 0, k, s, n, sk[3];
   ed_item = it;
   ed_roll();
@@ -162,8 +163,9 @@ static void give_scene(void) {
   mk_screen();
   head(T_DBG_GIVE);
   screen_on();
-  list_init(&l, BX_LIST, 10, ncat);
-  l.y = 20;
+  list_init(&l, BX_LIST, 9, ncat);
+  l.y = TOP_Y + LINE_C;
+  l.lh = LINE_C;      /* the rarity colour changes from row to row */
   for (;;) {
     mk_draw = cat_row; mk_moved = 0; mk_header = cat_header; mk_sprites = 0;
     win_open(BX_LIST, 0, 2, 32, 24, T_LIST, PAL_W);
@@ -200,27 +202,28 @@ static void root_row(u16 i, u8 y) { say(BX_LIST, 14, y, db_text[i]); }
 static void root_info(u16 i) {
   win_open(BX_INFO, 0, 17, 32, 11, T_INFO, PAL_W);
   tb_clear(BX_INFO);
-  if (db_desc[i]) say(BX_INFO, 10, 6, db_desc[i]);
+  /* the description (wrapped to the window, up to 4 lines), the counts below it */
+  if (db_desc[i]) say_wrap(BX_INFO, 8, TOP_Y, db_desc[i], 248);
   switch (i) {
   case DB_GOODS:
     targ_num2 = sv.mats[MAT_IT_RESET];
-    sayn(BX_INFO, 10, 40, T_DBG_GOODS_NOW, sv.mats[MAT_IT_FUERU]);
+    sayn(BX_INFO, 10, 54, T_DBG_GOODS_NOW, sv.mats[MAT_IT_FUERU]);
     targ_num2 = sv.mats[MAT_KYOUKA];
     targ_str = MATN_0 + MAT_KYOUKA;
-    sayn(BX_INFO, 10, 54, T_DBG_GOODS_NOW2, sv.tickets);
+    sayn(BX_INFO, 10, 68, T_DBG_GOODS_NOW2, sv.tickets);
     break;
   case DB_ALL:
     targ_num2 = D_INV_MAX;
-    sayn(BX_INFO, 10, 40, T_DBG_BAG_NOW, sv.ninv);
+    sayn(BX_INFO, 10, 54, T_DBG_BAG_NOW, sv.ninv);
     break;
   case DB_DEX:
     targ_num2 = debug_dex_count(2);
-    sayn(BX_INFO, 10, 40, T_DBG_DEX_NOW, debug_dex_count(0));
-    sayn(BX_INFO, 10, 54, T_DBG_DEX_NOW2, debug_dex_count(1));
+    sayn(BX_INFO, 10, 54, T_DBG_DEX_NOW, debug_dex_count(0));
+    sayn(BX_INFO, 10, 68, T_DBG_DEX_NOW2, debug_dex_count(1));
     break;
   case DB_OPEN:
-    if ((sv.story & ST_DEBUG_OPEN) && sv.area_open == AR_SECRET) say(BX_INFO, 10, 40, T_DBG_OPEN_ALL);
-    else { targ_num2 = AR_SECRET + 1; sayn(BX_INFO, 10, 40, T_DBG_OPEN_NOW, sv.area_open + 1); }
+    if ((sv.story & ST_DEBUG_OPEN) && sv.area_open == AR_SECRET) say(BX_INFO, 10, 68, T_DBG_OPEN_ALL);
+    else { targ_num2 = AR_SECRET + 1; sayn(BX_INFO, 10, 68, T_DBG_OPEN_NOW, sv.area_open + 1); }
     break;
   }
   tb_flush(BX_INFO);
@@ -241,7 +244,7 @@ void debug_scene(void) {
   root_screen();
   for (;;) {
     mk_draw = root_row; mk_moved = root_info; mk_header = 0; mk_sprites = 0;
-    win_open(BX_LIST, 4, 3, 24, 13, T_LIST, PAL_W);
+    win_open(BX_LIST, 4, 3, 24, 14, T_LIST, PAL_W);
     k = list_run(&l, 0);
     if ((k & BTN_B) || l.cur == DB_BACK) break;
     switch (l.cur) {

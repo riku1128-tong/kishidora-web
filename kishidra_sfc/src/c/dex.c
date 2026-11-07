@@ -10,7 +10,7 @@
 #define BX_INFO 2
 #define T_HEAD 1
 #define T_LIST 65            /* list window: up to 32 x 24 tiles (768) */
-#define T_INFO 449           /* info under a 14-row list (65 + 32 * 12) */
+#define T_INFO 481           /* info under a 13-row list (65 + 32 * 13) */
 
 enum { TB_MON, TB_WP, TB_SH, TB_SP, TB_SK, N_TAB };
 #define N_FILT_WP 4          /* 全部 / 剣 / 槍 / 槌 */
@@ -105,6 +105,9 @@ static void put(u8 bx, u8 y, u16 msg) {
   px += msg_width(msg);
 }
 
+/* the next text has another colour: start it on a tile of its own */
+static void put_tile(void) { px = (px + 7) & ~7; }
+
 static void put_s(u8 bx, u8 y, u16 fmt, u16 s) {
   targ_str = s;
   say(bx, px, y, fmt);
@@ -117,8 +120,9 @@ static void head(void) {
   say(BX_HEAD, 4, 2, T_DEX_HEAD);
   px = 34;
   for (t = 0; t < N_TAB; ++t) {
+    put_tile();
     put_s(BX_HEAD, 2, t == tab ? TXT_YELLOW_S : TXT_GRAY_S, T_DEX_TAB_0 + t);
-    px += 9;
+    px += 6;
   }
   tb_flush(BX_HEAD);
 }
@@ -141,16 +145,16 @@ static void row_item(u16 i, u8 y) {
   targ_str = RARN_0 + items[it].rarity;
   say(BX_LIST, 62, y, items[it].rarity >= R_SR ? TXT_YELLOW_S : TXT_GRAY_S);
   say(BX_LIST, 88, y, ITEMN_0 + it);
-  if (sv.got[it]) sayn(BX_LIST, 208, y, T_DEX_COUNT, sv.got[it]);
+  if (sv.got[it]) sayn(BX_LIST, 200, y, T_DEX_COUNT, sv.got[it]);
 }
 
 static void row_sp(u16 i, u8 y) {
   u8 n = ids[i];
   const Special *p = &specials[n];
-  if (!sp_known(n)) { say(BX_LIST, 22, y, T_DEX_UNKNOWN_GRAY); return; }
+  if (!sp_known(n)) { say(BX_LIST, 24, y, T_DEX_UNKNOWN_GRAY); return; }
   if (sp_ready(n) == 2) say(BX_LIST, 10, y, T_DEX_STAR);
-  say(BX_LIST, 22, y, SPN_0 + n);
-  px = 140;
+  say(BX_LIST, 24, y, SPN_0 + n);
+  px = 124;                    /* the hits end before the scroll marks at 236 */
   put(BX_LIST, y, TGTN_0 + p->target);
   targ_num2 = p->mult;
   sayn(BX_LIST, px + 6, y, T_DEX_HITS, p->hits);
@@ -168,15 +172,16 @@ static void row_sk(u16 i, u8 y) {
 
 static void list_header(void) {
   targ_num2 = nids;
-  sayn(BX_LIST, 10, 4, tab == TB_SK ? T_DEX_HAVE : T_DEX_FOUND, nknown);
+  sayn(BX_LIST, 10, TOP_Y, tab == TB_SK ? T_DEX_HAVE : T_DEX_FOUND, nknown);
   if (tab == TB_WP || tab == TB_SP || tab == TB_SK) {
     targ_str = filt_name(filt[tab]);
-    say(BX_LIST, 150, 4, T_DEX_FILTER);
+    say(BX_LIST, 152, TOP_Y, T_DEX_FILTER);
   }
-  if (tab <= TB_SH) say(BX_LIST, 10, 174, tab == TB_WP ? T_DEX_KEYS_F : T_DEX_KEYS);
+  if (tab <= TB_SH) say(BX_LIST, 10, 168, tab == TB_WP ? T_DEX_KEYS_F : T_DEX_KEYS);
 }
 
 /* ---------------------------------------------------------------- info box (specials, skills) */
+#define INFO_H 13
 static void seq_line(u8 bx, u8 y, u8 n) {
   u8 k, s;
   static const u16 col[3] = { TXT_GRAY_S, TXT_S, TXT_YELLOW_S };
@@ -184,31 +189,32 @@ static void seq_line(u8 bx, u8 y, u8 n) {
   for (k = 0; k < 3; ++k) {
     s = sp_skill(n, k);
     if (s == 255) break;
-    if (k) { put(bx, y, TXT_NEXT_ARROW); px += 4; }
+    if (k) { put_tile(); put(bx, y, TXT_NEXT_ARROW); }
+    put_tile();
     put_s(bx, y, col[have[s]], SKILLN_0 + s);
-    px += 4;
+    px += 2;
   }
 }
 
 static void info_sp(u16 i) {
   u8 n = ids[i], r;
   const Special *p = &specials[n];
-  win_open(BX_INFO, 0, 16, 32, 12, T_INFO, PAL_W);
+  win_open(BX_INFO, 0, 28 - INFO_H, 32, INFO_H, T_INFO, PAL_W);
   tb_clear(BX_INFO);
   if (!sp_known(n)) {
-    say(BX_INFO, 10, 4, T_DEX_UNKNOWN_GRAY);
-    say(BX_INFO, 10, 20, T_DEX_SP_UNK1);
-    say(BX_INFO, 10, 34, T_DEX_SP_UNK2);
+    say(BX_INFO, 10, TOP_Y, T_DEX_UNKNOWN_GRAY);
+    say(BX_INFO, 10, TOP_Y + LINE_C, T_DEX_SP_UNK1);
+    say(BX_INFO, 10, TOP_Y + LINE_C + LINE_H, T_DEX_SP_UNK2);
   } else {
     targ_str = SPN_0 + n;
-    say(BX_INFO, 10, 4, TXT_YELLOW_S);
-    seq_line(BX_INFO, 20, n);
+    say(BX_INFO, 10, TOP_Y, TXT_YELLOW_S);
+    seq_line(BX_INFO, TOP_Y + LINE_C, n);
     targ_num2 = p->hits;
     targ_str = TGTN_0 + p->target;
-    sayn(BX_INFO, 14, 36, T_DEX_SP_POWER, p->mult);
+    sayn(BX_INFO, 14, TOP_Y + 2 * LINE_C, T_DEX_SP_POWER, p->mult);
     r = sp_ready(n);
-    say(BX_INFO, 14, 52, T_DEX_SP_READY_0 + r);
-    say(BX_INFO, 10, 72, T_DEX_SP_LEGEND);
+    say(BX_INFO, 14, TOP_Y + 3 * LINE_C, T_DEX_SP_READY_0 + r);
+    say(BX_INFO, 10, TOP_Y + 4 * LINE_C, T_DEX_SP_LEGEND);
   }
   tb_flush(BX_INFO);
 }
@@ -216,25 +222,29 @@ static void info_sp(u16 i) {
 static void info_sk(u16 i) {
   u8 s = ids[i], n, c = 0;
   static const u16 col[3] = { TXT_GRAY_S, TXT_S, TXT_YELLOW_S };
-  u8 y = 4;
+  u8 y = TOP_Y;
   u16 w;
-  win_open(BX_INFO, 0, 16, 32, 12, T_INFO, PAL_W);
+  win_open(BX_INFO, 0, 28 - INFO_H, 32, INFO_H, T_INFO, PAL_W);
   tb_clear(BX_INFO);
   targ_str = SKILLN_0 + s;
   say(BX_INFO, 10, y, col[have[s]]);
   px = 10 + msg_width(SKILLN_0 + s) + 10;
+  put_tile();
   sayn(BX_INFO, px, y, T_DEX_ST, skills[s].cost);
+  px += 40;
+  put_tile();
   targ_str = filt_name(sk_group(s) + 1);
-  say(BX_INFO, px + 40, y, TXT_GRAY_S);
-  say(BX_INFO, 14, 18, SKILLD_0 + s);
+  say(BX_INFO, px, y, TXT_GRAY_S);
+  say(BX_INFO, 14, TOP_Y + LINE_C, SKILLD_0 + s);
   if (skills[s].hits > 0) {
-    say(BX_INFO, 10, 48, T_DEX_SK_IN);
-    y = 62; px = 14;
+    say(BX_INFO, 10, TOP_Y + 3 * LINE_C, T_DEX_SK_IN);
+    y = TOP_Y + 4 * LINE_C; px = 14;
     for (n = 0; n < N_SPECIAL; ++n) {
       if (sp_skill(n, 0) != s && sp_skill(n, 1) != s && sp_skill(n, 2) != s) continue;
       if (c++) put(BX_INFO, y, T_DEX_DOT);
       w = sp_known(n) ? SPN_0 + n : T_DEX_UNKNOWN_GRAY;
-      if (px + msg_width(w) > 240) { y += 14; px = 14; }
+      put_tile();
+      if (px + msg_width(w) > 240) { y += LINE_C; px = 14; }
       put(BX_INFO, y, w);
     }
     if (!c) say(BX_INFO, 14, y, T_DEX_NONE);
@@ -336,13 +346,13 @@ static void card_head(u16 no, u16 name) {
   box(BX_HEAD, 0, 0, 32, 2, T_HEAD, PAL_W, BOX_OPAQUE);
   sayn(BX_HEAD, 6, 2, T_DEX_NO, no);
   say(BX_HEAD, 54, 2, name);
-  say(BX_HEAD, 182, 2, T_DEX_CARD_KEYS);
+  say(BX_HEAD, 252 - msg_width(T_DEX_CARD_KEYS), 2, T_DEX_CARD_KEYS);
   tb_flush(BX_HEAD);
 }
 
 static void mon_lines(u8 m) {
   const Enemy *r = &enemy_rows[m];
-  u8 a, el, y = 4, k;
+  u8 a, el, y = TOP_Y, k;
   u16 mask = mon_areas[m];
   px = 10;
   put(BX_INFO, y, m == MON_117 ? T_RACE_SECRET : RACEN_0 + r->race);
@@ -352,7 +362,7 @@ static void mon_lines(u8 m) {
   put(BX_INFO, y, T_DEX_DOT);
   put(BX_INFO, y, SZN_0 + r->size);
   put(BX_INFO, y, T_DEX_SIZE);
-  y = 18; px = 10;
+  y = TOP_Y + LINE_H; px = 10;
   put(BX_INFO, y, T_DEX_WEAK_W);
   put(BX_INFO, y, r->weak < WT_SHIELD ? WTN_0 + r->weak : T_DEX_NONE);
   px += 12;
@@ -361,7 +371,7 @@ static void mon_lines(u8 m) {
   for (k = 0; k < N_EL; ++k) if (r->element != EL_NONE && el_strong[k] == r->element) el = k;
   if (el != 255) { put(BX_INFO, y, ELN_0 + el); put(BX_INFO, y, T_DEX_ZOKUSEI); }
   else put(BX_INFO, y, T_DEX_NONE);
-  y = 32; px = 10;
+  y = TOP_Y + 2 * LINE_H; px = 10;
   put(BX_INFO, y, T_DEX_PLACE);
   if (!mask) put(BX_INFO, y, m == MON_116 ? T_DEX_PLACE_TUT : T_DEX_Q);
   for (a = 0, k = 0; a < 16; ++a) {
@@ -381,9 +391,9 @@ static u16 mon_card(u8 pos) {
   pic_load(m, known);
   win_base();
   card_head(pos + 1, known ? MONN_0 + m : T_DEX_UNKNOWN);
-  win_open(BX_INFO, 0, 18, 32, 10, T_INFO, PAL_W);
+  win_open(BX_INFO, 0, 17, 32, 11, T_INFO, PAL_W);
   tb_clear(BX_INFO);
-  if (known) mon_lines(m); else say(BX_INFO, 10, 4, T_DEX_NOT_YET);
+  if (known) mon_lines(m); else say(BX_INFO, 10, TOP_Y, T_DEX_NOT_YET);
   tb_flush(BX_INFO);
   oam_next = 0; pic_sprites(); oam_finish();
   screen_on();
@@ -416,29 +426,30 @@ static void item_lines(u8 it) {
   const Item *r = &items[it];
   u8 y;
   targ_str = RARN_0 + r->rarity;
-  say(BX_INFO, 10, 4, TXT_YELLOW_S);
+  say(BX_INFO, 10, TOP_Y, TXT_YELLOW_S);
   px = 10 + msg_width(RARN_0 + r->rarity) + 8;
-  put(BX_INFO, 4, WTN_0 + r->type);
+  put(BX_INFO, TOP_Y, WTN_0 + r->type);
+  y = TOP_Y + LINE_C;
   if (r->type == WT_SHIELD) {
-    sayn(BX_INFO, 10, 20, T_ITEM_DEF, r->def);
-    sayn(BX_INFO, 70, 20, T_DEX_HP, r->atk);
-    sayn(BX_INFO, 10, 34, T_DEX_GUARD, MIN((u16)r->def * D_GUARD_PCT_PER_DEF, D_GUARD_PCT_MAX));
+    sayn(BX_INFO, 10, y, T_ITEM_DEF, r->def);
+    sayn(BX_INFO, 70, y, T_DEX_HP, r->atk);
+    sayn(BX_INFO, 10, y + LINE_H, T_DEX_GUARD, MIN((u16)r->def * D_GUARD_PCT_PER_DEF, D_GUARD_PCT_MAX));
   } else {
-    sayn(BX_INFO, 10, 20, T_ITEM_ATK, r->atk);
-    sayn(BX_INFO, 70, 20, T_ITEM_CRIT, r->crit);
-    sayn(BX_INFO, 130, 20, T_DEX_STUN, r->stun);
-    if (r->element == EL_NONE) say(BX_INFO, 10, 34, T_DEX_EL_NONE);
+    sayn(BX_INFO, 10, y, T_ITEM_ATK, r->atk);
+    sayn(BX_INFO, 70, y, T_ITEM_CRIT, r->crit);
+    sayn(BX_INFO, 130, y, T_DEX_STUN, r->stun);
+    if (r->element == EL_NONE) say(BX_INFO, 10, y + LINE_H, T_DEX_EL_NONE);
     else {
       px = 10;
-      put_s(BX_INFO, 34, T_DEX_EL, ELN_0 + r->element);
+      put_s(BX_INFO, y + LINE_H, T_DEX_EL, ELN_0 + r->element);
       px += 30;
-      if (el_strong[r->element] != 255) put_s(BX_INFO, 34, T_DEX_EL_X2, ELN_0 + el_strong[r->element]);
+      if (el_strong[r->element] != 255) put_s(BX_INFO, y + LINE_H, T_DEX_EL_X2, ELN_0 + el_strong[r->element]);
     }
   }
   targ_str = FXN_0 + r->effect;
-  say(BX_INFO, 10, 50, T_ITEM_FX);
-  y = 64;
-  if (r->effect != FX_NONE) { say(BX_INFO, 18, y, FXD_0 + r->effect); y += 42; }
+  say(BX_INFO, 10, TOP_Y + 3 * LINE_C, T_ITEM_FX);
+  y = TOP_Y + 3 * LINE_C + LINE_H;
+  if (r->effect != FX_NONE) { say(BX_INFO, 18, y, FXD_0 + r->effect); y += 3 * LINE_H; }
   evo_name(y, T_DEX_EVO_FROM, item_evo_from[it], 0); y += 14;
   evo_name(y, T_DEX_EVO_TO, r->evolve, item_evo_lost[it]); y += 18;
   targ_num2 = item_count(it);
@@ -452,7 +463,7 @@ static u16 item_card(u8 pos) {
   card_head(pos + 1, known ? ITEMN_0 + it : T_DEX_UNKNOWN);
   win_open(BX_INFO, 0, 2, 32, 26, T_LIST, PAL_W);
   tb_clear(BX_INFO);
-  if (known) item_lines(it); else say(BX_INFO, 10, 4, T_DEX_NOT_YET);
+  if (known) item_lines(it); else say(BX_INFO, 10, TOP_Y, T_DEX_NOT_YET);
   tb_flush(BX_INFO);
   screen_on();
   for (;;) {
@@ -479,14 +490,15 @@ static u8 list_screen(void) {
   make_list();
   mk_screen();
   head();
-  list_init(&l, BX_LIST, tall ? 10 : 5, nids);
-  l.y = 20;
+  list_init(&l, BX_LIST, tall ? 9 : 4, nids);
+  l.y = TOP_Y + LINE_C;
+  l.lh = LINE_C;      /* known / unknown rows have different colours */
   l.cur = cur_of[tab]; l.top = top_of[tab];
   mk_draw = tab == TB_MON ? row_mon : (tab == TB_SP ? row_sp : (tab == TB_SK ? row_sk : row_item));
   mk_moved = tall ? 0 : moved;
   mk_header = list_header;
   mk_sprites = 0;
-  win_open(BX_LIST, 0, 2, 32, tall ? 24 : 14, T_LIST, PAL_W);
+  win_open(BX_LIST, 0, 2, 32, tall ? 24 : 26 - INFO_H, T_LIST, PAL_W);
   screen_on();
   for (;;) {
     k = list_run(&l, BTN_L | BTN_R | BTN_SELECT);

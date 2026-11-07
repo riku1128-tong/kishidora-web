@@ -9,8 +9,8 @@
 #define BX_ACT 3
 #define T_HEAD 1
 #define T_LIST 65
-#define T_INFO 577
-#define T_ACT 865          /* shares the dialog range (never open together) */
+#define T_INFO 545          /* 65 + 32 x 15 (list); the card is 32 x 11 (to 896) */
+#define T_ACT MK_DLG_TILE(18, 7)   /* shares the dialog range (never open together) */
 
 static u16 order[INV_SLOTS];
 static u16 norder;
@@ -64,6 +64,10 @@ static void make_order(u8 filter) {
 }
 
 /* ---------------------------------------------------------------- shared list screen */
+/* list window above the item card: 6 rows and the key help on its own tile rows */
+#define LIST_H (26 - MK_CARD_H)
+#define LIST_ROWS 6
+#define LIST_KEYS_Y 96
 static u8 list_slot;        /* equip pick: slot being changed, 255 = inventory */
 
 static void head(u16 title) {
@@ -74,7 +78,7 @@ static void head(u16 title) {
 }
 
 static void info(u16 i) {
-  win_open(BX_INFO, 0, 19, 32, 9, T_INFO, PAL_W);
+  win_open(BX_INFO, 0, 28 - MK_CARD_H, 32, MK_CARD_H, T_INFO, PAL_W);
   mk_item_detail(BX_INFO, i == NO_ITEM ? 0 : &sv.inv[i]);
   tb_flush(BX_INFO);
 }
@@ -84,15 +88,15 @@ static void item_row(u16 n, u8 y) {
   Inv *it = &sv.inv[i];
   u8 s = equipped_slot(i);
   mk_item_name(BX_LIST, 14, y, it);
-  if (s != 255) say(BX_LIST, 214, y, T_TAG_MAIN + s);
-  if (inv_fav(it)) say(BX_LIST, 228, y, T_TAG_FAV);
+  if (s != 255) say(BX_LIST, 208, y, T_TAG_MAIN + s);
+  if (inv_fav(it)) say(BX_LIST, 224, y, T_TAG_FAV);      /* clear of the scroll marks at 236 */
   targ_str = RARN_0 + items[it->id].rarity;
   say(BX_LIST, 176, y, TXT_GRAY_S);
 }
 
 static void item_header(void) {
   targ_str = T_SORT_0 + sv.sort_mode;
-  say(BX_LIST, 14, 116, T_LIST_KEYS);
+  say(BX_LIST, 14, LIST_KEYS_Y, T_LIST_KEYS);
 }
 
 static void item_moved(u16 n) { info(norder ? order[n] : NO_ITEM); }
@@ -103,11 +107,11 @@ u16 pick_item(u8 filter, u16 title, u16 start) {
   u16 k, i;
   head(title);
   make_order(filter);
-  list_init(&l, BX_LIST, 8, norder);
+  list_init(&l, BX_LIST, LIST_ROWS, norder);
   for (i = 0; i < norder; ++i) if (order[i] == start) l.cur = i;
   for (;;) {
     mk_draw = item_row; mk_moved = item_moved; mk_header = item_header; mk_sprites = 0;
-    win_open(BX_LIST, 0, 2, 32, 16, T_LIST, PAL_W);
+    win_open(BX_LIST, 0, 2, 32, LIST_H, T_LIST, PAL_W);
     l.n = norder;
     k = list_run(&l, BTN_SELECT);
     if (k & BTN_SELECT) {
@@ -136,7 +140,7 @@ static void slot_row(u16 s, u8 y) {
   else mk_item_name(BX_LIST, 70, y, &sv.inv[sv.equip[s]]);
 }
 
-static void slot_header(void) { say(BX_LIST, 14, 116, T_EQ_KEYS); }
+static void slot_header(void) { say(BX_LIST, 14, LIST_KEYS_Y, T_EQ_KEYS); }
 
 static void slot_moved(u16 s) { info(sv.equip[s]); }
 
@@ -146,11 +150,11 @@ void equip_scene(void) {
   mk_screen();
   screen_on();
   list_init(&l, BX_LIST, 4, 4);
-  l.lh = 18;
+  l.lh = LINE_C;
   for (;;) {
     head(T_EQUIP_TITLE);
     mk_draw = slot_row; mk_moved = slot_moved; mk_header = slot_header; mk_sprites = 0;
-    win_open(BX_LIST, 0, 2, 32, 16, T_LIST, PAL_W);
+    win_open(BX_LIST, 0, 2, 32, LIST_H, T_LIST, PAL_W);
     k = list_run(&l, BTN_X);
     mk_header = 0;
     if (k & BTN_B) break;
@@ -174,16 +178,16 @@ static u8 item_actions(u16 i) {
   u16 k;
   Inv *it = &sv.inv[i];
   u8 sel;
-  win_open(BX_ACT, 6, 7, 20, 7, T_ACT, PAL_W_FRAME);
-  say(BX_ACT, 14, 4, inv_fav(it) ? T_ACT_UNFAV : T_ACT_FAV);
-  sayn(BX_ACT, 14, 18, T_ACT_SELL, sell_price(it->id));
-  say(BX_ACT, 14, 32, T_ACT_FORGE);
+  win_open(BX_ACT, 7, 7, 18, 7, T_ACT, PAL_W_FRAME);
+  say(BX_ACT, 14, TOP_Y, inv_fav(it) ? T_ACT_UNFAV : T_ACT_FAV);
+  sayn(BX_ACT, 14, TOP_Y + LINE_H, T_ACT_SELL, sell_price(it->id));
+  say(BX_ACT, 14, TOP_Y + 2 * LINE_H, T_ACT_FORGE);
   tb_flush(BX_ACT);
   list_init(&l, BX_ACT, 3, 3);
   sel = 0;
   for (;;) {
     oam_next = 0;
-    mk_cursor(48 + 3, 56 + 4 + sel * 14 + 2);
+    mk_cursor(56 + 3, 56 + TOP_Y + sel * LINE_H + 2);
     oam_finish();
     frame_wait();
     if (pad_rep & BTN_UP) { sel = sel ? sel - 1 : 2; se_play(SE_CURSOR); }
@@ -229,18 +233,20 @@ static void items_scene(void) {
 /* ---------------------------------------------------------------- specials (status) */
 static u8 sp_have[N_SKILL];
 
+/* two lines per entry: the name, then the skill chain, both yellow when it can be used */
 static void sp_row(u16 n, u8 y) {
   const Special *p = &specials[n];
   u8 ok = sp_have[p->sk1] && sp_have[p->sk2] && (p->sk3 == 255 || sp_have[p->sk3]);
-  u16 x = 110;
+  u16 c = ok ? TXT_YELLOW_S : TXT_GRAY_S, x = 26;
+  u8 k, sk;
   targ_str = SPN_0 + n;
-  say(BX_LIST, 14, y, ok ? TXT_YELLOW_S : TXT_GRAY_S);
-  targ_str = SKILLN_0 + p->sk1; say(BX_LIST, x, y, TXT_GRAY_S); x += msg_width(SKILLN_0 + p->sk1) + 4;
-  say(BX_LIST, x, y, TXT_NEXT_ARROW); x += 10;
-  targ_str = SKILLN_0 + p->sk2; say(BX_LIST, x, y, TXT_GRAY_S); x += msg_width(SKILLN_0 + p->sk2) + 4;
-  if (p->sk3 != 255) {
-    say(BX_LIST, x, y, TXT_NEXT_ARROW); x += 10;
-    targ_str = SKILLN_0 + p->sk3; say(BX_LIST, x, y, TXT_GRAY_S);
+  say(BX_LIST, 14, y, c);
+  y += LINE_C;                 /* the gray arrows must not share tile rows with the name */
+  for (k = 0; k < 3; ++k) {
+    sk = k == 0 ? p->sk1 : (k == 1 ? p->sk2 : p->sk3);
+    if (sk == 255) break;
+    if (k) { x = (x + 7) & ~7; say(BX_LIST, x, y, TXT_NEXT_ARROW); x += 12; }   /* gray arrow on a tile of its own */
+    targ_str = SKILLN_0 + sk; say(BX_LIST, x, y, c); x += msg_width(SKILLN_0 + sk) + 4;
   }
 }
 
@@ -255,7 +261,8 @@ static void specials_scene(void) {
   mk_screen();
   head(T_SP_HEAD);
   screen_on();
-  list_init(&l, BX_LIST, 17, N_SPECIAL);
+  list_init(&l, BX_LIST, 6, N_SPECIAL);
+  l.lh = 2 * LINE_C;
   mk_draw = sp_row; mk_moved = 0; mk_header = 0; mk_sprites = 0;
   win_open(BX_LIST, 0, 2, 32, 26, T_LIST, PAL_W);
   do { s = (u8)(list_run(&l, 0) & BTN_B); } while (!s);
@@ -270,12 +277,12 @@ static void options_scene(void) {
   screen_on();
   for (;;) {
     win_open(BX_LIST, 4, 6, 24, 6, T_LIST, PAL_W);
-    sayn(BX_LIST, 20, 6, T_OPT_GUARD, sv.guard_late);
-    say(BX_LIST, 20, 22, T_OPT_BACK);
+    sayn(BX_LIST, 20, TOP_Y, T_OPT_GUARD, sv.guard_late);
+    say(BX_LIST, 20, TOP_Y + LINE_C, T_OPT_BACK);
     tb_flush(BX_LIST);
     for (;;) {
       oam_next = 0;
-      mk_cursor(32 + 8, 48 + 6 + sel * 16 + 2);
+      mk_cursor(32 + 8, 48 + TOP_Y + sel * LINE_C + 2);
       oam_finish();
       frame_wait();
       if (pad_rep & (BTN_UP | BTN_DOWN)) { sel ^= 1; se_play(SE_CURSOR); }

@@ -53,16 +53,18 @@ void clear_maps(void) {
   bgmap_dirty = 7;
 }
 
-/* BG3 text palettes: 0-3 transparent text (white, yellow, red, gray), 4-7 opaque windows */
+/* BG3 text palettes, the same in every box: colour 1 = text shadow, 2 = window fill, 3 = text.
+ * (text.s draws text as colour 3 and its shadow as 1, so one palette serves transparent boxes
+ * and windows; an 8x8 tile has one palette, so colours change on tile boundaries) */
 static const u16 bg3pal[32] = {
-  0x0000, 0x7fff, 0x0842, 0x7fff,     /* 0 white */
-  0x0000, 0x23ff, 0x0842, 0x23ff,     /* 1 yellow */
-  0x0000, 0x295f, 0x0842, 0x295f,     /* 2 red */
-  0x0000, 0x0421, 0x0866, 0x5294,     /* 3 window gray (shadow, fill, gray) */
-  0x0000, 0x0421, 0x0866, 0x7fff,     /* 4 window: shadow, fill, white */
-  0x0000, 0x0421, 0x0866, 0x23ff,     /* 5 window yellow */
-  0x0000, 0x0421, 0x0866, 0x229b,     /* 6 window frame gold */
-  0x0000, 0x0421, 0x0866, 0x295f,     /* 7 window red */
+  0x0000, 0x0421, 0x0866, 0x7fff,     /* 0 white */
+  0x0000, 0x0421, 0x0866, 0x23ff,     /* 1 yellow */
+  0x0000, 0x0421, 0x0866, 0x295f,     /* 2 red */
+  0x0000, 0x0421, 0x0866, 0x5294,     /* 3 gray */
+  0x0000, 0x0421, 0x0866, 0x2f4a,     /* 4 green */
+  0x0000, 0x0421, 0x0866, 0x7eed,     /* 5 blue */
+  0x0000, 0x0421, 0x0866, 0x229b,     /* 6 gold (window frames) */
+  0x0000, 0x0421, 0x0866, 0x7fff,     /* 7 spare */
 };
 
 void set_bg3_palettes(void) {

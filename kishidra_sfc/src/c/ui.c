@@ -14,7 +14,31 @@ void tb_flush_rows(u8 id, u8 r0, u8 nr) {
 
 void tb_flush(u8 id) { tb_flush_rows(id, 0, tb[id * 8 + 3]); }
 
+/* A box canvas must not change while the NMI still has to upload it (the screen would show a
+ * half-drawn canvas for a frame): wait until no queued upload reads tiles t0..t0+n-1. */
+extern u8 vq_count, vq[8 * 24];
+static void canvas_wait(u16 t0, u16 n) {
+  u16 lo = t0 * 16, hi = (t0 + n) * 16, s;
+  u8 i, busy;
+  do {
+    busy = 0;
+    for (i = 0; i < vq_count; ++i) {
+      if (vq[i * 8 + 4] != 0x7f) continue;
+      s = vq[i * 8 + 2] | ((u16)vq[i * 8 + 3] << 8);
+      if (s < hi && s + (vq[i * 8 + 5] | ((u16)vq[i * 8 + 6] << 8)) > lo) { busy = 1; break; }
+    }
+    if (busy) wait_frame();
+  } while (busy);
+}
+
+void tb_clear(u8 id) {
+  u8 *b = &tb[id * 8];
+  canvas_wait(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3]);
+  tb_clear_now(id);
+}
+
 void box(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal, u8 flags) {
+  canvas_wait(tile, (u16)w * h);
   ea[0] = x | ((u16)y << 8);
   ea[1] = w | ((u16)h << 8);
   ea[2] = tile;
@@ -35,6 +59,13 @@ void sayn(u8 id, u16 px, u16 py, u16 msg, u32 n) {
 void says(u8 id, u16 px, u16 py, u16 msg, u16 s) {
   targ_str = s;
   say(id, px, py, msg);
+}
+
+/* text that breaks into lines (14 px apart) before it would pass x = maxx */
+void say_wrap(u8 id, u16 px, u16 py, u16 msg, u16 maxx) {
+  text_wrap = maxx;
+  say(id, px, py, msg);
+  text_wrap = 0;
 }
 
 u16 msg_width(u16 msg) {

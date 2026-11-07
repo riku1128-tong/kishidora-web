@@ -8,22 +8,32 @@
 #define BOX_FRAME  2
 #define BOX_WINDOW 3
 #define BOX_LOW 4
-#define PAL_T_WHITE 0
-#define PAL_T_YELLOW 1
-#define PAL_T_RED 2
-#define PAL_T_GRAY 3
-#define PAL_W 4
-#define PAL_W_YELLOW 5
-#define PAL_W_FRAME 6
-#define PAL_W_RED 7
+/* BG3 text palettes (bg3pal in sys.c): the same for transparent boxes and windows */
+#define PAL_WHITE 0
+#define PAL_YELLOW 1
+#define PAL_RED 2
+#define PAL_GRAY 3
+#define PAL_GREEN 4
+#define PAL_BLUE 5
+#define PAL_GOLD 6             /* window frames */
+#define PAL_T_WHITE PAL_WHITE
+#define PAL_T_YELLOW PAL_YELLOW
+#define PAL_T_RED PAL_RED
+#define PAL_T_GRAY PAL_GRAY
+#define PAL_W PAL_WHITE
+#define PAL_W_YELLOW PAL_YELLOW
+#define PAL_W_FRAME PAL_WHITE  /* framed windows: gold frame (ring tiles), white text */
+#define PAL_W_RED PAL_RED
 
 extern u8 tb[12 * 8];
 extern u32 targ_num, targ_num2;
 extern u16 targ_str;
+extern u16 text_wrap;          /* > 0: lines break before this x (say_wrap) */
 extern u16 hero_name[8];
 
 void tb_open(u8 box);
-void tb_clear(u8 box);
+void tb_clear(u8 box);         /* waits until no queued upload reads the box's canvas */
+void tb_clear_now(u8 box);
 void tb_flush(u8 box);
 void tb_flush_rows(u8 box, u8 r0, u8 nr);
 void tb_text(u8 box);
@@ -35,6 +45,7 @@ void say(u8 id, u16 px, u16 py, u16 msg);
 void sayn(u8 id, u16 px, u16 py, u16 msg, u32 n);
 void says(u8 id, u16 px, u16 py, u16 msg, u16 s);
 void say_center(u8 id, u16 py, u16 msg);
+void say_wrap(u8 id, u16 px, u16 py, u16 msg, u16 maxx);
 u16  msg_width(u16 msg);
 void box_pal(u8 id, u8 tx, u8 ty, u8 tw, u8 th, u8 pal);
 void box_hide(u8 id);

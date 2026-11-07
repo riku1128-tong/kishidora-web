@@ -75,8 +75,9 @@ static void map_sprites(void) {
 
 static void draw_top(void) {
   tb_clear(BX_TOP);
+  /* two lines 12 px apart share a tile row: the coin mark (yellow) has no text above it */
   say(BX_TOP, 6, 0, TXT_NAME);
-  sayn(BX_TOP, 168, 0, T_MAP_TICKET2, sv.tickets);
+  sayn(BX_TOP, 184, 0, T_MAP_TICKET2, sv.tickets);
   if (sel != AR_MIRAGE) {
     targ_num2 = men_count(sel);
     sayn(BX_TOP, 6, 12, T_MAP_CLEAR2, cleared_count(sel));
@@ -109,7 +110,7 @@ static void draw_label(void) {
   if (tx + label_w > 32) tx = 32 - label_w;
   if (ty > 23) ty = ((s16)areas[sel].y - scroll_y - 26) >> 3;
   label_tx = (u8)tx; label_ty = (u8)ty;
-  box(BX_LABEL, label_tx, label_ty, label_w, 2, T_LABEL, PAL_W_FRAME, BOX_OPAQUE);
+  box(BX_LABEL, label_tx, label_ty, label_w, 2, T_LABEL, PAL_GOLD, BOX_OPAQUE);
   say_center(BX_LABEL, 2, AREAN_0 + sel);
   tb_flush(BX_LABEL);
 }
@@ -172,6 +173,11 @@ static u16 waves_of(u8 a) {
   return D_MEN_STAGES;
 }
 
+/* stage list window: 30 tiles wide; rows 16 px apart (open / locked rows and the labels have
+ * different colours); the scroll marks at the right edge are clear of the WAVE column */
+#define ROW_LBL 128
+#define ROW_WAVE 168
+
 static void row_draw(u16 i, u8 y) {
   Row *r = &rows[i];
   u8 n = men_count(map_area);
@@ -179,28 +185,28 @@ static void row_draw(u16 i, u8 y) {
   case RK_MEN:
     targ_str = AREAN_0 + map_area;
     sayn(BX_WIN, 14, y, r->open ? T_MEN : T_MEN_GRAY, r->men);
-    if (is_cleared(map_area, r->men)) say(BX_WIN, 124, y, T_LBL_CLEAR);
-    else if (map_area == AR_CASTLE) say(BX_WIN, 124, y, r->men == n ? T_LBL_MAOU : T_LBL_BOSS);
-    else if (map_area == AR_SECRET) say(BX_WIN, 124, y, T_LBL_SECRET);
-    else if (r->men == D_AREA_MEN) say(BX_WIN, 124, y, T_LBL_BOSS);
-    else if (r->men == D_AREA_MEN - 1) say(BX_WIN, 124, y, T_LBL_MID);
-    sayn(BX_WIN, 166, y, T_LBL_WAVE, waves_of(map_area));
+    if (is_cleared(map_area, r->men)) say(BX_WIN, ROW_LBL, y, T_LBL_CLEAR);
+    else if (map_area == AR_CASTLE) say(BX_WIN, ROW_LBL, y, r->men == n ? T_LBL_MAOU : T_LBL_BOSS);
+    else if (map_area == AR_SECRET) say(BX_WIN, ROW_LBL, y, T_LBL_SECRET);
+    else if (r->men == D_AREA_MEN) say(BX_WIN, ROW_LBL, y, T_LBL_BOSS);
+    else if (r->men == D_AREA_MEN - 1) say(BX_WIN, ROW_LBL, y, T_LBL_MID);
+    sayn(BX_WIN, ROW_WAVE, y, T_LBL_WAVE, waves_of(map_area));
     break;
   case RK_TREASURE:
     say(BX_WIN, 14, y, r->open ? T_ROW_TREASURE : T_ROW_TREASURE_GRAY);
-    sayn(BX_WIN, 124, y, sv.tickets ? T_LBL_TICKET : T_LBL_NOTICKET, sv.tickets);
+    sayn(BX_WIN, ROW_LBL, y, sv.tickets ? T_LBL_TICKET : T_LBL_NOTICKET, sv.tickets);
     break;
   case RK_GACHA:
     say(BX_WIN, 14, y, T_ROW_GACHA);
     break;
   case RK_MONEY:
     say(BX_WIN, 14, y, T_ROW_MONEY);
-    say(BX_WIN, 124, y, is_cleared(AR_CASTLE, T_MONEY_MEN) ? T_LBL_CLEAR : T_LBL_MONEY);
-    sayn(BX_WIN, 166, y, T_LBL_WAVE, T_MONEY_STAGES);
+    say(BX_WIN, ROW_LBL, y, is_cleared(AR_CASTLE, T_MONEY_MEN) ? T_LBL_CLEAR : T_LBL_MONEY);
+    sayn(BX_WIN, ROW_WAVE, y, T_LBL_WAVE, T_MONEY_STAGES);
     break;
   case RK_TUT:
     say(BX_WIN, 14, y, T_ROW_TUTORIAL);
-    if (sv.tut_cleared) say(BX_WIN, 124, y, T_LBL_CLEAR);
+    if (sv.tut_cleared) say(BX_WIN, ROW_LBL, y, T_LBL_CLEAR);
     break;
   case RK_TRAIN:
     say(BX_WIN, 14, y, T_ROW_TRAINING);
@@ -211,16 +217,17 @@ static void row_draw(u16 i, u8 y) {
   }
 }
 
+#define SORTIE_BTN_Y (TOP_Y + 4 * LINE_C)
 static void sortie_draw(u8 cur) {
   u8 s;
   tb_clear(BX_SORTIE);
   for (s = 0; s < 4; ++s) {
-    say(BX_SORTIE, 8, 4 + s * 13, T_SLOT_MAIN + s);
-    if (sv.equip[s] == NO_ITEM) say(BX_SORTIE, 52, 4 + s * 13, T_SLOT_EMPTY);
-    else mk_item_name(BX_SORTIE, 52, 4 + s * 13, &sv.inv[sv.equip[s]]);
+    say(BX_SORTIE, 12, TOP_Y + s * LINE_C, T_SLOT_MAIN + s);
+    if (sv.equip[s] == NO_ITEM) say(BX_SORTIE, 56, TOP_Y + s * LINE_C, T_SLOT_EMPTY);
+    else mk_item_name(BX_SORTIE, 56, TOP_Y + s * LINE_C, &sv.inv[sv.equip[s]]);
   }
-  say(BX_SORTIE, 24, 58, T_SORTIE_GO);
-  say(BX_SORTIE, 96, 58, T_SORTIE_EQUIP);
+  say(BX_SORTIE, 32, SORTIE_BTN_Y, T_SORTIE_GO);
+  say(BX_SORTIE, 112, SORTIE_BTN_Y, T_SORTIE_EQUIP);
   tb_flush(BX_SORTIE);
   (void)cur;
 }
@@ -229,11 +236,11 @@ static void sortie_draw(u8 cur) {
 static u8 sortie(void) {
   u8 cur = 0;
   for (;;) {
-    win_open(BX_SORTIE, 4, 8, 24, 9, T_SORTIE, PAL_W_FRAME);
+    win_open(BX_SORTIE, 3, 7, 26, 12, T_SORTIE, PAL_W_FRAME);
     sortie_draw(cur);
     for (;;) {
       oam_next = 0;
-      mk_cursor(32 + 14 + cur * 72, 64 + 58 + 2);
+      mk_cursor(24 + 32 - 11 + cur * 80, 56 + SORTIE_BTN_Y + 2);
       oam_finish();
       frame_wait();
       if (pad_new & (BTN_LEFT | BTN_RIGHT)) { cur ^= 1; se_play(SE_CURSOR); }
@@ -252,10 +259,10 @@ static u8 sortie(void) {
 
 static void win_header(void) {
   targ_str = AREAN_0 + map_area;
-  say(BX_WIN, 10, 4, TXT_YELLOW_S);
+  say(BX_WIN, 10, TOP_Y, TXT_YELLOW_S);
   targ_num2 = men_count(map_area);
-  sayn(BX_WIN, 140, 4, T_MAP_CLEAR2, cleared_count(map_area));
-  say(BX_WIN, 10, 145, T_WIN_KEYS);
+  sayn(BX_WIN, 150, TOP_Y, T_MAP_CLEAR2, cleared_count(map_area));
+  say(BX_WIN, 10, 24 + 7 * LINE_C, T_WIN_KEYS);
 }
 
 /* stage list of the selected area; returns MA_* */
@@ -265,15 +272,16 @@ static u8 area_window(void) {
   u8 r;
   map_area = sel;
   make_rows(sel);
-  list_init(&l, BX_WIN, 8, nrows);
-  l.y = 22;
+  list_init(&l, BX_WIN, 7, nrows);
+  l.y = 24;
+  l.lh = LINE_C;
   for (r = 0; r < nrows; ++r) if (rows[r].open && rows[r].kind == RK_MEN) l.cur = r;   /* newest open stage */
   mk_sprites = 0;          /* map sprites would show through the low-priority window */
   for (;;) {
     mk_draw = row_draw;
     mk_moved = 0;
     mk_header = win_header;
-    win_open(BX_WIN, 3, 3, 26, 20, T_WIN, PAL_W);
+    win_open(BX_WIN, 1, 3, 30, 20, T_WIN, PAL_W);
     k = list_run(&l, 0);
     mk_header = 0;
     if (k & BTN_B) { win_close(BX_WIN); return MA_NONE; }
@@ -293,17 +301,17 @@ static u8 area_window(void) {
 static u8 mirage_window(void) {
   u8 sel = 0;
   mk_sprites = 0;
-  win_open(BX_WIN, 2, 3, 28, 22, T_WIN, PAL_W_FRAME);
-  say_center(BX_WIN, 4, T_MIRAGE_TITLE);
-  if (sv.mirage_best) sayn(BX_WIN, 14, 22, sv.mirage_clear ? T_MIRAGE_BEST_CLEAR : T_MIRAGE_BEST, sv.mirage_best);
-  else say(BX_WIN, 14, 22, T_MIRAGE_NONE);
-  say(BX_WIN, 14, 42, T_MIRAGE_RULES);
-  say(BX_WIN, 40, 150, T_MIRAGE_GO);
-  say(BX_WIN, 136, 150, T_SORTIE_BACK);
+  win_open(BX_WIN, 1, 3, 30, 22, T_WIN, PAL_W_FRAME);
+  say_center(BX_WIN, TOP_Y, T_MIRAGE_TITLE);
+  if (sv.mirage_best) sayn(BX_WIN, 12, TOP_Y + LINE_C, sv.mirage_clear ? T_MIRAGE_BEST_CLEAR : T_MIRAGE_BEST, sv.mirage_best);
+  else say(BX_WIN, 12, TOP_Y + LINE_C, T_MIRAGE_NONE);
+  say(BX_WIN, 12, 42, T_MIRAGE_RULES);
+  say(BX_WIN, 48, 150, T_MIRAGE_GO);
+  say(BX_WIN, 144, 150, T_SORTIE_BACK);
   tb_flush(BX_WIN);
   for (;;) {
     oam_next = 0;
-    mk_cursor(16 + 40 - 11 + sel * 96, 24 + 150 + 2);
+    mk_cursor(8 + 48 - 11 + sel * 96, 24 + 150 + 2);
     oam_finish();
     frame_wait();
     if (pad_new & (BTN_LEFT | BTN_RIGHT)) { sel ^= 1; se_play(SE_CURSOR); }

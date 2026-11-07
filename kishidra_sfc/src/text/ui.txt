@@ -198,8 +198,8 @@ TXT_YELLOW_S	{yellow}{s}
 TXT_GRAY_S	{gray}{s}
 TXT_RED_S	{red}{s}
 # new game
-T_DIFF_NOTE	{gray}あとから「その他」→「難易度」で変えられる
-T_NAME_KEYS	{gray}A:入力 B:1字けす L/R:文字の種類 START:けってい
+T_DIFF_NOTE	{gray}あとでメニューの「難易度」から変えられる
+T_NAME_KEYS	{gray}A:入力 B:けす L/R:文字 START:けってい
 T_OPENED	新しい場所に行けるようになった！
 T_ORB_GET	{yellow}{s}{c0}を取り戻した！
 T_THE_END	{yellow}Thank you for playing!
@@ -254,7 +254,7 @@ T_TAG_FAV	{red}♥
 T_LIST_KEYS	{gray}A:えらぶ B:もどる SELECT:ならび {s}
 T_EQ_KEYS	{gray}A:かえる X:はずす B:もどる
 T_ITEMS_HEAD	持ち物 {n}/{m}
-T_ACT_FAV	お気に入り（売れなくなる）
+T_ACT_FAV	お気に入りにする
 T_ACT_UNFAV	お気に入りをやめる
 T_ACT_SELL	売る（{n} コイン）
 T_ACT_FORGE	鍛冶屋で強化・進化
@@ -389,7 +389,7 @@ T_DEX_SP_POWER	威力 {n}% ×{m}回 {s}
 T_DEX_SP_READY_0	{gray}スキルが足りない
 T_DEX_SP_READY_1	装備を変えれば出せる
 T_DEX_SP_READY_2	{yellow}今の装備で出せる！
-T_DEX_SP_LEGEND	{yellow}黄：装備 {c0}白：持ち物 {gray}灰：ない {yellow}＊{gray}：今出せる
+T_DEX_SP_LEGEND	{yellow}黄:装備 {c0}白:持ち物 {gray}灰:ない {yellow}＊{gray}:今出せる
 T_DEX_SP_UNK1	まだ出したことがない
 T_DEX_SP_UNK2	スキルを順番に使うと出る
 T_DEX_SK_IN	{yellow}このスキルが入る必殺技

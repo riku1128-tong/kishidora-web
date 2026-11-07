@@ -20,6 +20,11 @@
 #define MK_T_KING 64
 
 #define LINE_H 14
+/* Text in a framed window stays 8 px inside it (the frame's tiles use the gold palette) and an
+ * 8x8 tile has one palette: lines of different colours in the same columns are 16 px apart
+ * (LINE_C, starting on a tile row), lines of one colour may be LINE_H apart. */
+#define LINE_C 16
+#define TOP_Y 8
 
 /* screen in the menu VRAM layout with the menu sprites loaded */
 static void mk_screen(void) {
@@ -66,7 +71,7 @@ static void list_draw(List *l) {
 
 static void list_init(List *l, u8 box, u8 rows, u16 n) {
   u8 *b = &tb[box * 8];
-  l->box = box; l->rows = rows; l->lh = LINE_H; l->x = 14; l->y = 4;
+  l->box = box; l->rows = rows; l->lh = LINE_H; l->x = 14; l->y = TOP_Y;
   l->n = n; l->cur = 0; l->top = 0;
   l->sx = b[0] * 8; l->sy = b[1] * 8;
 }
@@ -119,13 +124,16 @@ static u16 list_run(List *l, u16 keys) {
 
 /* ---------------------------------------------------------------- dialogs (box 11) */
 #define MK_BOX_DLG 11
-#define MK_T_DLG 865
+/* a dialog's tiles are the last w * h of the 1024 BG3 tiles: a screen keeps its boxes below
+ * 1024 - (its largest dialog), 904 for one-line dialogs (26 x 4, 20 x 6) */
+#define MK_DLG_TILE(w, h) (1024 - (u16)(w) * (h))
 
 /* message window with one or two lines; waits for A / B */
 static void mk_notice(u16 l1, u16 l2) {
-  win_open(MK_BOX_DLG, 3, 9, 26, l2 ? 6 : 4, MK_T_DLG, PAL_W);
-  say_center(MK_BOX_DLG, 6, l1);
-  if (l2) say_center(MK_BOX_DLG, 22, l2);
+  u8 h = l2 ? 6 : 4;
+  win_open(MK_BOX_DLG, 3, 9, 26, h, MK_DLG_TILE(26, h), PAL_W);
+  say_center(MK_BOX_DLG, 10, l1);
+  if (l2) say_center(MK_BOX_DLG, 26, l2);
   tb_flush(MK_BOX_DLG);
   do { oam_next = 0; if (mk_sprites) mk_sprites(); oam_finish(); frame_wait(); } while (!(pad_new & (BTN_A | BTN_B)));
   se_play(SE_OK);
@@ -135,10 +143,10 @@ static void mk_notice(u16 l1, u16 l2) {
 /* yes / no on a question line; returns 1 = yes */
 static u8 mk_confirm(u16 q, u16 q2) {
   u8 sel = 0;
-  u8 h = q2 ? 7 : 5, y0 = q2 ? 32 : 18;
-  win_open(MK_BOX_DLG, 6, 8, 20, h, MK_T_DLG, PAL_W);
-  say_center(MK_BOX_DLG, 4, q);
-  if (q2) say_center(MK_BOX_DLG, 18, q2);
+  u8 h = q2 ? 8 : 6, y0 = q2 ? 40 : 24;
+  win_open(MK_BOX_DLG, 6, 8, 20, h, MK_DLG_TILE(20, h), PAL_W);
+  say_center(MK_BOX_DLG, 8, q);
+  if (q2) say_center(MK_BOX_DLG, 24, q2);
   say(MK_BOX_DLG, 40, y0, T_YESNO_Y);
   say(MK_BOX_DLG, 104, y0, T_YESNO_N);
   tb_flush(MK_BOX_DLG);
@@ -163,40 +171,41 @@ static void mk_item_name(u8 bx, u16 x, u8 y, const Inv *it) {
   if (n) sayn(bx, x + msg_width(ITEMN_0 + it->id) + 1, y, TXT_PLUS, n);
 }
 
-/* item card: 5 lines in a box at least 9 tiles tall */
+/* item card: 4 lines (5 with a two-line effect text) in a window of MK_CARD_H tiles:
+ *   rarity type element stars    ATK +n   |  会心 n%  効果 name  |  skills  |  effect text */
+#define MK_CARD_H 11
 static void mk_item_detail(u8 bx, const Inv *it) {
   const Item *r;
   u16 x;
-  u8 k, n;
-  if (!it) { say(bx, 10, 4, T_SLOT_EMPTY); return; }
+  u8 k, n, y;
+  if (!it) { say(bx, 10, TOP_Y, T_SLOT_EMPTY); return; }
   r = &items[it->id];
   targ_str = RARN_0 + r->rarity;
-  say(bx, 10, 4, TXT_YELLOW_S);
+  say(bx, 10, TOP_Y, TXT_YELLOW_S);
   x = 10 + msg_width(RARN_0 + r->rarity) + 8;
-  say(bx, x, 4, WTN_0 + r->type);
-  x += msg_width(WTN_0 + r->type) + 8;
-  if (r->type != WT_SHIELD && r->element != EL_NONE) say(bx, x, 4, ELN_0 + r->element);
-  if (r->type == WT_SHIELD) { sayn(bx, 150, 4, T_ITEM_HP, r->atk); sayn(bx, 200, 4, T_ITEM_DEF, r->def); }
-  else { sayn(bx, 150, 4, T_ITEM_ATK, r->atk); if (enh_sum(it)) sayn(bx, 150 + 52, 4, TXT_PLUS, enh_sum(it)); }
+  say(bx, x, TOP_Y, WTN_0 + r->type);
+  x += msg_width(WTN_0 + r->type) + 6;
+  if (r->type != WT_SHIELD && r->element != EL_NONE) { say(bx, x, TOP_Y, ELN_0 + r->element); x += msg_width(ELN_0 + r->element); }
+  x = (x + 15) & ~7;                       /* stars on their own tiles */
   n = inv_slots_of(it);
-  targ_num2 = n;
-  sayn(bx, 10, 17, T_ITEM_SLOTS, enh_count(it));
-  for (k = 0; k < n; ++k) say(bx, 96 + k * 12, 17, T_STAR_0 + enh_get(it, k));
+  for (k = 0; k < n; ++k) say(bx, x + k * 12, TOP_Y, T_STAR_0 + enh_get(it, k));
+  if (r->type == WT_SHIELD) { sayn(bx, 150, TOP_Y, T_ITEM_HP, r->atk); sayn(bx, 200, TOP_Y, T_ITEM_DEF, r->def); }
+  else { sayn(bx, 160, TOP_Y, T_ITEM_ATK, r->atk); if (enh_sum(it)) sayn(bx, 208, TOP_Y, TXT_PLUS, enh_sum(it)); }
+  y = TOP_Y + LINE_C;
+  x = 10;
+  if (r->type != WT_SHIELD) { sayn(bx, 10, y, T_ITEM_CRIT, r->crit); x = 80; }
+  if (r->effect != FX_NONE) { targ_str = FXN_0 + r->effect; say(bx, x, y, T_ITEM_FX); }
+  if (x == 80 || r->effect != FX_NONE) y += LINE_H;
   if (r->type != WT_SHIELD) {
-    sayn(bx, 150, 17, T_ITEM_CRIT, r->crit);
-    say(bx, 10, 30, T_ITEM_SKILLS);
-    x = 46;
+    x = 10;
     for (k = 0; k < 3; ++k) {
       if (it->sk[k] == 255) continue;
-      say(bx, x, 30, SKILLN_0 + it->sk[k]);
-      x += msg_width(SKILLN_0 + it->sk[k]) + 10;
+      say(bx, x, y, SKILLN_0 + it->sk[k]);
+      x += msg_width(SKILLN_0 + it->sk[k]) + 8;
     }
+    y += LINE_H;
   }
-  if (r->effect != FX_NONE) {
-    targ_str = FXN_0 + r->effect;
-    say(bx, 10, 43, T_ITEM_FX);
-    say(bx, 18, 56, FXD_0 + r->effect);
-  }
+  if (r->effect != FX_NONE) say(bx, 10, y, FXD_0 + r->effect);
 }
 
 static void mk_wait_release(void) {
