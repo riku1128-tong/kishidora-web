@@ -42,11 +42,11 @@ void spr_put(u8 k, u16 vaddr, u16 src, u8 bank, u16 size) {
   spr_on = 1;
 }
 
-u16 spr_bytes(void) {
+u16 spr_bytes(void) {         /* (with the NMI's set-up time of each, crt0.s VQ_ENTRY) */
   u8 k;
-  u16 n = 0;
+  u16 n = 0, z;
   if (!spr_on) return 0;      /* the NMI took them all */
-  for (k = 0; k < SPR_SLOTS; ++k) n += spr_q[k * 8 + 5] | ((u16)spr_q[k * 8 + 6] << 8);
+  for (k = 0; k < SPR_SLOTS; ++k) if ((z = spr_q[k * 8 + 5] | ((u16)spr_q[k * 8 + 6] << 8)) != 0) n += z + 80;
   return n;
 }
 

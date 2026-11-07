@@ -59,7 +59,7 @@ skip:
 
 
 SPR_SLOTS = 10            ; must match src/c/sfc.h
-MQ_SLOTS = 4
+MQ_SLOTS = 12
 
 .segment "LOWBSS"
 _ea:          .res 32      ; argument block for engine calls (16 words)
@@ -116,7 +116,7 @@ _bg2map: .res 2048
 _bg3map: .res 2048
 
 VQ_MAX = 24
-VQ_ENTRY = 48
+VQ_ENTRY = 80           ; an entry's set-up time (about half a line), in bytes of DMA
 
 ; BG tilemap VRAM word addresses (must match src/c/sfc.h)
 BG1MAP_VRAM = $7000
@@ -430,9 +430,11 @@ nmi_uploads:
   lda _spr_q+5,x
   beq @spr_next
   sta DAS0L
-  eor #$ffff
+  eor #$ffff           ; budget -= size + the time to set it up
   sec
   adc nmi_budget
+  sec
+  sbc #VQ_ENTRY
   sta nmi_budget
   lda _spr_q+0,x
   sta VMADDL
@@ -499,7 +501,9 @@ nmi_uploads:
   A16
 @mqsum:
   lda _mq+5,x
+  beq @mqsum_end       ; slots fill from 0 up and empty together: the first empty one ends them
   clc
+  adc #VQ_ENTRY        ; and the time to set it up
   adc nmi_tmp
   sta nmi_tmp
   txa
@@ -508,6 +512,7 @@ nmi_uploads:
   tax
   cpx #8*MQ_SLOTS
   bne @mqsum
+@mqsum_end:
   A8
 @mq_summed:
   stz _nmi_late
@@ -539,7 +544,7 @@ nmi_uploads:
 @mq:
   A16
   lda _mq+5,x
-  beq @mq_next
+  beq @mq_end
   sta DAS0L
   lda _mq+0,x
   sta VMADDL
@@ -556,7 +561,6 @@ nmi_uploads:
   lda #$01
   sta MDMAEN
   A16
-@mq_next:
   txa
   clc
   adc #8
@@ -564,6 +568,10 @@ nmi_uploads:
   A8
   cpx #8*MQ_SLOTS
   bne @mq
+  bra @nomq
+@mq_end:
+  .a16
+  A8
 @nomq:
   lda _bgmap_dirty
   bit #$04

@@ -14,7 +14,30 @@ void tb_flush_rows(u8 id, u8 r0, u8 nr) {
   }
 }
 
-void tb_flush(u8 id) { tb_flush_rows(id, 0, tb[id * 8 + 3]); }
+/* a window just opened (win_open) on a screen that is shown appears once its text is in VRAM,
+ * not in pieces: its cells stay blank while the canvas is uploaded */
+static u16 tb_fresh;
+static u16 hold_cells[32 * 28];
+void tb_flush(u8 id) {
+  u8 *b = &tb[id * 8], y;
+  u16 *h = hold_cells, i;
+  if (!(tb_fresh & (1 << id)) || (bright & 0x80) || !bright) {
+    tb_fresh &= ~(1 << id);
+    tb_flush_rows(id, 0, b[3]);
+    return;
+  }
+  tb_fresh &= ~(1 << id);
+  for (y = 0; y < b[3]; ++y, h += b[2]) {
+    i = ((u16)(b[1] + y) << 5) + b[0];
+    memcpy(h, &bg3map[i], (u16)b[2] * 2);
+    memset(&bg3map[i], 0, (u16)b[2] * 2);
+  }
+  bgmap_dirty |= 4;
+  tb_flush_rows(id, 0, b[3]);
+  canvas_wait(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3]);
+  for (y = 0, h = hold_cells; y < b[3]; ++y, h += b[2]) memcpy(&bg3map[((u16)(b[1] + y) << 5) + b[0]], h, (u16)b[2] * 2);
+  bgmap_dirty |= 4;
+}
 
 /* canvases that change in the same NMI as the BG3 map (crt0.s _mq): a box redrawn in another
  * colour (or shown again) never shows the old text in the new colours, or the new in the old.
@@ -22,17 +45,18 @@ void tb_flush(u8 id) { tb_flush_rows(id, 0, tb[id * 8 + 3]); }
 #define MQ_CAP 2272
 static u16 q_size(u8 *q, u8 k) { return q[k * 8 + 5] | ((u16)q[k * 8 + 6] << 8); }
 
+#define MQ_ENTRY 80             /* the NMI's time to set up an entry, in bytes (crt0.s VQ_ENTRY) */
 u16 mq_bytes(void) {
   u8 k;
-  u16 n = 0;
+  u16 n = 0, z;
   if (!mq_on) return 0;
-  for (k = 0; k < MQ_SLOTS; ++k) n += q_size(mq, k);
+  for (k = 0; k < MQ_SLOTS; ++k) if ((z = q_size(mq, k)) != 0) n += z + MQ_ENTRY;
   return n;
 }
 
-u8 mq_fits(u16 bytes) {
+u8 mq_fits(u16 bytes) {           /* (sprite tiles waiting for the same NMI count too) */
   u8 k;
-  for (k = 0; k < MQ_SLOTS; ++k) if (!q_size(mq, k)) return mq_bytes() + bytes <= MQ_CAP;
+  for (k = 0; k < MQ_SLOTS; ++k) if (!q_size(mq, k)) return mq_bytes() + spr_bytes() + bytes + MQ_ENTRY <= MQ_CAP;
   return 0;
 }
 
@@ -48,7 +72,7 @@ static u8 mq_add(u16 vaddr, u16 src, u16 size) {
     if (!q_size(mq, k)) { if (f == 255) f = k; continue; }
     if ((e[0] | ((u16)e[1] << 8)) == vaddr && q_size(mq, k) == size) return 1;   /* sent from WRAM then */
   }
-  if (f == 255 || mq_bytes() + size > MQ_CAP) return 0;
+  if (f == 255 || mq_bytes() + size + MQ_ENTRY > MQ_CAP) return 0;
   e = &mq[f * 8];
   e[0] = (u8)vaddr; e[1] = (u8)(vaddr >> 8); e[2] = (u8)src; e[3] = (u8)(src >> 8); e[4] = 0x7f;
   e[5] = (u8)size; e[6] = (u8)(size >> 8);
@@ -174,6 +198,7 @@ void box_hide(u8 id) {
   u8 *b = &tb[id * 8];
   u8 x, y;
   u16 i;
+  tb_fresh &= ~(1 << id);
   for (y = 0; y < b[3]; ++y) {
     i = ((u16)(b[1] + y) << 5) + b[0];
     for (x = 0; x < b[2]; ++x) bg3map[i++] = 0;
@@ -247,6 +272,7 @@ void win_open(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal) {
   wins[i][0] = id; wins[i][1] = x; wins[i][2] = y; wins[i][3] = w; wins[i][4] = h;
   bg1_rect(x, y, w, h, 1);
   box(id, x, y, w, h, tile, pal, BOX_WINDOW | BOX_LOW);
+  tb_fresh |= 1 << id;
 }
 
 void win_close(u8 id) {

@@ -38,16 +38,16 @@
 #define BX_BANNER 3
 #define BX_HERO 4
 #define BX_LBL 5               /* "HP" / "ST" */
-#define BX_TABS 6              /* rows 18-19: button letters, element orbs, 必殺 tags */
-#define BX_CARDS 7             /* rows 20-24: costs, names */
-#define BX_NEXT 8              /* rows 25-27 */
+/* the panel text: one box per column (8 x 10 tiles, rows 18-27), so a column changes in one
+ * upload: rows 0-1 the tab (button, element orb or 必殺), 2-6 the card (cost, name), 7-9 NEXT */
+#define BX_COL0 6              /* columns 0-2: boxes 6, 7, 8 */
+#define BX_COL3 10             /* the guard / meat column */
 #define BX_COMBO 9             /* rows 2-3: "n HIT!" */
 #define TL_TOP 1
 #define TL_HPNUM (TL_TOP + 64)
 #define TL_LBL (TL_HPNUM + 16)
 #define TL_TABS (TL_LBL + 6)
-#define TL_CARDS (TL_TABS + 64)
-#define TL_NEXT (TL_CARDS + 160)
+#define TL_COL(c) (TL_TABS + (c) * 80)
 #define TL_WIN TL_TABS           /* windows: up to 32x11 = 352 tiles (87-438) */
 #define TL_COMBO 439             /* 12x2 (439-462) */
 #define TL_BANNER 896            /* 32x3, rows 4-6 (896-991) */
@@ -169,38 +169,43 @@ static void hero_upload(u8 p) { hero_pose_now = p; }
  * NMI has 4320 bytes after the OAM; the BG3 map waits for this unless it already waited (then
  * the pose waits a frame), the palette too. */
 #define SPR_ROOM (4864 - 544)
+static u16 slot_cost(u8 k) {     /* a pending slot's bytes and its set-up time (crt0.s VQ_ENTRY) */
+  u16 z = spr_q[k * 8 + 5] | ((u16)spr_q[k * 8 + 6] << 8);
+  return z ? z + 80 : 0;
+}
+
 static void pose_tiles(void) {
   s16 room = SPR_ROOM - (s16)spr_bytes();
   u16 size, buf;
-  u8 i;
+  u8 i, k;
   const u8 *d;
   Actor *a;
   if (cgram_dirty) room -= 512;
-  if (nmi_late) room -= ((bgmap_dirty & 4) ? 2048 : 0) + (s16)mq_bytes();
+  if (nmi_late || mq_on) room -= ((bgmap_dirty & 4) ? 2048 : 0) + (s16)mq_bytes();   /* text with its map first */
   if (hero_pose_now != 255 && hero_pose_now != hero_shown) {
     d = hdesc + hero_off[hero_pose_now];
     size = (u16)d[3] * 2048;
     if (size > 4096) size = 4096;
-    room += (s16)(spr_q[5] | ((u16)spr_q[6] << 8));     /* replaced */
-    if ((s16)size <= room) {
+    room += (s16)slot_cost(0);       /* replaced */
+    if ((s16)(size + 80) <= room) {
       unpack(rd16(d + 1), 0x2000);
       spr_put(0, OBJ_VRAM(STRIP_HERO), 0x2000, 0x7f, size);
       hero_shown = hero_pose_now;
-      room -= (s16)size;
-    } else room -= (s16)(spr_q[5] | ((u16)spr_q[6] << 8));
+      room -= (s16)(size + 80);
+    } else room -= (s16)slot_cost(0);
   }
-  for (i = 0; i < b_ne; ++i) {
-    a = &act[i];
+  for (i = 0, a = act; i < b_ne; ++i, ++a) {
     if (a->boss || a->cur == 255 || a->cur == a->shown) continue;
-    if ((s16)2048 > room + (s16)(spr_q[(1 + a->slot) * 8 + 5] | ((u16)spr_q[(1 + a->slot) * 8 + 6] << 8))) continue;   /* next frame */
-    room += (s16)(spr_q[(1 + a->slot) * 8 + 5] | ((u16)spr_q[(1 + a->slot) * 8 + 6] << 8));
+    k = 1 + a->slot;
+    if ((s16)(2048 + 80) > room + (s16)slot_cost(k)) continue;   /* next frame */
+    room += (s16)slot_cost(k);
     d = zdesc[a->slot] + a->off[a->cur];
     buf = 0x4800 + a->slot * 0x0800;   /* $7F:3800-$3FFF is the canvas of BG3 tiles 896-1023 */
     size = unpack(rd16(d + 1), buf);
     if (size > 2048) size = 2048;
-    spr_put(1 + a->slot, OBJ_VRAM(STRIP_ZAKO + a->slot), buf, 0x7f, size);
+    spr_put(k, OBJ_VRAM(STRIP_ZAKO + a->slot), buf, 0x7f, size);
     a->shown = a->cur;
-    room -= (s16)size;
+    room -= (s16)(size + 80);
   }
 }
 
@@ -330,24 +335,19 @@ static void misc_setup(void) {
   panel_icons();
 }
 
-/* skill icon of slot s (current) into misc strip tiles 2+s*2, with the OAM that shows it
- * (_spr_q slots 4-9: the icon changes together with its card's sprites and text) */
+/* skill icon of column s into misc strip tiles 2+s*2, with the OAM that shows it (_spr_q slots
+ * 4-9), in the frame its column's text goes */
 static u8 skill_icon_shown[3];
 static u8 skill_sel[N_SKILL];
-static void skill_icons_update(void) {
-  u8 s, sk, bank;
-  u16 src, at;
+static void skill_icon(u8 s, u8 sk) {
+  u16 src;
+  if (sk == skill_icon_shown[s]) return;
+  skill_icon_shown[s] = sk;
+  if (sk == SK_NONE) return;
   ea[0] = ASSET_SKILL_ICONS; asset_where();     /* stored raw: DMA'd from the ROM */
-  at = ea[1]; bank = (u8)ea[2];
-  for (s = 0; s < 3; ++s) {
-    sk = skill_of(s);
-    if (sk == skill_icon_shown[s]) continue;
-    skill_icon_shown[s] = sk;
-    if (sk == SK_NONE) continue;
-    src = at + (u16)sk * 128;
-    spr_put(4 + s * 2, OBJ_VRAM(STRIP_MISC) + (2 + s * 2) * 16, src, bank, 64);
-    spr_put(5 + s * 2, OBJ_VRAM(STRIP_MISC) + (18 + s * 2) * 16, src + 64, bank, 64);
-  }
+  src = ea[1] + (u16)sk * 128;
+  spr_put(4 + s * 2, OBJ_VRAM(STRIP_MISC) + (2 + s * 2) * 16, src, (u8)ea[2], 64);
+  spr_put(5 + s * 2, OBJ_VRAM(STRIP_MISC) + (18 + s * 2) * 16, src + 64, (u8)ea[2], 64);
 }
 
 static void bg_setup(void) {
@@ -383,8 +383,12 @@ static u8 st_blink;            /* frames of the ST-short blink */
 static u8 modal_on;            /* a window over the field: the HUD text boxes are hidden */
 static u8 panel_can;           /* the cards were drawn for "can command" */
 static u8 panel_st;            /* ... and for this ST (a cost above it is red) */
-static u8 sk_recalc;           /* draw_panel ran: the card sprites are worked out again (not every frame) */
-static u8 pan_drawn;           /* 0: the panel boxes are new, the next draw_panel draws */
+static u8 sk_recalc;           /* a column was sent: the panel sprite list is built again */
+static u8 sk_col[3][3];        /* the panel sprites of each column as it was sent: icon palette (255 none), badge, NEXT badge */
+static u8 col_sig[4][8];       /* what each column's text shows, as sent */
+static u8 col_drawn;           /* bit c: column c's box holds its text */
+static u8 panel_hold;          /* the panel rows are held blank: columns go through the queue */
+static u8 col_box(u8 c) { return c < 3 ? BX_COL0 + c : BX_COL3; }
 
 static void bg1_put(u8 row, u8 col, u16 t) { bg1map[(u16)row * 32 + col] = t | HUD_ATTR; }
 
@@ -445,10 +449,9 @@ static void hud_fixed_boxes(void) {
 
 /* the panel text: tabs, cards, NEXT (their tiles are a window's while one is open) */
 static void hud_panel_boxes(void) {
-  pan_drawn = 0;                 /* new boxes: the next draw_panel draws */
-  box(BX_TABS, 0, 18, 32, 2, TL_TABS, PAL_W, BOX_SMALL);
-  box(BX_CARDS, 0, 20, 32, 5, TL_CARDS, PAL_W, 0);
-  box(BX_NEXT, 0, 25, 32, 3, TL_NEXT, PAL_W, BOX_SMALL);
+  u8 c;
+  for (c = 0; c < 4; ++c) box(col_box(c), c * 8, 18, 8, 10, TL_COL(c), PAL_W, 0);
+  col_drawn = 0;                 /* new boxes: the next draw_panel draws every column */
 }
 
 static void hud_boxes(void) {
@@ -503,12 +506,13 @@ static void modal_open(u8 x, u8 y, u8 w, u8 h) {
 /* the window's text is in its canvas: the panel text and its sprites go, the window comes
  * (the panel shows until now: its tiles in VRAM are still its own) */
 static void modal_show(void) {
-  u8 *b = &tb[BX_PANEL * 8];
+  u8 *b, c;
   if (panel_shown) {
-    box_hide(BX_TABS); box_hide(BX_CARDS); box_hide(BX_NEXT);
+    for (c = 0; c < 4; ++c) box_hide(col_box(c));
     draw_sprites();
     panel_shown = 0;
   }
+  b = &tb[BX_PANEL * 8];
   rows_hold(b[1], b[3]);
   tb_flush(BX_PANEL);
   canvas_wait(TL_WIN, (u16)b[2] * b[3]);
@@ -522,11 +526,15 @@ static void modal_close(void) {
   modal_on = 0;
   hud_panel_boxes();
   tb_front = 1;                /* ahead of what is queued (a wave's boss tiles) */
+  panel_hold = 1;              /* the rows are held: the columns go through the queue */
   draw_panel();
+  panel_hold = 0;
   tb_front = 0;
   rows_hold(18, 10);
   canvas_wait(TL_TABS, 320);
   rows_restore(18, 10);
+  draw_sprites();              /* the panel sprites with their text, in this NMI */
+  wait_frame();
   top_dirty = hp_dirty = 1;
   combo_shown = 0xffff;
 }
@@ -612,101 +620,127 @@ static void say_small_mid(u8 bx, u8 c, u8 y, u16 msg, u16 w) {
 
 static u8 guard_off(void) { return b_guard_cool || b_phase != PH_FIGHT; }
 
-/* what the panel text shows: a redraw that would draw the same is skipped (text is slow) */
-static u8 pan_sig[3 * 7 + 2];
-static u8 panel_same(u8 can) {
-  u8 sig[3 * 7 + 2], c, sk, *p = sig;
-  for (c = 0; c < 3; ++c) {
-    sk = skill_of(c);
-    *p++ = sk;
-    if (sk == SK_NONE) { p += 6; continue; }
-    *p++ = skill_cost(sk);
-    *p++ = special_if(c);
-    *p++ = is_locked(c) ? b_lock_turns : 255;
-    *p++ = b_w[c].nsk > 1 ? next_skill_of(c) : 255;
-    *p++ = b_w[c].nsk > 1 ? skill_cost(p[-1]) : 0;
-    *p++ = 0;
+/* what column c shows: skill, cost, lock turns (255 none), 必殺 tag, can command, cost above ST,
+ * next skill (255 none) and its cost.  A column is drawn and sent only when this changes */
+static void col_signature(u8 c, u8 can, u8 *g) {
+  u8 sk, nx;
+  memset(g, 0, 8);
+  if (c == 3) return;
+  sk = skill_of(c);
+  g[0] = sk;
+  if (sk == SK_NONE) return;
+  g[1] = skill_cost(sk);
+  g[2] = is_locked(c) ? b_lock_turns : 255;
+  g[3] = special_if(c) != 255 && g[1] <= b_st && g[2] == 255;
+  g[4] = can;
+  g[5] = g[1] > b_st;
+  g[6] = 255;
+  if (b_w[c].nsk > 1) { nx = next_skill_of(c); g[6] = nx; g[7] = skill_cost(nx); }
+}
+
+/* the panel sprites of column c (skill icon, cost badge, NEXT badge) as its text is sent */
+static void col_sprites(u8 c, const u8 *g) {
+  u8 sk = g[0], *k = sk_col[c];
+  k[0] = sk == SK_NONE ? 255 : skill_sel[sk];
+  k[1] = sk == SK_NONE || g[2] != 255 ? 0 : (g[5] ? 2 : 1);
+  k[2] = sk != SK_NONE && g[6] != 255;
+  skill_icon(c, sk);
+  sk_recalc = 1;
+}
+
+/* column c's text in its box (8 x 10 tiles): rows 0-1 tab, 2-3 cost (or B), 5-6 name, 7-9 NEXT
+ * (row 4 stays empty).  The parts in send (CP_*) go with the map, so text, colours and sprites
+ * change in one frame (all of it goes through the queue while the rows are held).  The other
+ * parts keep the same glyphs in VRAM: only their colours change, and the map carries those */
+#define CP_TAB 1
+#define CP_COST 2
+#define CP_NAME 4
+#define CP_NEXT 8
+static const u8 cp_row[4] = { 0, 2, 5, 7 }, cp_rows[4] = { 2, 2, 2, 3 };
+static void draw_column(u8 c, const u8 *g, u8 send) {
+  u8 bx = col_box(c), sk = g[0], el;
+  u16 w;
+  tb_clear(bx);
+  if (c == 3) {                /* guard (B), meat (R) */
+    say(bx, 8, 17, TXT_BTN_B);
+    say_small_mid(bx, 0, 44, TXT_GUARD_LABEL, small_width(TXT_GUARD_LABEL));
+    text_small = 8;
+    say(bx, 8, 59, TXT_BTN_R);
+    text_small = 0;
+  } else {
+    text_small = 8;
+    say(bx, 8, 4, TXT_BTN_Y + c);
+    text_small = 0;
+    if (sk == SK_NONE) say_small_mid(bx, 0, 44, TXT_NONE_GRAY, small_width(TXT_NONE_GRAY));   /* the name's place */
+    else {
+      el = items[b_w[c].item].element;
+      text_small = 8;
+      if (g[3]) say(bx, 42, 4, TXT_SP_TAG);
+      else say(bx, 48, 4, TXT_ORB_0 + (el < 6 ? el : 0));
+      text_small = 0;
+      if (g[2] != 255) {
+        targ_num = g[2];
+        say_small_mid(bx, 0, 44, TXT_LOCK_TURNS, small_width(TXT_LOCK_TURNS));
+      } else {
+        targ_str = SKILLN_0 + sk;
+        say_small_mid(bx, 0, 44, g[4] ? TXT_S : TXT_S_GRAY, small_width(SKILLN_0 + sk));
+        targ_num = g[1];       /* in the badge's disc (screen rows 164-171): the 8-dot digits */
+        w = small_width(TXT_N_WHITE);
+        text_small = 8;
+        say(bx, 48 - w / 2, 21, g[5] ? TXT_N_RED : TXT_N_WHITE);
+        text_small = 0;
+      }
+      text_small = 8;          /* NEXT: the label, the next skill's cost (gray badge) and name */
+      say(bx, 8, 59, TXT_NEXT_LABEL);
+      if (g[6] != 255) {
+        targ_num = g[7];
+        say(bx, 47, 59, TXT_N_WHITE);
+        targ_str = SKILLN_0 + g[6];
+        say_small_mid(bx, 0, 68, TXT_S, small_width(SKILLN_0 + g[6]));   /* white like the label (a tile row is shared) */
+      }
+      text_small = 0;
+    }
   }
-  *p++ = can;
-  *p = b_st;
-  for (c = 0; c < 3; ++c) if (sig[c * 7] == SK_NONE) memset(&sig[c * 7 + 1], 0, 6);
-  if (pan_drawn && !memcmp(sig, pan_sig, sizeof(sig))) return 1;
-  memcpy(pan_sig, sig, sizeof(sig));
-  pan_drawn = 1;
-  return 0;
+  if (panel_hold || (bright & 0x80)) tb_flush(bx);
+  else for (el = 0; el < 4; ++el) if (send & (1 << el)) tb_flush_rows_sync(bx, cp_row[el], cp_rows[el]);
+  if (c < 3) col_sprites(c, g);
 }
 
 static void draw_panel(void) {
-  u8 c, sk, nx, cost, sp, can, el, x;
-  u16 nm, w;
+  u8 c, can, g[8], sk;
   if (modal_on) return;
   can = battle_can_command();
   panel_can = can;
   panel_st = b_st;
-  if (panel_same(can)) {         /* only the guard / meat buttons can have changed */
-    panel_part(3, 0, guard_off());
-    panel_part(3, 1, (can || meat_asker() != 255) ? 0 : 1);
-    panel_dirty = 0;
-    return;
-  }
-  tb_clear(BX_TABS); tb_clear(BX_CARDS); tb_clear(BX_NEXT);
-  for (c = 0; c < 3; ++c) {
-    x = c * 64;
-    sk = skill_of(c);
-    say(BX_TABS, x + 8, 4, TXT_BTN_Y + c);
-    if (sk == SK_NONE) {
-      panel_part(c, 0, 1); panel_part(c, 1, 1);
-      say_small_mid(BX_CARDS, c, 28, TXT_NONE_GRAY, small_width(TXT_NONE_GRAY));   /* the name's place */
-      continue;
-    }
-    panel_part(c, 0, 0); panel_part(c, 1, 0);
-    cost = skill_cost(sk);
-    sp = special_if(c);
-    el = items[b_w[c].item].element;
-    if (sp != 255 && cost <= b_st && !is_locked(c)) say(BX_TABS, x + 42, 4, TXT_SP_TAG);
-    else say(BX_TABS, x + 48, 4, TXT_ORB_0 + (el < 6 ? el : 0));
-    /* card: the cost in the badge (a sprite), the name in the strip */
-    if (is_locked(c)) {
-      targ_num = b_lock_turns;
-      say_small_mid(BX_CARDS, c, 28, TXT_LOCK_TURNS, small_width(TXT_LOCK_TURNS));
-    } else {
-      nm = SKILLN_0 + sk;
-      targ_str = nm;
-      say_small_mid(BX_CARDS, c, 28, can ? TXT_S : TXT_S_GRAY, small_width(nm));
-    }
-    if (!is_locked(c)) {         /* in the badge's disc (screen rows 164-171): the 8-dot digits */
-      targ_num = cost;
-      w = small_width(TXT_N_WHITE);
-      text_small = 8;
-      say(BX_CARDS, x + 48 - w / 2, 4, cost > b_st ? TXT_N_RED : TXT_N_WHITE);
-      text_small = 0;
-    }
-    /* NEXT: the label, the next skill's cost (gray badge) and name */
-    say(BX_NEXT, x + 8, 3, TXT_NEXT_LABEL);
-    if (b_w[c].nsk > 1) {
-      nx = next_skill_of(c);
-      targ_num = skill_cost(nx);
-      say(BX_NEXT, x + 47, 3, TXT_N_WHITE);
-      targ_str = SKILLN_0 + nx;
-      say(BX_NEXT, col_mid(c, small_width(SKILLN_0 + nx)), 12, TXT_S);   /* white like the label above (a tile row is shared) */
-    }
-  }
-  /* column 3: guard (B), meat (R) */
+  panel_dirty = 0;
+  for (c = 0; c < 3; ++c) { sk = skill_of(c) == SK_NONE; panel_part(c, 0, sk); panel_part(c, 1, sk); }
   panel_part(3, 0, guard_off());
   panel_part(3, 1, (can || meat_asker() != 255) ? 0 : 1);
-  say(BX_CARDS, 192 + 8, 1, TXT_BTN_B);
-  say_small_mid(BX_CARDS, 3, 28, TXT_GUARD_LABEL, small_width(TXT_GUARD_LABEL));
-  say(BX_NEXT, 192 + 8, 3, TXT_BTN_R);
-  sk_recalc = 1;
-  panel_st = b_st;
-  tb_flush(BX_TABS); tb_flush(BX_NEXT);
-  /* the cards (costs rows 0-1, names rows 3-4; row 2 is empty) with the map: a name or a cost
-   * never shows half old, or in the last colours; when that does not fit now, the queue */
-  if (!tb_front && mq_fits(2 * 32 * 2 * 16)) {   /* (modal_close holds the rows anyway: the queue's front) */
-    tb_flush_rows_sync(BX_CARDS, 0, 2); tb_flush_rows_sync(BX_CARDS, 3, 2);
-    tb_flush_rows(BX_CARDS, 2, 1);   /* blank, but a window may have left its text in these tiles */
-  } else tb_flush(BX_CARDS);
-  panel_dirty = 0;
+  for (c = 0; c < 4; ++c) {
+    u8 *o = col_sig[c], parts = 0;
+    u16 need = 0;
+    col_signature(c, can, g);
+    if ((col_drawn & (1 << c)) && !memcmp(g, o, 8)) continue;
+    /* the parts with new glyphs (g[4], g[5] are colours only: gray name, red cost) */
+    if (!(col_drawn & (1 << c))) parts = CP_TAB | CP_COST | CP_NAME | CP_NEXT;
+    else {
+      if (g[3] != o[3]) parts |= CP_TAB;
+      if ((g[0] == SK_NONE) != (o[0] == SK_NONE) || g[1] != o[1] || (g[2] == 255) != (o[2] == 255)) parts |= CP_COST;
+      if (g[0] != o[0] || g[2] != o[2]) parts |= CP_NAME;
+      if (g[0] != o[0] || g[6] != o[6] || g[7] != o[7]) parts |= CP_NEXT;
+    }
+    /* each part and the icon's two DMAs with their set-up time (80, crt0.s VQ_ENTRY) */
+    if (parts & CP_TAB) need += 2 * 8 * 16 + 80;
+    if (parts & CP_COST) need += 2 * 8 * 16 + 80;
+    if (parts & CP_NAME) need += 2 * 8 * 16 + 80;
+    if (parts & CP_NEXT) need += 3 * 8 * 16 + 80;
+    if (g[0] != o[0]) need += 128 + 2 * 80;     /* its icon */
+    /* when the map's group is full this frame, the column waits whole (the next may fit) */
+    if (parts && !panel_hold && !(bright & 0x80) && !mq_fits(need - 80)) { panel_dirty = 1; continue; }
+    memcpy(o, g, 8);
+    col_drawn |= 1 << c;
+    draw_column(c, g, parts);
+  }
 }
 
 /* the banner (rows 4-6, above the enemies' bubbles and numbers) */
@@ -1196,7 +1230,7 @@ static void draw_number(const Num *p, s16 y) {
 typedef struct { s16 x, y; u16 ta, big; } SprEnt;
 #define OV_MAX 9
 static SprEnt ov_spr[ENEMY_MAX][OV_MAX], sk_spr[30];
-static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n, sk_sig[9], sk_new[9];
+static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n;
 
 static void spr_emit(const SprEnt *p, u8 n) {
   if (!n) return;
@@ -1209,7 +1243,8 @@ static void ent_add(s16 x, s16 y, u16 ta) { ent->x = x; ent->y = y; ent->ta = ta
 
 static void lists_reset(void) {
   memset(ov_sig, 0xff, sizeof(ov_sig));
-  memset(sk_sig, 0xfe, sizeof(sk_sig));
+  memset(sk_col, 0, sizeof(sk_col));
+  sk_col[0][0] = sk_col[1][0] = sk_col[2][0] = 255;
   sk_recalc = 1;
   memset(ov_n, 0, sizeof(ov_n));
   sk_n = 0;
@@ -1218,38 +1253,26 @@ static void lists_reset(void) {
 /* panel sprites: the skill icon (16x16, palette = selected / not) and the cost badge of each
  * card, the small gray badge of each NEXT card */
 static void skill_sprites(void) {
-  u8 i, sk, *sig = sk_new, x;
-  if (sk_recalc) {               /* what the cards show changed (draw_panel) */
+  u8 i, x, *k;
+  if (sk_recalc) {               /* a column was sent this frame: its sprites go in the same NMI */
     sk_recalc = 0;
-    for (i = 0; i < 3; ++i) {
-      sk = skill_of(i);
-      sig[i] = sk == SK_NONE ? 255 : skill_sel[sk];
-      sig[3 + i] = sk == SK_NONE || is_locked(i) ? 0 : (skill_cost(sk) > b_st ? 2 : 1);
-      sig[6 + i] = b_w[i].nsk > 1 ? 1 : 0;
-    }
-  }
-  /* together with the card text: once the queue has it (what waits with the map goes in the
-   * NMI that takes this OAM) */
-  if (memcmp(sig, sk_sig, 9) && !vq_busy(TL_TABS * 16, (TL_TABS + 320) * 16)) {
-    memcpy(sk_sig, sig, 9);
-    skill_icons_update();
     ent = sk_spr;
-    for (i = 0; i < 3; ++i) {
+    for (i = 0, k = sk_col[0]; i < 3; ++i, k += 3) {
       x = i * 64;
-      if (sig[i] != 255) {
-        ent_add(x + 10, 164, ATTR(STRIP_TILE(STRIP_MISC) + 2 + i * 2, OBJ_SKILL + sig[i], 3));
-        ent_add(x + 18, 164, ATTR(STRIP_TILE(STRIP_MISC) + 3 + i * 2, OBJ_SKILL + sig[i], 3));
-        ent_add(x + 10, 172, ATTR(STRIP_TILE(STRIP_MISC) + 18 + i * 2, OBJ_SKILL + sig[i], 3));
-        ent_add(x + 18, 172, ATTR(STRIP_TILE(STRIP_MISC) + 19 + i * 2, OBJ_SKILL + sig[i], 3));
+      if (k[0] != 255) {
+        ent_add(x + 10, 164, ATTR(STRIP_TILE(STRIP_MISC) + 2 + i * 2, OBJ_SKILL + k[0], 3));
+        ent_add(x + 18, 164, ATTR(STRIP_TILE(STRIP_MISC) + 3 + i * 2, OBJ_SKILL + k[0], 3));
+        ent_add(x + 10, 172, ATTR(STRIP_TILE(STRIP_MISC) + 18 + i * 2, OBJ_SKILL + k[0], 3));
+        ent_add(x + 18, 172, ATTR(STRIP_TILE(STRIP_MISC) + 19 + i * 2, OBJ_SKILL + k[0], 3));
       }
-      if (sig[3 + i]) {
-        u16 t = STRIP_TILE(STRIP_MISC) + MISC_BADGE + (sig[3 + i] == 2 ? 2 : 0);
+      if (k[1]) {
+        u16 t = STRIP_TILE(STRIP_MISC) + MISC_BADGE + (k[1] == 2 ? 2 : 0);
         ent_add(x + 40, 160, ATTR(t, OBJ_FX, 3));
         ent_add(x + 48, 160, ATTR(t + 1, OBJ_FX, 3));
         ent_add(x + 40, 168, ATTR(t + 16, OBJ_FX, 3));
         ent_add(x + 48, 168, ATTR(t + 17, OBJ_FX, 3));
       }
-      if (sig[6 + i]) {
+      if (k[2]) {
         ent_add(x + 42, 202, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BADGE + 6, OBJ_FX, 3));
         ent_add(x + 50, 202, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BADGE + 7, OBJ_FX, 3));
       }
@@ -1566,9 +1589,10 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
     animate();
     if (top_dirty) draw_top();
     if (hp_dirty) draw_hpst();
-    if (panel_dirty || panel_can != battle_can_command() || panel_st != b_st) draw_panel();
     if (!modal_on) panel_part(3, 0, guard_off());   /* the cooldown ends between redraws */
     if (!modal_on && combo_shown != b_combo) draw_combo();
+    /* last before the sprites: a column's text and its sprites go in the next NMI */
+    if (panel_dirty || panel_can != battle_can_command() || panel_st != b_st) draw_panel();
     draw_sprites();
     if (win_t) { if (++win_t > 150) { result = 1; break; } }
     if (lose_t) { if (++lose_t > 180) { result = 0; break; } }

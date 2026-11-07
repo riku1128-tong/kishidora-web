@@ -54,7 +54,7 @@ extern u8  vq_count, vq_head, vq[8 * 24];   /* NMI DMA ring of 24: vaddr(2) src(
 /* sent with the OAM (10 slots) / with the BG3 map (4 slots) (crt0.s nmi_uploads): vaddr(2) src(2)
  * bank(1) size(2, 0 = empty) -(1); the *_on byte says the NMI has to look at them */
 #define SPR_SLOTS 10
-#define MQ_SLOTS 4
+#define MQ_SLOTS 12
 extern u8  spr_q[8 * SPR_SLOTS], spr_on, mq[8 * MQ_SLOTS], mq_on, nmi_late;
 void spr_put(u8 k, u16 vaddr, u16 src, u8 bank, u16 size);   /* sys.c */
 u16 spr_bytes(void);
