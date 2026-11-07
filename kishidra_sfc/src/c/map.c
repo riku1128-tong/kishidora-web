@@ -68,7 +68,7 @@ static void map_sprites(void) {
       x = x0 + dx * k / n - 4;
       y = y0 + dy * k / n - 4 - scroll_y;
       if (y < VIEW_TOP - 4 || y > VIEW_TOP + VIEW_H) continue;
-      spr_add(x, y, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 1), 0);
+      spr_add(x, y, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 2), 0);
     }
   }
 }
@@ -266,18 +266,28 @@ static u8 area_window(void) {
 
 /* ---------------------------------------------------------------- mirage tower */
 static u8 mirage_window(void) {
-  u8 go;
+  u8 sel = 0;
   mk_sprites = 0;
-  win_open(BX_WIN, 3, 4, 26, 18, T_WIN, PAL_W_FRAME);
+  win_open(BX_WIN, 2, 3, 28, 22, T_WIN, PAL_W_FRAME);
   say_center(BX_WIN, 4, T_MIRAGE_TITLE);
-  if (sv.mirage_best) sayn(BX_WIN, 16, 24, sv.mirage_clear ? T_MIRAGE_BEST_CLEAR : T_MIRAGE_BEST, sv.mirage_best);
-  else say(BX_WIN, 16, 24, T_MIRAGE_NONE);
-  say(BX_WIN, 16, 44, T_MIRAGE_RULE);
-  say(BX_WIN, 16, 112, T_MIRAGE_RULE2);
+  if (sv.mirage_best) sayn(BX_WIN, 14, 22, sv.mirage_clear ? T_MIRAGE_BEST_CLEAR : T_MIRAGE_BEST, sv.mirage_best);
+  else say(BX_WIN, 14, 22, T_MIRAGE_NONE);
+  say(BX_WIN, 14, 42, T_MIRAGE_RULES);
+  say(BX_WIN, 40, 150, T_MIRAGE_GO);
+  say(BX_WIN, 136, 150, T_SORTIE_BACK);
   tb_flush(BX_WIN);
-  go = mk_confirm(T_MIRAGE_ASK, 0);
+  for (;;) {
+    oam_next = 0;
+    mk_cursor(16 + 40 - 11 + sel * 96, 24 + 150 + 2);
+    oam_finish();
+    frame_wait();
+    if (pad_new & (BTN_LEFT | BTN_RIGHT)) { sel ^= 1; se_play(SE_CURSOR); }
+    if (pad_new & BTN_B) { sel = 1; break; }
+    if (pad_new & BTN_A) break;
+  }
+  se_play(sel ? SE_CANCEL : SE_OK);
   win_close(BX_WIN);
-  if (!go) return MA_NONE;
+  if (sel) return MA_NONE;
   if (sv.ninv >= D_INV_MAX) { mk_notice(T_INV_FULL, T_INV_FULL2); return MA_NONE; }
   map_area = AR_MIRAGE; map_men = 1;
   return MA_BATTLE;

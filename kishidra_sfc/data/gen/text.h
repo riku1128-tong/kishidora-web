@@ -1216,6 +1216,7 @@
 #define T_CONTINUE_GRAY          1212
 #define T_NEW_ASK                1213
 #define T_NEW_ASK2               1214
-#define N_TEXT 1215
-#define N_GLYPH 674
+#define T_MIRAGE_RULES           1215
+#define N_TEXT 1216
+#define N_GLYPH 676
 #endif

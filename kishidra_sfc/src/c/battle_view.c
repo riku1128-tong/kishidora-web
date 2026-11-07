@@ -208,7 +208,7 @@ static void load_stage_gfx(void) {
       load_pal(mon_gfx[a->mon][1], PAL_OBJ(OBJ_ZAKO + a->slot));
       zako_upload(i, pose_by_code(a, 0));
     }
-    a->slide = 160;
+    a->slide = a->boss ? 0 : 160;   /* BG1 is 256 px wide: a sliding boss would wrap around */
     a->want = a->cur;
   }
 }
@@ -548,6 +548,7 @@ static void on_event(Ev *e) {
     break;
   case EV_STAGE_CLEAR:
     banner(T_STAGE_CLEAR, PAL_T_YELLOW, 60);
+    se_play(SE_MIRACLE);
     break;
   case EV_VICTORY:
     banner(T_VICTORY, PAL_T_YELLOW, 255);

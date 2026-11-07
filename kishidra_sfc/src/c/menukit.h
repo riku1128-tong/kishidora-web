@@ -58,8 +58,9 @@ static void list_draw(List *l) {
   tb_clear(l->box);
   if (mk_header) mk_header();
   for (r = 0; r < l->rows && l->top + r < l->n; ++r) mk_draw(l->top + r, l->y + r * l->lh);
-  if (l->top > 0) say(l->box, l->x + 0, 0, TXT_MORE_UP);
-  if (l->top + l->rows < l->n) say(l->box, l->x + 0, l->y + l->rows * l->lh - 2, TXT_MORE_DOWN);
+  r = tb[l->box * 8 + 2];          /* scroll hints at the right edge */
+  if (l->top > 0) say(l->box, r * 8 - 20, l->y, TXT_MORE_UP);
+  if (l->top + l->rows < l->n) say(l->box, r * 8 - 20, l->y + (l->rows - 1) * l->lh, TXT_MORE_DOWN);
   tb_flush(l->box);
 }
 
