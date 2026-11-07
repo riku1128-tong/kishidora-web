@@ -4,7 +4,7 @@
 
 .import bgm_table, bgm_banks, spc_image, se_dir, se_vol, _ea
 .import SPC_IMAGE_LEN_LO, SPC_IMAGE_LEN_HI, SPC_BOOT_LEN, SPC_SPLIT_END, se_thr
-.export spc_boot_far
+.export spc_boot_far, stream_idle
 
 APU0 = $2140
 APU1 = $2141
@@ -34,6 +34,7 @@ s_tail:  .res 2
 s_p2:    .res 1
 s_p3:    .res 1
 s_cnt:   .res 2
+s_allow: .res 1        ; blocks the ring still takes this frame (stream_idle)
 s_ready: .res 1
 s_lleft: .res 2        ; bytes of samples still to upload (0 = sound effects ready)
 
@@ -462,14 +463,23 @@ CFUNC sound_tick
   beq @out
   lda s_on
   beq @out
+  ; what this frame may send: the driver's free count, read once (it does not update port 2
+  ; while blocks arrive), at most PER_FRAME_MAX
   lda APU2             ; free blocks / 8 reported by the driver
+  cmp #3
+  bcc :+
+  lda #PER_FRAME_MAX / 8
+:
+  asl
+  asl
+  asl
+  sta s_allow
+  lda APU2
   cmp #146
   bcs @max             ; 1168+ free (under 0.9 s left in the ring): catch up
-  cmp #2
-  bcs @norm
-  asl
-  asl
-  asl                  ; fewer than 16 free: what fits
+  cmp #100
+  bcs @norm            ; 800+ free (under 1.5 s left): the frame's share now
+  lda #0               ; else wait_frame sends them while the CPU waits (stream_idle)
   bra @set
 @norm:
   lda #PER_FRAME
@@ -477,7 +487,15 @@ CFUNC sound_tick
 @max:
   lda #PER_FRAME_MAX
 @set:
+  cmp s_allow
+  bcc :+
+  lda s_allow
+:
   sta s_cnt
+  eor #$ff             ; s_allow -= s_cnt
+  sec
+  adc s_allow
+  sta s_allow
 @l:
   lda s_cnt
   beq @out
@@ -492,6 +510,26 @@ CFUNC sound_tick
 :
   plb
   plp
+  rtl
+
+; one block of the stream while wait_frame waits for the next frame, while the ring has room
+; (jsl, A8 I16, DB $80).  The frame's music then costs the game loop nothing; sound_tick still
+; sends it before the wait when the ring runs low (no idle time).
+stream_idle:
+  .a8
+  .i16
+  lda s_ready
+  beq @no
+  lda s_on
+  beq @no
+  lda s_lleft          ; sound effect samples still uploading: sound_tick does both
+  ora s_lleft+1
+  bne @no
+  lda s_allow          ; what the ring takes this frame (sound_tick read the driver's count)
+  beq @no
+  dec s_allow
+  jsr stream_one
+@no:
   rtl
 
 ; void se_start(void): ea0 = SE id, ea1 = volume scale (0-8)

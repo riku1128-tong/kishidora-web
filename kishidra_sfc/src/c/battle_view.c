@@ -382,6 +382,9 @@ static u8 col_var[4][2];       /* shown variant: [card, next] 0 normal, 1 empty 
 static u8 st_blink;            /* frames of the ST-short blink */
 static u8 modal_on;            /* a window over the field: the HUD text boxes are hidden */
 static u8 panel_can;           /* the cards were drawn for "can command" */
+static u8 panel_st;            /* ... and for this ST (a cost above it is red) */
+static u8 sk_recalc;           /* draw_panel ran: the card sprites are worked out again (not every frame) */
+static u8 pan_drawn;           /* 0: the panel boxes are new, the next draw_panel draws */
 
 static void bg1_put(u8 row, u8 col, u16 t) { bg1map[(u16)row * 32 + col] = t | HUD_ATTR; }
 
@@ -442,6 +445,7 @@ static void hud_fixed_boxes(void) {
 
 /* the panel text: tabs, cards, NEXT (their tiles are a window's while one is open) */
 static void hud_panel_boxes(void) {
+  pan_drawn = 0;                 /* new boxes: the next draw_panel draws */
   box(BX_TABS, 0, 18, 32, 2, TL_TABS, PAL_W, BOX_SMALL);
   box(BX_CARDS, 0, 20, 32, 5, TL_CARDS, PAL_W, 0);
   box(BX_NEXT, 0, 25, 32, 3, TL_NEXT, PAL_W, BOX_SMALL);
@@ -608,12 +612,43 @@ static void say_small_mid(u8 bx, u8 c, u8 y, u16 msg, u16 w) {
 
 static u8 guard_off(void) { return b_guard_cool || b_phase != PH_FIGHT; }
 
+/* what the panel text shows: a redraw that would draw the same is skipped (text is slow) */
+static u8 pan_sig[3 * 7 + 2];
+static u8 panel_same(u8 can) {
+  u8 sig[3 * 7 + 2], c, sk, *p = sig;
+  for (c = 0; c < 3; ++c) {
+    sk = skill_of(c);
+    *p++ = sk;
+    if (sk == SK_NONE) { p += 6; continue; }
+    *p++ = skill_cost(sk);
+    *p++ = special_if(c);
+    *p++ = is_locked(c) ? b_lock_turns : 255;
+    *p++ = b_w[c].nsk > 1 ? next_skill_of(c) : 255;
+    *p++ = b_w[c].nsk > 1 ? skill_cost(p[-1]) : 0;
+    *p++ = 0;
+  }
+  *p++ = can;
+  *p = b_st;
+  for (c = 0; c < 3; ++c) if (sig[c * 7] == SK_NONE) memset(&sig[c * 7 + 1], 0, 6);
+  if (pan_drawn && !memcmp(sig, pan_sig, sizeof(sig))) return 1;
+  memcpy(pan_sig, sig, sizeof(sig));
+  pan_drawn = 1;
+  return 0;
+}
+
 static void draw_panel(void) {
   u8 c, sk, nx, cost, sp, can, el, x;
   u16 nm, w;
   if (modal_on) return;
   can = battle_can_command();
   panel_can = can;
+  panel_st = b_st;
+  if (panel_same(can)) {         /* only the guard / meat buttons can have changed */
+    panel_part(3, 0, guard_off());
+    panel_part(3, 1, (can || meat_asker() != 255) ? 0 : 1);
+    panel_dirty = 0;
+    return;
+  }
   tb_clear(BX_TABS); tb_clear(BX_CARDS); tb_clear(BX_NEXT);
   for (c = 0; c < 3; ++c) {
     x = c * 64;
@@ -662,6 +697,8 @@ static void draw_panel(void) {
   say(BX_CARDS, 192 + 8, 1, TXT_BTN_B);
   say_small_mid(BX_CARDS, 3, 28, TXT_GUARD_LABEL, small_width(TXT_GUARD_LABEL));
   say(BX_NEXT, 192 + 8, 3, TXT_BTN_R);
+  sk_recalc = 1;
+  panel_st = b_st;
   tb_flush(BX_TABS); tb_flush(BX_NEXT);
   /* the cards (costs rows 0-1, names rows 3-4; row 2 is empty) with the map: a name or a cost
    * never shows half old, or in the last colours; when that does not fit now, the queue */
@@ -1159,7 +1196,7 @@ static void draw_number(const Num *p, s16 y) {
 typedef struct { s16 x, y; u16 ta, big; } SprEnt;
 #define OV_MAX 9
 static SprEnt ov_spr[ENEMY_MAX][OV_MAX], sk_spr[30];
-static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n, sk_sig[9];
+static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n, sk_sig[9], sk_new[9];
 
 static void spr_emit(const SprEnt *p, u8 n) {
   if (!n) return;
@@ -1173,6 +1210,7 @@ static void ent_add(s16 x, s16 y, u16 ta) { ent->x = x; ent->y = y; ent->ta = ta
 static void lists_reset(void) {
   memset(ov_sig, 0xff, sizeof(ov_sig));
   memset(sk_sig, 0xfe, sizeof(sk_sig));
+  sk_recalc = 1;
   memset(ov_n, 0, sizeof(ov_n));
   sk_n = 0;
 }
@@ -1180,12 +1218,15 @@ static void lists_reset(void) {
 /* panel sprites: the skill icon (16x16, palette = selected / not) and the cost badge of each
  * card, the small gray badge of each NEXT card */
 static void skill_sprites(void) {
-  u8 i, sk, sig[9], x;
-  for (i = 0; i < 3; ++i) {
-    sk = skill_of(i);
-    sig[i] = sk == SK_NONE ? 255 : skill_sel[sk];
-    sig[3 + i] = sk == SK_NONE || is_locked(i) ? 0 : (skill_cost(sk) > b_st ? 2 : 1);
-    sig[6 + i] = b_w[i].nsk > 1 ? 1 : 0;
+  u8 i, sk, *sig = sk_new, x;
+  if (sk_recalc) {               /* what the cards show changed (draw_panel) */
+    sk_recalc = 0;
+    for (i = 0; i < 3; ++i) {
+      sk = skill_of(i);
+      sig[i] = sk == SK_NONE ? 255 : skill_sel[sk];
+      sig[3 + i] = sk == SK_NONE || is_locked(i) ? 0 : (skill_cost(sk) > b_st ? 2 : 1);
+      sig[6 + i] = b_w[i].nsk > 1 ? 1 : 0;
+    }
   }
   /* together with the card text: once the queue has it (what waits with the map goes in the
    * NMI that takes this OAM) */
@@ -1220,8 +1261,9 @@ static void skill_sprites(void) {
 
 /* target arrow, count bubble, HP bar, ailments of enemy i */
 static void overlay_sprites(u8 i, Foe *e, Actor *a) {
-  u8 sig[7], c, hp;
+  u8 sig[7], c, hp, *os;
   s16 x, y;
+  SprEnt *ol;
   if (e->gone || !foe_targetable(e)) return;
   if (a->boss && warn_t) return;
   x = e->sx + a->slide + a->dx;
@@ -1237,11 +1279,13 @@ static void overlay_sprites(u8 i, Foe *e, Actor *a) {
   sig[3] = c; sig[4] = hp;
   sig[5] = (e->ail[AIL_POISON] ? 1 : 0) | (e->ail[AIL_PARALYZE] ? 2 : 0) | (e->ail[AIL_BLIND] ? 4 : 0);
   sig[6] = a->boss ? (u8)boss_top : 0;
-  if (memcmp(sig, ov_sig[i], 7)) {
-    memcpy(ov_sig[i], sig, 7);
+  os = ov_sig[i];
+  ol = ov_spr[i];
+  if (memcmp(sig, os, 7)) {
+    memcpy(os, sig, 7);
     /* zako: above the head; boss: at the picture's top, below the top bar (rows 0-1) */
     y = a->boss ? MAX(boss_top + 4, FIELD_Y + 14) : FOOT_Y - 56;
-    ent = ov_spr[i];
+    ent = ol;
     if (sig[2]) ent_add(x - 4, y - 10 + (sig[2] - 1), ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 9, OBJ_FX, 3));
     if (c != 255) ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + (c < 6 ? 10 + c : 16 + 10 + (c - 6)), OBJ_FX, 3));
     else ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 10, OBJ_FX, 3));
@@ -1253,9 +1297,9 @@ static void overlay_sprites(u8 i, Foe *e, Actor *a) {
     if (sig[5] & 1) ent_add(x - 12, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 11, OBJ_FX, 3));
     if (sig[5] & 2) ent_add(x - 20, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 12, OBJ_FX, 3));
     if (sig[5] & 4) ent_add(x - 28, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 13, OBJ_FX, 3));
-    ov_n[i] = (u8)(ent - ov_spr[i]);
+    ov_n[i] = (u8)(ent - ol);
   }
-  spr_emit(ov_spr[i], ov_n[i]);
+  spr_emit(ol, ov_n[i]);
 }
 
 static void shield_sprites(s16 x, s16 y) {
@@ -1298,8 +1342,9 @@ static void draw_sprites(void) {
 }
 
 /* ---------------------------------------------------------------- per-frame animation */
+/* (loops walk pointers: indexing an array of structs costs a multiplication in cc65) */
 static void animate(void) {
-  u8 i, want;
+  u8 i, want, ph;
   Actor *a;
   Foe *e;
   ++frame_ct;
@@ -1310,9 +1355,7 @@ static void animate(void) {
   if (hero_parry) --hero_parry;
   want = hero_pose();
   if (want != hero_pose_now) hero_upload(want);
-  for (i = 0; i < b_ne; ++i) {
-    a = &act[i];
-    e = &b_e[i];
+  for (i = 0, a = act, e = b_e, ph = (u8)frame_ct; i < b_ne; ++i, ++a, ++e, ph += 23) {
     if (a->slide > 0) a->slide = a->slide > 6 ? a->slide - 6 : 0;
     if (e->fleeing) a->slide += 3;
     if (a->hurt_t) --a->hurt_t;
@@ -1323,22 +1366,19 @@ static void animate(void) {
     else if (a->hurt_t) want = pose_by_code(a, 3);
     else if (a->atk_t || a->dx) want = pose_by_code(a, b_special_now && b_attacker == i ? 5 : 2);
     else if (e->mon == MON_117 && e->awake && 0) want = pose_by_code(a, 6);
-    else want = pose_by_code(a, ((frame_ct + i * 23) & 64) ? 1 : 0);
+    else want = pose_by_code(a, (ph & 64) ? 1 : 0);
     if (a->boss) {
       if (want != a->cur && !boss_pending) boss_upload(i, want);
-    } else {
-      if (want != a->cur) zako_upload(i, want);
-    }
+    } else a->cur = want;     /* its tiles go with the OAM that draws it (pose_tiles) */
   }
   /* boss map once its tiles are in VRAM; position via BG1 scroll */
-  for (i = 0; i < b_ne; ++i) {
-    a = &act[i];
+  for (i = 0, a = act, e = b_e; i < b_ne; ++i, ++a, ++e) {
     if (!a->boss) continue;
     if (boss_pending && !vq_busy(0xa000, 0xc000)) {
       boss_pending = 0;
       boss_place(i);
     }
-    if (b_e[i].gone && a->boss_drawn) {
+    if (e->gone && a->boss_drawn) {
       u16 k;
       for (k = 2 * 32; k < 16 * 32; ++k) bg1map[k] = 0;
       bgmap_dirty |= 1;
@@ -1350,11 +1390,11 @@ static void animate(void) {
   /* HDMA: BG1 (boss) and BG2 (scenery) scroll for lines 0-127, 0 below (the panel) */
   {
     s16 bx = 0, by = 0;
-    for (i = 0; i < b_ne; ++i) if (act[i].boss) {
-      bx = -(act[i].dx + boss_x0 * 0) - shake_x;
+    for (i = 0, a = act, e = b_e; i < b_ne; ++i, ++a, ++e) if (a->boss) {
+      bx = -a->dx - shake_x;
       by = -shake_y;
-      if ((b_e[i].dying || act[i].flash) && (frame_ct & 4)) by = 256 - 0;   /* blink: scroll the boss away */
-      if (b_e[i].dying && (frame_ct & 4)) bx = 256;
+      if ((e->dying || a->flash) && (frame_ct & 4)) by = 256;   /* blink: scroll the boss away */
+      if (e->dying && (frame_ct & 4)) bx = 256;
     }
     hdma_tab1[0] = 127; hdma_tab1[1] = (u8)bx; hdma_tab1[2] = (u8)(bx >> 8); hdma_tab1[3] = (u8)by; hdma_tab1[4] = (u8)(by >> 8);
     hdma_tab1[5] = 1; hdma_tab1[6] = (u8)bx; hdma_tab1[7] = (u8)(bx >> 8); hdma_tab1[8] = (u8)by; hdma_tab1[9] = (u8)(by >> 8);
@@ -1526,7 +1566,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
     animate();
     if (top_dirty) draw_top();
     if (hp_dirty) draw_hpst();
-    if (panel_dirty || panel_can != battle_can_command()) draw_panel();
+    if (panel_dirty || panel_can != battle_can_command() || panel_st != b_st) draw_panel();
     if (!modal_on) panel_part(3, 0, guard_off());   /* the cooldown ends between redraws */
     if (!modal_on && combo_shown != b_combo) draw_combo();
     draw_sprites();

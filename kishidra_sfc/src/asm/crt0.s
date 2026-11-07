@@ -10,6 +10,7 @@
 .import __BSS_RUN__, __BSS_SIZE__
 .import __LOWBSS_RUN__, __LOWBSS_SIZE__
 .import spc_boot_far
+.import stream_idle: far
 .import RODATA_LOAD_BANK
 
 .export __STARTUP__ : absolute = 1
@@ -107,6 +108,7 @@ _spr_on:      .res 1       ; any slot set
 _mq:          .res 8*MQ_SLOTS
 _mq_on:       .res 1
 _nmi_late:    .res 1       ; the BG3 map (with _mq) did not fit the last NMI: the queue waited too
+wf_frame:     .res 2       ; wait_frame: the frame it waits to end
 
 .segment "BSS"
 _bg1map: .res 2048
@@ -916,7 +918,12 @@ CFUNC wait_frame
   sta _nmi_ready
   A16
   lda _frame
+  sta wf_frame
 @w:
+  A8
+  jsl stream_idle      ; the music while waiting (a block takes ~150 us, then the frame is checked)
+  A16
+  lda wf_frame
   cmp _frame
   beq @w
   ; latch joypad edges (the next NMI is a frame away)
