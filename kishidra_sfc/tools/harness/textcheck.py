@@ -3,7 +3,7 @@
 that leaves its box, sits on a window frame, shares an 8x8 tile with text of another colour, or is
 drawn over other text.  (text.s logs glyphs and lines at $7F:E000; see text_check there.)
 
-usage: textcheck.py SCRIPT [SCRIPT ...]      (each script is run from power-on; WRAM snapshots are
+usage: [ROM=x.sfc] textcheck.py SCRIPT ...   (each script is run from power-on; WRAM snapshots are
                                                taken every 10 frames while it runs; the log ring
                                                holds 512 entries, an overflow is reported)
 Prints one line per distinct finding: script, the step (last 'shot' name or press before it), kind,
@@ -16,6 +16,8 @@ import tempfile
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
 CORE = os.environ.get('CORE', '/usr/lib/x86_64-linux-gnu/libretro/snes9x_libretro.so')
+ROM = os.environ.get('ROM', os.path.join(ROOT, 'build', 'kishidra.sfc'))           # a PROFILE=1 build
+MAP = os.environ.get('MAP', os.path.splitext(ROM)[0] + '.map')                     # its link map
 KIND = {1: 'right', 2: 'bottom', 3: 'colour', 4: 'left', 5: 'top', 8: 'overlap'}
 PAL = ['white', 'yellow', 'red', 'gray', 'green', 'blue', 'gold', 'pal7']
 STEP = 10
@@ -29,7 +31,7 @@ def text_names():
 
 
 def bg3map_addr():
-    m = re.search(r'(?:^|\s)_bg3map\s+([0-9A-F]{6})', open(os.path.join(ROOT, 'build', 'kishidra.map')).read(), re.M)
+    m = re.search(r'(?:^|\s)_bg3map\s+([0-9A-F]{6})', open(MAP).read(), re.M)
     return int(m.group(1), 16) & 0xffff
 
 
@@ -76,7 +78,7 @@ def run(script, names):
     lines = [l.replace('@', td + '/w') + '.bin' if l.startswith('wram @') else l for l in lines]
     sc = os.path.join(td, 's.txt')
     open(sc, 'w').write('\n'.join(lines) + '\n')
-    subprocess.run([os.path.join(ROOT, 'tools', 'harness', 'runrom'), CORE, os.path.join(ROOT, 'build', 'kishidra.sfc'), sc],
+    subprocess.run([os.path.join(ROOT, 'tools', 'harness', 'runrom'), CORE, ROM, sc],
                    check=True, capture_output=True)
     seen = {}
     shared = {}
