@@ -85,34 +85,41 @@ static u16 wins_at[12];
 static u8 nwins;
 
 void win_base(void) {
-  memcpy(bg1_base, bg1map, sizeof(bg1_base));
+  ea[0] = (u16)bg1map; ea[1] = (u16)bg1_base; ea[2] = sizeof(bg1_base);
+  mem_copy();
   nwins = 0;
   save_top = 0;
 }
 
-/* screen tile rect -> BG1 map rows under it (BG1 may be scrolled vertically) */
+/* screen tile rect -> BG1 map rows under it (BG1 may be scrolled vertically).
+ * Rows are cleared / copied with DMA and MVN (src/asm/sprite.s). */
 static void bg1_rect(u8 x, u8 y, u8 w, u8 h, u8 clear) {
-  u8 i, r, r0, r1;
+  u8 r, r0, r1, n;
   u16 k, vs = scroll[1];
+  if (x >= 32) return;
+  n = x + w > 32 ? 32 - x : w;
   r0 = (u8)((((u16)y << 3) + vs) >> 3);
   r1 = (u8)((((u16)(y + h) << 3) - 1 + vs) >> 3);
   for (r = r0; ; ++r) {
     k = ((u16)(r & 31) << 5) + x;
-    for (i = 0; i < w && x + i < 32; ++i, ++k) bg1map[k] = clear ? 0 : bg1_base[k];
+    if (clear) { ea[0] = (u16)&bg1map[k]; ea[1] = 0x7e; ea[2] = (u16)n * 2; wram_zero(); }
+    else { ea[0] = (u16)&bg1_base[k]; ea[1] = (u16)&bg1map[k]; ea[2] = (u16)n * 2; mem_copy(); }
     if (r == r1) break;
   }
   bgmap_dirty |= 1;
 }
 
 static void bg3_rect(u8 x, u8 y, u8 w, u8 h, u16 at, u8 restore) {
-  u8 i, j;
+  u8 j;
   u16 k;
   for (j = 0; j < h; ++j) {
+    if (at + w > WIN_SAVE) break;
     k = ((u16)(y + j) << 5) + x;
-    for (i = 0; i < w; ++i, ++k, ++at) {
-      if (at >= WIN_SAVE) return;
-      if (restore) bg3map[k] = bg3_save[at]; else bg3_save[at] = bg3map[k];
-    }
+    if (restore) { ea[0] = (u16)&bg3_save[at]; ea[1] = (u16)&bg3map[k]; }
+    else { ea[0] = (u16)&bg3map[k]; ea[1] = (u16)&bg3_save[at]; }
+    ea[2] = (u16)w * 2;
+    mem_copy();
+    at += w;
   }
   bgmap_dirty |= 4;
 }

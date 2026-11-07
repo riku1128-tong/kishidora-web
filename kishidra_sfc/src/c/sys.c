@@ -48,8 +48,8 @@ void queue_vram_big(u16 vaddr, u16 src, u8 bank, u16 size) {
 }
 
 void clear_maps(void) {
-  u16 i;
-  for (i = 0; i < 1024; ++i) { bg1map[i] = 0; bg2map[i] = 0; bg3map[i] = 0; }
+  ea[0] = (u16)bg1map; ea[1] = 0x7e; ea[2] = sizeof(bg1map) * 3;   /* bg1map, bg2map, bg3map in a row */
+  wram_zero();
   bgmap_dirty = 7;
 }
 
@@ -108,34 +108,9 @@ void fade_in(void) {
   frame_wait();
 }
 
-void oam_clear(void) {
-  u16 i;
-  for (i = 0; i < 512; i += 4) { oam[i] = 0; oam[i + 1] = 240; oam[i + 2] = 0; oam[i + 3] = 0; }
-  for (i = 512; i < 544; ++i) oam[i] = 0x55;   /* x9 = 1 (off screen), small */
-  oam_next = 0;
-}
+/* oam_clear: src/asm/sprite.s */
 
-/* sprite i at (x,y); tile_attr = tile (9 bits) | attr<<8 style: bits 9-11 pal, 12-13 prio, 14 hflip, 15 vflip */
-void spr(u8 i, s16 x, s16 y, u16 tile_attr, u8 large) {
-  u16 o = (u16)i << 2;
-  u8 hi = i >> 2, sh = (i & 3) << 1, bits;
-  if (y < -64 || y >= 224 || x <= -64 || x >= 256) { oam[o + 1] = 240; return; }
-  oam[o] = (u8)x;
-  oam[o + 1] = (u8)y;
-  oam[o + 2] = (u8)tile_attr;
-  oam[o + 3] = (u8)(tile_attr >> 8);
-  bits = ((x < 0) ? 1 : 0) | (large ? 2 : 0);
-  oam[512 + hi] = (oam[512 + hi] & ~(3 << sh)) | (bits << sh);
-}
-
-void spr_add(s16 x, s16 y, u16 tile_attr, u8 large) {
-  if (oam_next < 128) spr(oam_next++, x, y, tile_attr, large);
-}
-
-void oam_finish(void) {
-  while (oam_next < 128) { oam[(u16)oam_next << 2 | 1] = 240; ++oam_next; }
-  oam_next = 0;
-}
+/* spr_add and oam_finish: src/asm/sprite.s */
 
 void rnd_seed(u16 s) { seed = s ? s : 0x2b7e; }
 
@@ -165,11 +140,21 @@ u32 mul_pct(u32 v, u16 p) {
   return (v * p) / 100;
 }
 
+#ifdef PROFILE
+u16 prof_marks[16];
+#endif
+
 void frame_wait(void) {
+  PROF_LINE(4);
   sound_service();
+  PROF_LINE(5);
   wait_frame();
+  PROF_LINE(0);
   pad = joy;
   pad_new = pad_lat; pad_lat = 0;
+#ifdef PROFILE
+  if (pad_new & (BTN_A | BTN_B | BTN_Y | BTN_X | BTN_START | BTN_L | BTN_R | BTN_SELECT)) PROF_MARK(7);
+#endif
   pad_rep = rep_lat; rep_lat = 0;
   rnd();
 }

@@ -13,7 +13,8 @@ APU3 = $2143
 BLOCKS_PER_BANK = 3640
 RING_BLOCKS = 1813
 PREFILL = 640
-PER_FRAME = 24
+PER_FRAME = 13          ; blocks per frame while the ring is nearly full (11.5 are played)
+PER_FRAME_MAX = 24      ; ... and while it is low (after slow frames)
 LOAD_BLOCKS = 64       ; sound effect upload after boot: at most this many 9-byte blocks per frame
 LOAD_STOP = 212        ; ...and none once the beam reaches this scanline (the NMI comes at 225)
 SPC_IMAGE_LEN = SPC_IMAGE_LEN_LO + SPC_IMAGE_LEN_HI * 65536
@@ -461,11 +462,21 @@ CFUNC sound_tick
   beq @out
   lda s_on
   beq @out
-  lda APU2             ; free blocks reported by the driver
-  cmp #PER_FRAME
-  bcc :+
+  lda APU2             ; free blocks / 8 reported by the driver
+  cmp #146
+  bcs @max             ; 1168+ free (under 0.9 s left in the ring): catch up
+  cmp #2
+  bcs @norm
+  asl
+  asl
+  asl                  ; fewer than 16 free: what fits
+  bra @set
+@norm:
   lda #PER_FRAME
-:
+  bra @set
+@max:
+  lda #PER_FRAME_MAX
+@set:
   sta s_cnt
 @l:
   lda s_cnt

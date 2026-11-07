@@ -259,19 +259,62 @@ box_clear:
   asl
   asl
   tax
+  ; fill by DMA through the WRAM port (channel 2: the NMI uses 0, assets 1, HDMA 6-7)
+  txa
+  sta f:WMADDL         ; + WMADDM
+  sep #$20
+  .a8
+  lda #$7f
+  sta f:WMADDH
+  lda #^fill_pat
+  sta f:DMAP0+$24
+  rep #$20
+  .a16
   lda t_flags
   and #1
-  beq :+
-  lda #$ff00
-:
+  bne @opaque
+  lda #$8008           ; fixed source (zeros) -> B bus $80 (WMDATA)
+  sta f:DMAP0+$20
+  lda #.loword(fill_pat)
+  sta f:DMAP0+$22
+  lda t_tmp2
+  asl
+  sta f:DMAP0+$25
+  sep #$20
+  .a8
+  lda #$04
+  sta f:MDMAEN
+  rep #$20
+  .a16
+  bra @filled
+@opaque:               ; 00 ff 00 ff ... (colour 2) in 1 KB pieces
+  lda t_tmp2
+  asl
   sta t_tmp
-@f:
+@piece:
+  lda #$8000           ; incrementing source -> WMDATA
+  sta f:DMAP0+$20
+  lda #.loword(fill_pat)
+  sta f:DMAP0+$22
   lda t_tmp
-  sta f:$7f0000,x
-  inx
-  inx
-  dec t_tmp2
-  bne @f
+  cmp #1024
+  bcc :+
+  lda #1024
+:
+  sta f:DMAP0+$25
+  sep #$20
+  .a8
+  lda #$04
+  sta f:MDMAEN
+  rep #$20
+  .a16
+  lda t_tmp
+  sec
+  sbc #1024
+  sta t_tmp
+  beq @filled
+  bcs @piece
+@filled:
   lda t_flags
   and #2
   bne :+
@@ -951,14 +994,21 @@ draw_glyph:
   sta t_px
   rts
 
-; one-pass glyph blit at (t_px, t_py): rows of t_glyph plus the shadow (previous row >> 1).
-; transparent boxes: text plane 0, shadow plane 1; opaque: shadow = colour 1, text = colour 3.
+; one-pass glyph blit at (t_px, t_py): rows of t_glyph plus the shadow (the previous row
+; one pixel to the right).  transparent boxes: text plane 0, shadow plane 1 (one 16-bit OR
+; per tile row); opaque: shadow = colour 1, text = colour 3 (gput).
+; Row bytes are shifted with tables: tile k gets text byte k of (row << 8 >> s), s = x & 7.
+; t_tmp / t_tmp2 / g_sl hold (text, shadow) byte pairs of the three tiles a row touches.
+G_P0 = t_tmp
+G_P1 = t_tmp2
+G_P2 = g_sl
 gblit:
   .a16
   .i16
   lda t_px
   and #7
-  sta t_ty1            ; sub-tile shift
+  xba
+  sta t_ty1            ; shift * 256: index into the shift tables
   lda t_px
   lsr
   lsr
@@ -994,106 +1044,105 @@ gblit:
   clc
   adc t_off
   sta t_off
-  stz t_fy             ; previous row
+  stz G_P0
+  stz G_P1
+  stz G_P2
   stz t_row
 @row:
+  sep #$20
+  .a8
+  lda G_P0             ; shadow = last row's text >> 1 across the three tiles
+  lsr
+  sta G_P0+1
+  lda G_P1
+  ror
+  sta G_P1+1
+  lda G_P2
+  ror
+  sta G_P2+1
+  rep #$20
+  .a16
   lda t_row
   cmp #12
-  bcs @past
+  bcs @blank
   asl
   tay
-  lda [t_glyph],y
-  xba                  ; font rows are big-endian
-  bra @have
-@past:
-  lda #0
-@have:
+  lda [t_glyph],y      ; low byte = left 8 pixels (H), high byte = the rest (L)
   sta t_bits
-  lda t_fy
-  lsr
-  sta t_tmp2           ; shadow
+  and #$00ff
+  ora t_ty1
+  tax
+  sep #$20
+  .a8
+  lda f:shr_tab,x
+  sta G_P0
+  lda f:shl_tab,x
+  sta G_P1
+  rep #$20
+  .a16
   lda t_bits
-  sta t_fy
-  ora t_tmp2
-  bne :+
-  jmp @adv
-:
+  xba
+  and #$00ff
+  ora t_ty1
+  tax
+  sep #$20
+  .a8
+  lda f:shr_tab,x
+  ora G_P1
+  sta G_P1
+  lda f:shl_tab,x
+  sta G_P2
+  rep #$20
+  .a16
+  bra @have
+@blank:
+  sep #$20
+  .a8
+  stz G_P0
+  stz G_P1
+  stz G_P2
+  rep #$20
+  .a16
+@have:
+  lda G_P0
+  ora G_P1
+  ora G_P2
+  beq @adv
   lda g_ty
   cmp t_h
-  bcc :+
-  rts                  ; below the box
-:
-  ; shift text and shadow right by the sub-tile offset into 24 bits
-  stz t_tmp
-  stz g_sl
-  ldx t_ty1
-  beq @shifted
-  lda t_bits
-@s1:
-  lsr a
-  ror t_tmp
-  dex
-  bne @s1
-  sta t_bits
-  ldx t_ty1
-  lda t_tmp2
-@s2:
-  lsr a
-  ror g_sl
-  dex
-  bne @s2
-  sta t_tmp2
-@shifted:
+  bcs @ret             ; below the box
   ldx t_off
-  A8
-  lda t_tx
-  cmp t_w
-  bcs @skip
-  lda t_bits+1
-  sta g_b
-  lda t_tmp2+1
-  sta g_c
-  jsr gput
+  lda g_op
+  and #$00ff
+  bne @opaque
+  lda G_P0
+  beq :+
+  ora f:$7f0000,x
+  sta f:$7f0000,x
+:
   lda t_tx
   inc a
   cmp t_w
-  bcs @skip
-  A16
-  txa
-  clc
-  adc #16
-  tax
-  A8
-  lda t_bits
-  sta g_b
-  lda t_tmp2
-  sta g_c
-  jsr gput
+  bcs @adv
+  lda G_P1
+  beq :+
+  ora f:$7f0010,x
+  sta f:$7f0010,x
+:
   lda t_tx
   inc a
   inc a
   cmp t_w
-  bcs @skip
-  A16
-  txa
-  clc
-  adc #16
-  tax
-  A8
-  lda t_tmp+1
-  sta g_b
-  lda g_sl+1
-  sta g_c
-  jsr gput
-@skip:
-  A16
+  bcs @adv
+  lda G_P2
+  beq @adv
+  ora f:$7f0020,x
+  sta f:$7f0020,x
 @adv:
   inc t_row
   lda t_row
   cmp #13
-  bcc :+
-  rts
-:
+  bcs @ret
   lda t_off
   clc
   adc #2
@@ -1113,6 +1162,59 @@ gblit:
   sbc #16
   sta t_off
   jmp @row
+@ret:
+  rts
+@opaque:               ; colour rules of gput, inline: p0 |= text | shadow,
+  sep #$20             ; p1 = (p1 & (text | ~shadow)) | text
+  .a8
+  lda G_P0
+  ora G_P0+1
+  beq @o1
+  ora f:$7f0000,x
+  sta f:$7f0000,x
+  lda G_P0+1
+  eor #$ff
+  ora G_P0
+  and f:$7f0001,x
+  ora G_P0
+  sta f:$7f0001,x
+@o1:
+  lda t_tx
+  inc a
+  cmp t_w
+  bcs @op_done
+  lda G_P1
+  ora G_P1+1
+  beq @o2
+  ora f:$7f0010,x
+  sta f:$7f0010,x
+  lda G_P1+1
+  eor #$ff
+  ora G_P1
+  and f:$7f0011,x
+  ora G_P1
+  sta f:$7f0011,x
+@o2:
+  lda t_tx
+  inc a
+  inc a
+  cmp t_w
+  bcs @op_done
+  lda G_P2
+  ora G_P2+1
+  beq @op_done
+  ora f:$7f0020,x
+  sta f:$7f0020,x
+  lda G_P2+1
+  eor #$ff
+  ora G_P2
+  and f:$7f0021,x
+  ora G_P2
+  sta f:$7f0021,x
+@op_done:
+  rep #$20
+  .a16
+  jmp @adv
 
 ; g_b = text bits, g_c = shadow bits at canvas X (plane 0 byte)
 gput:
@@ -1404,3 +1506,25 @@ glyph_pal:
   A16
   rts
 
+
+.segment "ENGINE"
+; box fill source: byte 0 = 0 (transparent, fixed source); 00 ff pairs for opaque boxes
+fill_pat:
+  .repeat 512
+  .byte $00, $ff
+  .endrep
+
+; glyph shift tables (gblit): shr_tab[s][x] = x >> s, shl_tab[s][x] = (x << (8 - s)) & $ff
+.segment "BANKAF"
+shr_tab:
+  .repeat 8, sh
+    .repeat 256, xx
+      .byte xx >> sh
+    .endrep
+  .endrep
+shl_tab:
+  .repeat 8, sh
+    .repeat 256, xx
+      .byte (xx << (8 - sh)) & $ff
+    .endrep
+  .endrep

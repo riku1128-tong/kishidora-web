@@ -361,7 +361,7 @@ T_DEX_UNKNOWN_GRAY	{gray}？？？
 T_DEX_COUNT	{gray}×{n}
 T_DEX_KEYS	{gray}A:くわしく B:もどる L/R:タブ
 T_DEX_KEYS_F	{gray}A:くわしく B:もどる L/R:タブ SELECT:種類
-T_DEX_CARD_KEYS	{gray}←→  B:もどる
+T_DEX_CARD_KEYS	{gray}←→ B:もどる
 T_DEX_NOT_YET	まだ見つけていない。
 T_DEX_DOT	・
 T_DEX_ZOKUSEI	属性

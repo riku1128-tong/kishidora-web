@@ -336,7 +336,7 @@ static void card_head(u16 no, u16 name) {
   box(BX_HEAD, 0, 0, 32, 2, T_HEAD, PAL_W, BOX_OPAQUE);
   sayn(BX_HEAD, 6, 2, T_DEX_NO, no);
   say(BX_HEAD, 54, 2, name);
-  say(BX_HEAD, 186, 2, T_DEX_CARD_KEYS);
+  say(BX_HEAD, 182, 2, T_DEX_CARD_KEYS);
   tb_flush(BX_HEAD);
 }
 

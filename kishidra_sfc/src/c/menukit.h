@@ -82,7 +82,11 @@ static void list_fix(List *l) {
 /* run until one of keys (plus A / B) is pressed; returns the button */
 static u16 list_run(List *l, u16 keys) {
   u16 top0 = 0xffff, k, cur0 = 0xffff;
+#ifdef PROFILE
+  u8 pm = 0;
+#endif
   keys |= BTN_A | BTN_B;
+  PROF_MARK(2);
   l->sx = tb[l->box * 8] * 8;
   l->sy = tb[l->box * 8 + 1] * 8;
   for (;;) {
@@ -94,6 +98,9 @@ static u16 list_run(List *l, u16 keys) {
     if (mk_sprites) mk_sprites();
     oam_finish();
     frame_wait();
+#ifdef PROFILE
+    if (!pm) { pm = 1; PROF_MARK(3); }
+#endif
     k = pad_new & keys;
     if (k) {
       se_play((k & BTN_B) ? SE_CANCEL : SE_OK);

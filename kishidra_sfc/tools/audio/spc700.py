@@ -111,6 +111,8 @@ class Asm:
     def dec_y(self): self.b(0xDC)
     def inc_dp(self, d): self.b(0xAB, d)
     def dec_dp(self, d): self.b(0x8B, d)
+    def lsr_dp(self, d): self.b(0x4B, d)
+    def ror_dp(self, d): self.b(0x6B, d)
     def asl_a(self): self.b(0x1C)
     def lsr_a(self): self.b(0x5C)
     def mul_ya(self): self.b(0xCF)

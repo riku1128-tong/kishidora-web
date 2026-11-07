@@ -49,6 +49,9 @@ typedef struct {
   s16 slide;
   u8 boss_buf;             /* which BG1 tile buffer holds the boss pose */
   u8 boss_drawn;
+  u8 pcode[7];             /* pose index for each pose code (pose_fill) */
+  u32 bar_hp;              /* HP the bar was computed for */
+  u8 bar;                  /* HP bar 0..24 */
 } Actor;
 
 static u8 zdesc[3][96];
@@ -75,6 +78,7 @@ static u16 frame_ct;
 static u8 lose_t, win_t;
 static u8 sp_frame_t;
 static u8 last_attack_sp;
+static u8 prof_ready;
 
 typedef struct { s16 x, y; u32 v; u8 t, col; } Num;
 #define NUM_MAX 8
@@ -109,13 +113,21 @@ static void parse_desc(const u8 *d, u16 *off, u8 *code, u8 boss) {
   }
 }
 
-static u8 pose_by_code(Actor *a, u8 c) {
+static u8 pose_find(Actor *a, u8 c) {
   u8 i;
   for (i = 0; i < a->npose; ++i) if (a->code[i] == c) return i;
-  if (c == 1 || c == 6) return pose_by_code(a, 0);
-  if (c == 5) return pose_by_code(a, 2);
+  if (c == 1 || c == 6) return pose_find(a, 0);
+  if (c == 5) return pose_find(a, 2);
   return 0;
 }
+
+/* after parse_desc: the pose of every code, so animate() needs no search */
+static void pose_fill(Actor *a) {
+  u8 c;
+  for (c = 0; c < 7; ++c) a->pcode[c] = pose_find(a, c);
+}
+
+#define pose_by_code(a, c) ((a)->pcode[c])
 
 static u16 rd16(const u8 *p) { return p[0] | ((u16)p[1] << 8); }
 
@@ -197,6 +209,7 @@ static void load_stage_gfx(void) {
       copy_asset(mon_gfx[a->mon][0], bdesc, sizeof(bdesc));
       a->npose = bdesc[0];
       parse_desc(bdesc, a->off, a->code, 1);
+      pose_fill(a);
       load_pal(mon_gfx[a->mon][1], 96);
       a->boss_buf = 1;
       boss_upload(i, pose_by_code(a, 0));
@@ -205,6 +218,7 @@ static void load_stage_gfx(void) {
       copy_asset(mon_gfx[a->mon][0], zdesc[a->slot], sizeof(zdesc[0]));
       a->npose = zdesc[a->slot][0];
       parse_desc(zdesc[a->slot], a->off, a->code, 0);
+      pose_fill(a);
       load_pal(mon_gfx[a->mon][1], PAL_OBJ(OBJ_ZAKO + a->slot));
       zako_upload(i, pose_by_code(a, 0));
     }
@@ -655,6 +669,7 @@ static void on_event(Ev *e) {
     copy_asset(mon_gfx[b_e[e->enemy].mon][0], bdesc, sizeof(bdesc));
     act[e->enemy].npose = bdesc[0];
     parse_desc(bdesc, act[e->enemy].off, act[e->enemy].code, 1);
+    pose_fill(&act[e->enemy]);
     load_pal(mon_gfx[b_e[e->enemy].mon][1], 96);
     boss_upload(e->enemy, pose_by_code(&act[e->enemy], 0));
     bgm_play(battle_bgm());
@@ -742,13 +757,11 @@ static u8 hero_pose(void) {
 }
 
 /* ---------------------------------------------------------------- sprites */
+/* pose pieces (32x32 cells of the strip) at (x, y): src/asm/sprite.s meta_add */
 static void draw_meta(const u8 *d, u8 strip, s16 x, s16 y, u8 pal, u8 prio) {
-  u8 n = d[4], k, cell;
-  const u8 *p = d + 5;
-  for (k = 0; k < n; ++k, p += 3) {
-    cell = p[2];
-    spr_add(x + (s8)p[0], y + (s8)p[1], ATTR(STRIP_TILE(strip) + (cell >> 2) * 64 + (cell & 3) * 4, pal, prio), 1);
-  }
+  ea[0] = (u16)d; ea[1] = STRIP_TILE(strip); ea[2] = x; ea[3] = y;
+  ea[4] = ((u16)pal << 9) | ((u16)prio << 12);
+  meta_add();
 }
 
 static void draw_number(s16 x, s16 y, u32 v, u8 col) {
@@ -763,81 +776,126 @@ static void draw_number(s16 x, s16 y, u32 v, u8 col) {
   }
 }
 
+/* sprite lists rebuilt only when what they show changes, put out by src/asm/sprite.s spr_list */
+typedef struct { s16 x, y; u16 ta, big; } SprEnt;
+#define OV_MAX 9
+static SprEnt ov_spr[ENEMY_MAX][OV_MAX], sk_spr[12];
+static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n, sk_sig[3];
+
+static void spr_emit(const SprEnt *p, u8 n) {
+  if (!n) return;
+  ea[0] = (u16)p; ea[1] = n;
+  spr_list();
+}
+
+static SprEnt *ent;
+static void ent_add(s16 x, s16 y, u16 ta) { ent->x = x; ent->y = y; ent->ta = ta; ent->big = 0; ++ent; }
+
+static void lists_reset(void) {
+  memset(ov_sig, 0xff, sizeof(ov_sig));
+  memset(sk_sig, 0xff, sizeof(sk_sig));
+  memset(ov_n, 0, sizeof(ov_n));
+  sk_n = 0;
+}
+
+/* skill icons on the panel (16x16 each, palette = selected / not) */
+static void skill_sprites(void) {
+  u8 i, sk, sig[3];
+  s16 y;
+  for (i = 0; i < 3; ++i) {
+    sk = skill_of(i);
+    sig[i] = sk == SK_NONE ? 255 : skill_sel[sk];
+  }
+  if (memcmp(sig, sk_sig, 3)) {
+    memcpy(sk_sig, sig, 3);
+    ent = sk_spr;
+    for (i = 0; i < 3; ++i) {
+      if (sig[i] == 255) continue;
+      y = 164 + i * 14;
+      ent_add(16, y, ATTR(STRIP_TILE(STRIP_MISC) + 2 + i * 2, OBJ_SKILL + sig[i], 3));
+      ent_add(24, y, ATTR(STRIP_TILE(STRIP_MISC) + 3 + i * 2, OBJ_SKILL + sig[i], 3));
+      ent_add(16, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 18 + i * 2, OBJ_SKILL + sig[i], 3));
+      ent_add(24, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 19 + i * 2, OBJ_SKILL + sig[i], 3));
+    }
+    sk_n = (u8)(ent - sk_spr);
+  }
+  spr_emit(sk_spr, sk_n);
+}
+
+/* target arrow, count bubble, HP bar, ailments of enemy i */
+static void overlay_sprites(u8 i, Foe *e, Actor *a) {
+  u8 sig[7], c, hp;
+  s16 x, y;
+  if (e->gone || !foe_targetable(e)) return;
+  x = e->sx + a->slide + a->dx;
+  if (a->bar_hp != e->hp || !a->bar_hp) {
+    hp = e->hp_max ? (u8)((u32)e->hp * 24 / e->hp_max) : 0;
+    if (e->hp && !hp) hp = 1;
+    a->bar = hp; a->bar_hp = e->hp;
+  }
+  hp = a->bar;
+  c = e->stun_turns ? 255 : MIN(e->count, 9);
+  sig[0] = (u8)x; sig[1] = (u8)((u16)x >> 8);
+  sig[2] = i == b_target ? 1 + ((frame_ct >> 3) & 1) : 0;
+  sig[3] = c; sig[4] = hp;
+  sig[5] = (e->ail[AIL_POISON] ? 1 : 0) | (e->ail[AIL_PARALYZE] ? 2 : 0) | (e->ail[AIL_BLIND] ? 4 : 0);
+  sig[6] = a->boss;
+  if (memcmp(sig, ov_sig[i], 7)) {
+    memcpy(ov_sig[i], sig, 7);
+    y = a->boss ? FIELD_Y + 4 : FOOT_Y - 56;
+    ent = ov_spr[i];
+    if (sig[2]) ent_add(x - 4, y - 10 + (sig[2] - 1), ATTR(STRIP_TILE(STRIP_FX) + 48 + 9, OBJ_FX, 3));
+    if (c != 255) ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + (c < 6 ? 10 + c : 16 + 10 + (c - 6)), OBJ_FX, 3));
+    else ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 10, OBJ_FX, 3));
+    ent_add(x - 12, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + MIN(hp, 8), OBJ_FX, 3));
+    ent_add(x - 4, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + (hp > 8 ? MIN(hp - 8, 8) : 0), OBJ_FX, 3));
+    ent_add(x + 4, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + (hp > 16 ? MIN(hp - 16, 8) : 0), OBJ_FX, 3));
+    if (sig[5] & 1) ent_add(x - 12, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 11, OBJ_FX, 3));
+    if (sig[5] & 2) ent_add(x - 20, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 12, OBJ_FX, 3));
+    if (sig[5] & 4) ent_add(x - 28, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 13, OBJ_FX, 3));
+    ov_n[i] = (u8)(ent - ov_spr[i]);
+  }
+  spr_emit(ov_spr[i], ov_n[i]);
+}
+
+static void shield_sprites(s16 x, s16 y) {
+  spr_add(x, y, ATTR(STRIP_TILE(STRIP_MISC) + 0, OBJ_SHIELD, 2), 0);
+  spr_add(x + 8, y, ATTR(STRIP_TILE(STRIP_MISC) + 1, OBJ_SHIELD, 2), 0);
+  spr_add(x, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 16, OBJ_SHIELD, 2), 0);
+  spr_add(x + 8, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 17, OBJ_SHIELD, 2), 0);
+}
+
 static void draw_sprites(void) {
-  u8 i, p, hp;
-  s16 x, y, hx = HERO_X + hero_slide;
+  u8 i, p;
+  s16 hx = HERO_X + hero_slide;
   Actor *a;
   Foe *e;
+  Num *n;
+  Fx *f;
   const s8 *sp;
   /* fx and numbers first (front) */
-  for (i = 0; i < NUM_MAX; ++i) if (nums[i].t) {
-    draw_number(nums[i].x, nums[i].y - (45 - nums[i].t) / 3, nums[i].v, nums[i].col);
-    --nums[i].t;
+  for (i = 0, n = nums; i < NUM_MAX; ++i, ++n) if (n->t) {
+    draw_number(n->x, n->y - (45 - n->t) / 3, n->v, n->col);
+    --n->t;
   }
-  for (i = 0; i < FX_MAX; ++i) if (fxs[i].t) {
-    spr_add(fxs[i].x, fxs[i].y, ATTR(STRIP_TILE(STRIP_CELLS) + fxs[i].cell * 4, OBJ_FX, 3), 1);
-    --fxs[i].t;
+  for (i = 0, f = fxs; i < FX_MAX; ++i, ++f) if (f->t) {
+    spr_add(f->x, f->y, ATTR(STRIP_TILE(STRIP_CELLS) + f->cell * 4, OBJ_FX, 3), 1);
+    --f->t;
   }
-  /* skill icons on the panel */
-  for (i = 0; i < 3; ++i) {
-    u8 sk = skill_of(i);
-    if (sk == SK_NONE) continue;
-    p = skill_sel[sk];
-    x = 16; y = 164 + i * 14;
-    spr_add(x, y, ATTR(STRIP_TILE(STRIP_MISC) + 2 + i * 2, OBJ_SKILL + p, 3), 0);
-    spr_add(x + 8, y, ATTR(STRIP_TILE(STRIP_MISC) + 3 + i * 2, OBJ_SKILL + p, 3), 0);
-    spr_add(x, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 18 + i * 2, OBJ_SKILL + p, 3), 0);
-    spr_add(x + 8, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 19 + i * 2, OBJ_SKILL + p, 3), 0);
-  }
-  /* enemy overlays: target arrow, count bubble, HP bar, ailments */
-  for (i = 0; i < b_ne; ++i) {
-    e = &b_e[i];
-    if (e->gone) continue;
-    x = foe_x(i);
-    y = act[i].boss ? FIELD_Y + 4 : FOOT_Y - 56;
-    if (foe_targetable(e)) {
-      if (i == b_target) spr_add(x - 4, y - 10 + ((frame_ct >> 3) & 1), ATTR(STRIP_TILE(STRIP_FX) + 48 + 9, OBJ_FX, 3), 0);
-      if (!e->stun_turns) {
-        u8 c = MIN(e->count, 9);
-        spr_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + (c < 6 ? 10 + c : 16 + 10 + (c - 6)), OBJ_FX, 3), 0);
-      } else spr_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 10, OBJ_FX, 3), 0);
-      hp = e->hp_max ? (u8)((u32)e->hp * 24 / e->hp_max) : 0;
-      if (e->hp && !hp) hp = 1;
-      spr_add(x - 12, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + MIN(hp, 8), OBJ_FX, 3), 0);
-      spr_add(x - 4, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + (hp > 8 ? MIN(hp - 8, 8) : 0), OBJ_FX, 3), 0);
-      spr_add(x + 4, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + (hp > 16 ? MIN(hp - 16, 8) : 0), OBJ_FX, 3), 0);
-      if (e->ail[AIL_POISON]) spr_add(x - 12, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 11, OBJ_FX, 3), 0);
-      if (e->ail[AIL_PARALYZE]) spr_add(x - 20, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 12, OBJ_FX, 3), 0);
-      if (e->ail[AIL_BLIND]) spr_add(x - 28, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 13, OBJ_FX, 3), 0);
-    }
-  }
-  /* shield (front of hero when the pose says so) */
+  skill_sprites();
+  for (i = 0, e = b_e, a = act; i < b_ne; ++i, ++e, ++a) overlay_sprites(i, e, a);
+  /* shield (in front of the hero or behind, as the pose says) and the hero */
   p = hero_pose_now == 255 ? 0 : hero_pose_now;
   sp = hero_shield_pos[p];
-  if (sp[2] && !lose_t) {
-    x = hx + sp[0] - 8; y = FOOT_Y + sp[1] - 8;
-    spr_add(x, y, ATTR(STRIP_TILE(STRIP_MISC) + 0, OBJ_SHIELD, 2), 0);
-    spr_add(x + 8, y, ATTR(STRIP_TILE(STRIP_MISC) + 1, OBJ_SHIELD, 2), 0);
-    spr_add(x, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 16, OBJ_SHIELD, 2), 0);
-    spr_add(x + 8, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 17, OBJ_SHIELD, 2), 0);
-  }
-  /* hero */
-  if (hero_pose_now != 255 && !((lose_t && (frame_ct & 2)) && 0))
+  if (sp[2] && !lose_t) shield_sprites(hx + sp[0] - 8, FOOT_Y + sp[1] - 8);
+  if (hero_pose_now != 255)
     draw_meta(hdesc + hero_off[hero_pose_now], STRIP_HERO, hx, FOOT_Y, OBJ_HERO, 2);
-  if (!sp[2] && !lose_t) {
-    x = hx + sp[0] - 8; y = FOOT_Y + sp[1] - 8;
-    spr_add(x, y, ATTR(STRIP_TILE(STRIP_MISC) + 0, OBJ_SHIELD, 2), 0);
-    spr_add(x + 8, y, ATTR(STRIP_TILE(STRIP_MISC) + 1, OBJ_SHIELD, 2), 0);
-    spr_add(x, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 16, OBJ_SHIELD, 2), 0);
-    spr_add(x + 8, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 17, OBJ_SHIELD, 2), 0);
-  }
+  if (!sp[2] && !lose_t) shield_sprites(hx + sp[0] - 8, FOOT_Y + sp[1] - 8);
   /* zako */
-  for (i = 0; i < b_ne; ++i) {
-    a = &act[i];
-    e = &b_e[i];
+  for (i = 0, e = b_e, a = act; i < b_ne; ++i, ++e, ++a) {
     if (a->boss || e->gone || a->cur == 255) continue;
     if ((e->dying || e->fleeing || a->flash) && (frame_ct & 4)) continue;
-    draw_meta(zdesc[a->slot] + a->off[a->cur], STRIP_ZAKO + a->slot, foe_x(i), FOOT_Y + 4, OBJ_ZAKO + a->slot, 2);
+    draw_meta(zdesc[a->slot] + a->off[a->cur], STRIP_ZAKO + a->slot, e->sx + a->slide + a->dx, FOOT_Y + 4, OBJ_ZAKO + a->slot, 2);
   }
   oam_finish();
 }
@@ -950,11 +1008,13 @@ static u8 pause_menu(void) {
 u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   Ev e;
   u8 i, result = 0;
+  prof_ready = 0;
   screen_off();
   sys_init();
   memset(nums, 0, sizeof(nums));
   memset(fxs, 0, sizeof(fxs));
   memset(act, 0, sizeof(act));
+  lists_reset();
   memset(skill_icon_shown, 0xfe, 3);
   lose_t = win_t = 0;
   banner_t = hero_msg_t = 0;
@@ -976,6 +1036,10 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   tut_open = tut_wait = tut_due = 0;
   for (;;) {
     frame_wait();
+#ifdef PROFILE
+    if (!prof_ready && battle_can_command()) { prof_ready = 1; PROF_MARK(1); }
+    ++prof_marks[6];
+#endif
     if (tut_due && battle_can_command() && !b_npending && !b_npopups) { tut_show(tut_due - 1); tut_due = 0; }
     if (tut_open) {                  /* tutorial window: the battle waits */
       if (pad_new & BTN_A) { se_play(SE_OK); tut_ok(); }
@@ -1026,7 +1090,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
     if (top_dirty) draw_top();
     if (hp_dirty) draw_hpst();
     if (panel_dirty && !talk_open && !tut_open && b_phase != PH_REWARD) draw_panel();
-   draw_sprites();
+    draw_sprites();
     if (win_t) { if (++win_t > 150) { result = 1; break; } }
     if (lose_t) { if (++lose_t > 180) { result = 0; break; } }
   }

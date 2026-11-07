@@ -112,11 +112,11 @@ def build_rom():
         base = os.path.splitext(os.path.basename(c))[0]
         s = os.path.join(OBJ, base + '.s')
         o = os.path.join(OBJ, base + '.o')
-        defs = []
+        defs = ['-D', 'PROFILE=1'] if os.environ.get('PROFILE') else []
         for f in bank_funcs[b]:
             if f != 'main':
                 defs += ['-D', '%s=%s__b' % (f, f)]
-        run([tool('cc65'), '-O', '-Oirs', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b] + DBG + [
+        run([tool('cc65'), '-O', '-Oirs', '-Cl', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b] + DBG + [
              '--rodata-name', 'RODATA', '--bss-name', 'BSS', '--data-name', 'DATA', '-o', s] + inc + defs + [c])
         run([tool('ca65'), '--cpu', '65816'] + DBG + ['-o', o, s])
         objs.append(o)

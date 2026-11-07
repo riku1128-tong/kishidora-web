@@ -8,7 +8,7 @@ ARAM:
 BGM is streamed: voice 0 plays the ring as one looping sample (the last ring block carries
 END+LOOP).  The CPU sends whole BRR blocks, three bytes per handshake.  The play position is
 estimated with timer 2 (one tick = one BRR block) and re-synchronised every time the voice
-wraps (ENDX bit 0).  Port 2 reports how many blocks may be sent.
+wraps (ENDX bit 0).  Port 2 reports how many blocks may be sent, divided by 8.
 
 CPU -> SPC protocol (port 0 changes on every transaction, the SPC echoes it back):
   port 0 = sequence (bits 2-7, +4 per transaction) | type (bits 0-1)
@@ -112,14 +112,22 @@ def build(n_se):
     a.mov_y_a()
     a.movw_dp_ya(FILL)
     a.label('no_wrap')
-    # free blocks -> port 2 (0..255)
+    # free blocks / 8 -> port 2 (0..255; the CPU sends more while the ring is low)
     a.movw_ya_dp(RINGM8)
     a.subw_ya(FILL)
     a.bcs('free_ok')
     a.mov_a_imm(0)
     a.mov_y_a()
     a.label('free_ok')
-    a.cmp_y_imm(0)
+    a.movw_dp_ya(TMP)
+    a.lsr_dp(TMP + 1)
+    a.ror_dp(TMP)
+    a.lsr_dp(TMP + 1)
+    a.ror_dp(TMP)
+    a.lsr_dp(TMP + 1)
+    a.ror_dp(TMP)
+    a.mov_a_dp(TMP)
+    a.mov_y_dp(TMP + 1)
     a.beq('free_lt')
     a.mov_a_imm(0xFF)
     a.label('free_lt')

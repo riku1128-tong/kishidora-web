@@ -1298,7 +1298,7 @@ text_base:
   .byte $08, $00, $e0, $00, $03, $00, $00, $00
   .byte $08, $00, $3b, $01, $04, $02, $15, $01, $f4, $00, $fb, $00, $15, $01, $d5, $00, $ff, $01, $04, $02, $d2, $00, $14, $01, $08, $01, $d5, $00, $43, $01, $0d, $02, $50, $01, $04, $02, $34, $00, $3d, $00, $00, $00
   .byte $08, $00, $3b, $01, $04, $02, $15, $01, $f4, $00, $fb, $00, $15, $01, $d5, $00, $ff, $01, $04, $02, $d2, $00, $14, $01, $08, $01, $d5, $00, $43, $01, $0d, $02, $50, $01, $04, $02, $34, $00, $3d, $00, $d5, $00, $04, $01, $3d, $01, $43, $01, $3d, $01, $05, $02, $05, $01, $04, $02, $3d, $02, $3e, $02, $00, $00
-  .byte $08, $00, $59, $02, $5a, $02, $d5, $00, $d5, $00, $ff, $01, $04, $02, $d2, $00, $14, $01, $08, $01, $00, $00
+  .byte $08, $00, $59, $02, $5a, $02, $d5, $00, $ff, $01, $04, $02, $d2, $00, $14, $01, $08, $01, $00, $00
   .byte $9f, $00, $85, $01, $87, $00, $38, $01, $d1, $00, $52, $01, $89, $00, $07, $01, $89, $00, $0b, $01, $00, $00
   .byte $38, $00, $00, $00
   .byte $26, $01, $27, $01, $00, $00
@@ -3965,153 +3965,153 @@ text_table:
   .byte $c1
   .word $e792
   .byte $c1
-  .word $e7a8
+  .word $e7a6
   .byte $c1
-  .word $e7be
+  .word $e7bc
   .byte $c1
-  .word $e7c2
+  .word $e7c0
   .byte $c1
-  .word $e7c8
+  .word $e7c6
   .byte $c1
-  .word $e7d0
+  .word $e7ce
   .byte $c1
-  .word $e7de
+  .word $e7dc
   .byte $c1
-  .word $e7ec
+  .word $e7ea
   .byte $c1
-  .word $e7f2
+  .word $e7f0
   .byte $c1
-  .word $e7fc
+  .word $e7fa
   .byte $c1
-  .word $e80c
+  .word $e80a
   .byte $c1
-  .word $e810
+  .word $e80e
   .byte $c1
-  .word $e81e
+  .word $e81c
   .byte $c1
-  .word $e82a
+  .word $e828
   .byte $c1
-  .word $e83a
+  .word $e838
   .byte $c1
-  .word $e862
+  .word $e860
   .byte $c1
-  .word $e86c
+  .word $e86a
   .byte $c1
-  .word $e876
+  .word $e874
   .byte $c1
-  .word $e884
+  .word $e882
   .byte $c1
-  .word $e88e
+  .word $e88c
   .byte $c1
-  .word $e898
+  .word $e896
   .byte $c1
-  .word $e8bc
+  .word $e8ba
   .byte $c1
-  .word $e8c2
+  .word $e8c0
   .byte $c1
-  .word $e8ce
+  .word $e8cc
   .byte $c1
-  .word $e8da
+  .word $e8d8
   .byte $c1
-  .word $e8f2
+  .word $e8f0
   .byte $c1
-  .word $e906
+  .word $e904
   .byte $c1
-  .word $e91c
+  .word $e91a
   .byte $c1
-  .word $e932
+  .word $e930
   .byte $c1
-  .word $e96a
+  .word $e968
   .byte $c1
-  .word $e980
+  .word $e97e
   .byte $c1
-  .word $e99a
+  .word $e998
   .byte $c1
-  .word $e9b4
+  .word $e9b2
   .byte $c1
-  .word $e9be
+  .word $e9bc
   .byte $c1
-  .word $e9d0
+  .word $e9ce
   .byte $c1
-  .word $ea0a
+  .word $ea08
   .byte $c1
-  .word $ea1c
+  .word $ea1a
   .byte $c1
-  .word $ea7a
+  .word $ea78
   .byte $c1
-  .word $eaa2
+  .word $eaa0
   .byte $c1
-  .word $eac6
+  .word $eac4
   .byte $c1
-  .word $eade
+  .word $eadc
   .byte $c1
-  .word $eb3c
+  .word $eb3a
   .byte $c1
-  .word $eb52
+  .word $eb50
   .byte $c1
-  .word $eb64
+  .word $eb62
   .byte $c1
-  .word $ebb6
+  .word $ebb4
   .byte $c1
-  .word $ebe4
+  .word $ebe2
   .byte $c1
-  .word $ec00
+  .word $ebfe
   .byte $c1
-  .word $ec24
+  .word $ec22
   .byte $c1
-  .word $eca0
+  .word $ec9e
   .byte $c1
-  .word $ecb8
+  .word $ecb6
   .byte $c1
-  .word $ecd8
+  .word $ecd6
   .byte $c1
-  .word $ecea
+  .word $ece8
   .byte $c1
-  .word $ecfe
+  .word $ecfc
   .byte $c1
-  .word $ed12
+  .word $ed10
   .byte $c1
-  .word $ed2c
+  .word $ed2a
   .byte $c1
-  .word $ed48
+  .word $ed46
   .byte $c1
-  .word $ed70
+  .word $ed6e
   .byte $c1
-  .word $ed84
+  .word $ed82
   .byte $c1
-  .word $ed96
+  .word $ed94
   .byte $c1
-  .word $edbc
+  .word $edba
   .byte $c1
-  .word $ede2
+  .word $ede0
   .byte $c1
-  .word $edf6
+  .word $edf4
   .byte $c1
-  .word $ee16
+  .word $ee14
   .byte $c1
-  .word $ee24
+  .word $ee22
   .byte $c1
-  .word $ee34
+  .word $ee32
   .byte $c1
-  .word $ee44
+  .word $ee42
   .byte $c1
-  .word $ee62
+  .word $ee60
   .byte $c1
-  .word $ee90
+  .word $ee8e
   .byte $c1
-  .word $ee98
+  .word $ee96
   .byte $c1
-  .word $eea4
+  .word $eea2
   .byte $c1
-  .word $eeac
+  .word $eeaa
   .byte $c1
-  .word $eeb6
+  .word $eeb4
   .byte $c1
-  .word $eebe
+  .word $eebc
   .byte $c1
-  .word $eec6
+  .word $eec4
   .byte $c1
-  .word $eee0
+  .word $eede
   .byte $c1
 .segment "BANKC2"
 font_glyphs:

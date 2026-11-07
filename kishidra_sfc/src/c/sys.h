@@ -32,10 +32,25 @@ void set_bg3_palettes(void);
 
 /* sprites: OAM shadow */
 void oam_clear(void);
-void spr(u8 i, s16 x, s16 y, u16 tile_attr, u8 large);
+void wram_zero(void);        /* ea0 address, ea1 bank, ea2 length */
+void mem_copy(void);         /* ea0 source, ea1 destination, ea2 length (bank $7E) */
 extern u8 oam_next;
+extern u16 oam_used;          /* sprite.s: slots oam_finish still has to hide */
 void spr_add(s16 x, s16 y, u16 tile_attr, u8 large);
 void oam_finish(void);
+void spr_list(void);         /* ea0 entries (s16 x, s16 y, u16 tile_attr, u16 large), ea1 count */
+void meta_add(void);         /* ea0 pose (n at +4, then dx dy cell), ea1 strip tile, ea2 x, ea3 y, ea4 attr */
+
+/* profiling build (PROFILE=1): frame numbers of a few moments, read by the test scripts */
+#ifdef PROFILE
+extern u16 prof_marks[16];
+#define PROF_MARK(i) (prof_marks[i] = frame)
+u16 prof_line(void);
+#define PROF_LINE(i) (prof_marks[i] = prof_line())
+#else
+#define PROF_MARK(i)
+#define PROF_LINE(i)
+#endif
 
 /* random */
 void rnd_seed(u16 s);

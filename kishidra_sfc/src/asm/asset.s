@@ -68,7 +68,11 @@ unpack7f:
   A16
   lda asset_size
   rts
+; LZSS: control byte (bit 1 = literal, 0 = match, LSB first), match = 16-bit token
+; (distance - 1 in bits 0-11, length - 3 in bits 12-15).  Matches are copied with MVN
+; (it copies forwards one byte at a time, so overlapping matches repeat as they should).
 lz:
+  phb                  ; MVN sets the data bank to $7F
   stx lz_tmp           ; start
   lda [lz_src]
   sta lz_len
@@ -76,71 +80,58 @@ lz:
   adc lz_tmp
   sta lz_end
   ldy #2
-@ctrl:
-  cpx lz_end
-  bcs @done
   A8
+@ctrl:
   lda [lz_src],y
   iny
   sta lz_ctrl
   lda #8
   sta lz_bits
 @bit:
-  A16
   cpx lz_end
   bcs @done
-  A8
   lsr lz_ctrl
   bcc @match
-  lda [lz_src],y
+  lda [lz_src],y       ; literal
   iny
   sta f:$7f0000,x
   inx
-  bra @next
+  dec lz_bits
+  bne @bit
+  bra @ctrl
 @match:
   A16
   lda [lz_src],y
   iny
   iny
-  pha
+  sta lz_bp            ; token
+  phy
+  txy                  ; Y = destination
   and #$0fff
   inc a
   sta lz_cnt           ; distance
   txa
   sec
   sbc lz_cnt
-  sta lz_bp
-  A8
-  lda #$7f
-  sta lz_bp+2
-  A16
-  pla
-  xba
+  tax                  ; X = source
+  lda lz_bp+1          ; high byte of the token in the low byte
   lsr
   lsr
   lsr
   lsr
   and #$000f
-  clc
-  adc #3
-  sta lz_cnt
+  inc a
+  inc a                ; length - 1
+  mvn #$7f, #$7f
+  tyx                  ; destination after the match
+  ply
   A8
-@copy:
-  lda [lz_bp]
-  sta f:$7f0000,x
-  inx
-  A16
-  inc lz_bp
-  dec lz_cnt
-  A8
-  bne @copy
-@next:
   dec lz_bits
   bne @bit
-  A16
   bra @ctrl
 @done:
   A16
+  plb
   lda lz_len
   rts
 

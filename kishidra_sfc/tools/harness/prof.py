@@ -54,9 +54,24 @@ def symbols():
             key = 0x80 + int(m.group(1))
         elif sname in ('CODE', 'STUBS'):
             key = 'low'
-        else:
+        elif sname in ('STARTUP', 'ENGINE') or sname.startswith('ENG'):
             key = (val >> 16) | 0x80
+        else:
+            continue             # data labels
         table[key].append((val & 0xffff, owner(f)))
+    # low WRAM code without symbols (the cc65 runtime library): module names from the map
+    mp = open(os.path.join(ROOT, 'build', 'kishidra.map')).read()
+    code = re.search(r'^CODE\s+([0-9A-F]{6})', mp, re.M)
+    if code:
+        base = int(code.group(1), 16)
+        cur = None
+        for line in mp.split('Segment list')[0].splitlines():
+            if line and not line.startswith(' '):
+                cur = re.sub(r'.*\((.*)\)$', r'\1', line.rstrip(':'))
+                continue
+            m2 = re.match(r'\s+CODE\s+Offs=([0-9A-F]+)', line)
+            if m2 and cur and not cur.startswith('a_crt0'):
+                table['low'].append((base + int(m2.group(1), 16), 'runtime ' + cur))
     for k in table:
         table[k].sort()
     return table
