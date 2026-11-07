@@ -35,6 +35,9 @@ extern u16 hero_name[8];
 
 void tb_open(u8 box);
 void tb_clear(u8 box);         /* waits until no queued upload reads the box's canvas */
+void canvas_wait(u16 t0, u16 n);   /* until no queued upload reads BG3 tiles t0..t0+n-1 (their canvas) */
+u8 canvas_busy(u16 t0, u16 n);
+u8 vq_busy(u16 lo, u16 hi);       /* a queued upload reads $7F:lo..hi-1 */
 void tb_clear_now(u8 box);
 void tb_rect_now(u8 box);
 void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour);   /* filled pixels in the canvas */

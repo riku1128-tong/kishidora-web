@@ -1,5 +1,6 @@
 #include "sys.h"
 #include "sound.h"
+#include <string.h>
 
 u16 pad, pad_new, pad_rep;
 u16 dbg[8];
@@ -80,6 +81,7 @@ void sys_init(void) {
   tm_main = 0x17;
   tm_sub = 0;
   cgwsel = 0; cgadsub = 0;
+  memset(scroll, 0, sizeof(scroll));
   clear_maps();
   set_bg3_palettes();
   oam_clear();
@@ -90,7 +92,9 @@ void screen_off(void) {
   force_blank(1);
 }
 
+/* the first frame shows a finished screen: everything queued is in VRAM first */
 void screen_on(void) {
+  while (vq_count) wait_frame();
   bright = 15;
   wait_frame();
   force_blank(0);

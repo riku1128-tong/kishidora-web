@@ -23,6 +23,7 @@ FONT_DIRS = ['/usr/share/fonts/X11/misc', os.path.join(HERE, '..', 'font')]
 FULL = 'shnmk12.pcf.gz'
 HALF = 'shnm6x12a.pcf.gz'
 GLYPH0 = 16
+NO_LINE_START = set('、。，．・！？）」』】〕…‥ー～〜!?),.:;ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ')
 CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12, '{purple}': 13}
 
 # characters the source text uses that the 12-dot fonts lack
@@ -175,6 +176,8 @@ class TextDB:
         open(self.font_path.replace('font.bin', 'font_s.bin'), 'wb').write(rows_out)
         open(self.font_path.replace('font.bin', 'font_s.bin') + '.wid', 'wb').write(wid)
 
+    # glyphs that must not start a line (kinsoku): a wrapped line takes the glyph before one of
+    # these to the next line as well (text.s @glyph)
     def write_font(self):
         """font.bin: per glyph 24 bytes (12 rows, big-endian 16-bit) ; font.wid: widths."""
         rows = bytearray()
@@ -184,7 +187,7 @@ class TextDB:
             w, r = g
             for v in r:
                 rows += struct.pack('>H', v)
-            wid.append(w)
+            wid.append(w | (0x80 if ch in NO_LINE_START else 0))   # bit 7: must not start a line (text.s)
         os.makedirs(os.path.dirname(self.font_path), exist_ok=True)
         open(self.font_path, 'wb').write(rows)
         open(self.font_path + '.wid', 'wb').write(wid)

@@ -15,7 +15,7 @@
 .export __STARTUP__ : absolute = 1
 .export _pad_lat, _rep_lat, _bg3_vram, _nmi_pc, _brk_info
 .export _ea, _oam, _cgram, _cgram_dirty, _scroll, _tm_main, _tm_sub, _bright, _joy, _joy_new, _joy_rep
-.export _frame, _bgmap_dirty, _nmi_ready, _vq_count, _vq, _bgmode, _cgadsub, _cgwsel, _coldata, _hdma_on
+.export _frame, _bgmap_dirty, _nmi_ready, _vq_count, _vq_head, _vq, _bgmode, _cgadsub, _cgwsel, _coldata, _hdma_on
 .export _bg1map, _bg2map, _bg3map, _oam_hide, _lag
 .export vq_push, _hdma_tab1, _hdma_tab2, _mosaic
 
@@ -86,10 +86,12 @@ _bgmap_dirty: .res 1       ; bit0 BG1, bit1 BG2, bit2 BG3 (whole 2KB map)
 _nmi_ready:   .res 1
 _oam_hide:    .res 1
 _vq_count:    .res 1
+_vq_head:     .res 1       ; ring index of the oldest entry
 _vq:          .res 8*24    ; DMA queue: vaddr(2) src(2) bank(1) size(2) mode(1)
 _hdma_tab1:   .res 32
 _hdma_tab2:   .res 32
 nmi_tmp:      .res 2
+nmi_budget:   .res 2
 
 .segment "BSS"
 _bg1map: .res 2048
@@ -260,8 +262,10 @@ nmi_fast:
 :
   lda #$8f
   sta INIDISP          ; blank during updates (restored below)
-  jsr nmi_uploads
-  stz _nmi_ready
+.ifdef PROFILE
+  jsr nmi_vline0
+.endif
+  ; registers and HDMA first: they must be in place before line 0 even if an upload runs late
   ; registers
   lda _bgmode
   sta BGMODE
@@ -310,6 +314,11 @@ nmi_fast:
   sta BG3VOFS
   ; HDMA channels 6/7 (set up by C via hdma tables)
   jsr hdma_setup
+  jsr nmi_uploads
+  stz _nmi_ready
+.ifdef PROFILE
+  jsr nmi_vline
+.endif
   lda _bright
   sta INIDISP
   bra @joy
@@ -367,10 +376,19 @@ nmi_fast:
   pla
   rti
 
-; upload OAM, palettes, tilemaps and queued DMA
+; upload OAM, palettes, tilemaps and queued DMA within one byte budget, so that the uploads end
+; inside vblank (NTSC: lines 225-261, about 157 bytes of DMA a line; measured with PROFILE=1,
+; see nmi_vline): OAM, CGRAM, the BG3 map,
+; one of the BG1 / BG2 maps when 2KB are left, then queue entries with what is left.  What does
+; not fit stays dirty / queued for the next NMI.
+NMI_BUDGET = 4864
 nmi_uploads:
   .a8
   .i16
+  A16
+  lda #NMI_BUDGET - 544
+  sta nmi_budget
+  A8
   ; OAM
   ldx #$0000
   stx OAMADDL
@@ -397,8 +415,14 @@ nmi_uploads:
   lda #$01
   sta MDMAEN
   stz _cgram_dirty
+  A16
+  lda nmi_budget
+  sec
+  sbc #512
+  sta nmi_budget
+  A8
 @nopal:
-  ; tilemaps (whole maps, at most two per frame)
+  ; tilemaps (whole maps): BG3, then BG1 or BG2
   lda #$80
   sta VMAIN
   ldx #$1801
@@ -419,10 +443,29 @@ nmi_uploads:
   lda _bgmap_dirty
   and #$fb
   sta _bgmap_dirty
+  A16
+  lda nmi_budget
+  sec
+  sbc #2048
+  sta nmi_budget
+  A8
 @nobg3:
+  A16
+  lda nmi_budget
+  cmp #2048
+  A8
+  bcc @maps_done
   lda _bgmap_dirty
+  and #$03
+  beq @maps_done
+  cmp #$03
+  bne @one
+  lda _frame           ; both dirty: take turns
+  and #$01
+  inc a
+@one:
   bit #$01
-  beq @nobg1
+  beq @bg2
   ldx #BG1MAP_VRAM
   stx VMADDL
   ldx #.loword(_bg1map)
@@ -434,10 +477,8 @@ nmi_uploads:
   lda _bgmap_dirty
   and #$fe
   sta _bgmap_dirty
-  bra @maps_done
-@nobg1:
-  bit #$02
-  beq @maps_done
+  bra @mapped
+@bg2:
   ldx #BG2MAP_VRAM
   stx VMADDL
   ldx #.loword(_bg2map)
@@ -449,10 +490,93 @@ nmi_uploads:
   lda _bgmap_dirty
   and #$fd
   sta _bgmap_dirty
+@mapped:
+  A16
+  lda nmi_budget
+  sec
+  sbc #2048
+  sta nmi_budget
+  A8
 @maps_done:
-  ; queued VRAM transfers (budget ~4KB)
   jsr vq_run
   rts
+
+.ifdef PROFILE
+; the scanline the uploads ended on (262 + line when they ran past the frame's start): the
+; largest since power-on at $7F:DBFA (read by tools/harness)
+NMI_VMAX = $7fdbfa
+; debug ring of 32 frames at $7F:DA00: entry line, end line, budget before the queue, queue
+; entries left, map dirty bits left
+nmi_vline0:
+  .a8
+  .i16
+  jsr vline
+  .a16
+  pha
+  lda _frame
+  and #$1f
+  asl
+  asl
+  asl
+  tax
+  pla
+  sta f:$7fda00,x
+  A8
+  rts
+vline:                 ; A16 = the current scanline (262 + n past the frame's start)
+  .a8
+  lda STAT78
+  lda SLHV
+  lda OPVCT
+  xba
+  lda OPVCT
+  and #$01
+  xba
+  A16
+  cmp #225
+  bcs :+
+  clc
+  adc #262
+:
+  rts
+nmi_vline:
+  .a8
+  .i16
+  jsr vline
+  .a16
+  pha
+  lda _frame
+  and #$1f
+  asl
+  asl
+  asl
+  tax
+  pla
+  sta f:$7fda02,x
+  pha
+  lda nmi_budget
+  sta f:$7fda04,x
+  A8
+  lda _vq_count
+  sta f:$7fda06,x
+  lda _bgmap_dirty
+  sta f:$7fda07,x
+  lda _bright          ; the maximum only over frames that are shown
+  bmi @no
+  A16
+  pla
+  cmp f:NMI_VMAX
+  bcc :+
+  sta f:NMI_VMAX
+:
+  A8
+  rts
+@no:
+  A16
+  pla
+  A8
+  rts
+.endif
 
 ; run DMA queue entries while budget lasts
 vq_run:
@@ -463,10 +587,15 @@ vq_run:
   rts
 :
   A16
-  lda #4096
+  lda nmi_budget
   sta nmi_tmp
+  lda _vq_head        ; read index (byte offset of the oldest entry)
+  and #$00ff
+  asl
+  asl
+  asl
+  tay
   A8
-  ldy #0             ; read index (byte offset)
 @loop:
   lda _vq_count
   bne :+
@@ -477,9 +606,9 @@ vq_run:
   cmp nmi_tmp
   bcc @fits
   beq @fits
-  ; does not fit: if nothing done yet this frame, still do it (large single entry)
+  ; does not fit: if nothing but OAM went this frame, still do it (large single entry)
   lda nmi_tmp
-  cmp #4096
+  cmp #NMI_BUDGET - 544
   bne @stop
 @fits:
   lda nmi_tmp
@@ -523,29 +652,24 @@ vq_run:
   lda #$80
   sta VMAIN
   dec _vq_count
+  lda _vq_head        ; the queue is a ring: no entries are moved
+  inc a
+  cmp #VQ_MAX
+  bcc :+
+  lda #0
+:
+  sta _vq_head
   A16
-  tya
-  clc
-  adc #8
+  and #$00ff
+  asl
+  asl
+  asl
   tay
   A8
   jmp @loop
 @stop:
   A8
 @done:
-  ; compact remaining entries to the front
-  lda _vq_count
-  beq @empty
-  sty nmi_tmp
-  ldx #0
-@mv:
-  lda _vq,y
-  sta _vq,x
-  inx
-  iny
-  cpy #VQ_MAX*8
-  bne @mv
-@empty:
   rts
 
 ; push one entry: ea[0]=vaddr ea[1]=src lo ea[2]=bank ea[3]=size ea[4]=mode
@@ -558,6 +682,12 @@ vq_push:
   bcc :+
   sec
   rts
+:
+  clc                  ; slot (head + count) mod VQ_MAX
+  adc _vq_head
+  cmp #VQ_MAX
+  bcc :+
+  sbc #VQ_MAX
 :
   A16
   and #$00ff

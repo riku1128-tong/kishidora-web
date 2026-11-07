@@ -50,6 +50,7 @@ extern u16 bg3_vram;          /* BG3 tile base used by text boxes */
 void menu_layout(void);       /* BG3 tiles $4000 (1024), OBJ $6000 */   /* edges since the last frame_wait */
 extern u16 frame, lag;
 extern u8  bgmap_dirty;
+extern u8  vq_count, vq_head, vq[8 * 24];   /* NMI DMA ring of 24: vaddr(2) src(2) bank(1) size(2) mode(1) */
 extern u8  oam_hide;
 extern u16 bg1map[1024], bg2map[1024], bg3map[1024];
 

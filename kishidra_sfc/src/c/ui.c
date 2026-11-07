@@ -16,19 +16,24 @@ void tb_flush(u8 id) { tb_flush_rows(id, 0, tb[id * 8 + 3]); }
 
 /* A box canvas must not change while the NMI still has to upload it (the screen would show a
  * half-drawn canvas for a frame): wait until no queued upload reads tiles t0..t0+n-1. */
-extern u8 vq_count, vq[8 * 24];
-static void canvas_wait(u16 t0, u16 n) {
-  u16 lo = t0 * 16, hi = (t0 + n) * 16, s;
-  u8 i, busy;
-  do {
-    busy = 0;
-    for (i = 0; i < vq_count; ++i) {
-      if (vq[i * 8 + 4] != 0x7f) continue;
-      s = vq[i * 8 + 2] | ((u16)vq[i * 8 + 3] << 8);
-      if (s < hi && s + (vq[i * 8 + 5] | ((u16)vq[i * 8 + 6] << 8)) > lo) { busy = 1; break; }
-    }
-    if (busy) wait_frame();
-  } while (busy);
+/* does a queued upload read $7F:lo..hi-1? */
+u8 vq_busy(u16 lo, u16 hi) {
+  u16 s;
+  u8 i, k, *e;
+  for (i = 0, k = vq_head; i < vq_count; ++i) {
+    e = &vq[k * 8];
+    if (++k == 24) k = 0;
+    if (e[4] != 0x7f) continue;
+    s = e[2] | ((u16)e[3] << 8);
+    if (s < hi && s + (e[5] | ((u16)e[6] << 8)) > lo) return 1;
+  }
+  return 0;
+}
+
+u8 canvas_busy(u16 t0, u16 n) { return vq_busy(t0 * 16, (t0 + n) * 16); }
+
+void canvas_wait(u16 t0, u16 n) {
+  while (canvas_busy(t0, n)) wait_frame();
 }
 
 void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour) {
@@ -66,7 +71,8 @@ void says(u8 id, u16 px, u16 py, u16 msg, u16 s) {
   say(id, px, py, msg);
 }
 
-/* text that breaks into lines (14 px apart) before it would pass x = maxx */
+/* text that breaks into lines (14 px apart) before it would pass x = maxx; a glyph that must
+ * not start a line (、。！？）… small kana) takes the glyph before it to the next line */
 void say_wrap(u8 id, u16 px, u16 py, u16 msg, u16 maxx) {
   text_wrap = maxx;
   say(id, px, py, msg);

@@ -63,7 +63,7 @@ def measure(codes, wid, chars):
         elif 5 <= c <= 10:
             w = (w + 7) & ~7 if w & 7 else w; txt += '{c%d}' % (c - 5)
         elif c >= 16:
-            w += wid[c - 16]; txt += chars[c - 16] if c - 16 < len(chars) else '?'
+            w += wid[c - 16] & 0x7f; txt += chars[c - 16] if c - 16 < len(chars) else '?'
     lines.append(w)
     return max(lines), len(lines), s, txt
 

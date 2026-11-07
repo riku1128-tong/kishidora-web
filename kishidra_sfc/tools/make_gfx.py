@@ -463,7 +463,7 @@ class Gfx:
             for ty in (0, 1):
                 for tx in (0, 1):
                     data += G.tile4([0 if px[tx * 8 + x, ty * 8 + y][3] == 0 else 1 + caches[g_](px[tx * 8 + x, ty * 8 + y][:3]) for y in range(8) for x in range(8)])
-        self.a.add('SKILL_ICONS', bytes(data))
+        self.a.add('SKILL_ICONS', bytes(data), compress=False)    # 128 bytes per skill, DMA'd from ROM
         self.a.add('SKILL_ICONS_PAL', b''.join(G.palette_bytes(p) for p in pals), compress=False)
         self.a.add('SKILL_ICONS_SEL', bytes(assign), compress=False)
 

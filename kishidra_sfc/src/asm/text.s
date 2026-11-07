@@ -44,6 +44,9 @@ t_row:    .res 2
 t_bits:   .res 2
 t_tmp:    .res 2
 t_tmp2:   .res 2
+t_tmp3:   .res 2
+t_pair:   .res 2             ; width of a following glyph that must stay on this line
+t_code:   .res 2
 t_dst:    .res 3             ; canvas pointer (long)
 t_plane:  .res 2             ; 0 = plane 0 (text), 1 = plane 1 (shadow)
 t_pal:    .res 2
@@ -295,36 +298,27 @@ box_clear:
   sta f:DMAP0+$24
   rep #$20
   .a16
+  ; in 512-byte pieces: a DMA holds off the NMI, which must not start late (crt0.s nmi_uploads)
+  lda #$8008           ; transparent: fixed source (zeros) -> B bus $80 (WMDATA)
+  sta t_tmp3
   lda t_flags
   and #1
-  bne @opaque
-  lda #$8008           ; fixed source (zeros) -> B bus $80 (WMDATA)
-  sta f:DMAP0+$20
-  lda #.loword(fill_pat)
-  sta f:DMAP0+$22
-  lda t_tmp2
-  asl
-  sta f:DMAP0+$25
-  sep #$20
-  .a8
-  lda #$04
-  sta f:MDMAEN
-  rep #$20
-  .a16
-  bra @filled
-@opaque:               ; 00 ff 00 ff ... (colour 2) in 1 KB pieces
+  beq :+
+  lda #$8000           ; opaque: 00 ff 00 ff ... (colour 2), incrementing source
+  sta t_tmp3
+:
   lda t_tmp2
   asl
   sta t_tmp
 @piece:
-  lda #$8000           ; incrementing source -> WMDATA
+  lda t_tmp3
   sta f:DMAP0+$20
   lda #.loword(fill_pat)
   sta f:DMAP0+$22
   lda t_tmp
-  cmp #1024
+  cmp #512
   bcc :+
-  lda #1024
+  lda #512
 :
   sta f:DMAP0+$25
   sep #$20
@@ -335,7 +329,7 @@ box_clear:
   .a16
   lda t_tmp
   sec
-  sbc #1024
+  sbc #512
   sta t_tmp
   beq @filled
   bcs @piece
@@ -1032,6 +1026,29 @@ draw_run:
 @samepal:
   jmp @loop
 @glyph:
+  ; kinsoku: when the next glyph must not start a line (、。！？）… small kana), this glyph
+  ; wraps if the two do not fit together
+  sta t_code
+  stz t_pair
+  lda _text_wrap
+  beq @draw
+  lda t_flags
+  and #8
+  bne @draw
+  lda [t_src]
+  cmp #16
+  bcc @draw
+  sec
+  sbc #16
+  tax
+  lda f:font_width,x
+  and #$00ff
+  bit #$0080
+  beq @draw
+  and #$007f
+  sta t_pair
+@draw:
+  lda t_code
   jsr draw_glyph
   lda #1
   sta t_drawn
@@ -1144,7 +1161,7 @@ draw_glyph:
   and #8
   bne @small
   lda f:font_width,x
-  and #$00ff
+  and #$007f           ; (bit 7: no line starts with this glyph, see @glyph)
   sta t_gw
   lda t_tmp
   asl
@@ -1186,6 +1203,7 @@ draw_glyph:
   lda t_px
   clc
   adc t_gw
+  adc t_pair           ; (and a following glyph that must not start a line)
   dec a
   dec a
   cmp _text_wrap
