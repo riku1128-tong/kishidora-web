@@ -29,7 +29,10 @@ Safari 版（Godot 4 Web 版）キシドラ！の地上世界を、スーパー�
 - マップ: 十字キーでエリアを選ぶ、A で決定、Y / X / START でメニュー
 - バトル: Y / X / A で MAIN / SUB / THIRD の武器のスキル、B でガード、R で肉、←→ で狙う敵、START でポーズ。
   画面下はスマホ版と同じ 4 列のパネル（武器のタブ・スキルのカードと ST の札・NEXT・ガード / 肉のボタン、
-  HP バーと 10 マスの ST）で、各列の左上にボタン（Y / X / A / B / R）が出ます
+  HP バーと 10 マスの ST）で、各列の左上にボタン（Y / X / A / B / R）が出ます。
+  スマホ版と同じく、技の名前（勇者の上）、必殺技の帯と白いフラッシュ、左上のコンボ（n HIT!、10 HIT から「必殺 x倍」）、
+  WAVE n / WAVE CLEAR! / CLEAR、赤く光る WARNING、ST+n・ST -n・「次の技 …」が出ます。START のメニューは
+  「続ける」「離脱する」（もう一度 A で離脱）
 - メニュー: A 決定、B もどる、SELECT で持ち物の並び替え、←→ でページ送り
 - 図鑑: L / R でタブ、SELECT で種類（武器・必殺技・スキル）、A でくわしく、カードは ←→ でとなり
 
@@ -68,7 +71,10 @@ python build.py rom
 - `tools/make_data.py` `tools/make_gfx.py` `tools/make_audio.py` 変換スクリプト、`tools/audio/` SPC700 ドライバとアセンブラ・BRR 変換
 - `tools/harness/` テスト用（libretro コアで ROM を動かしてスクリーンショット・メモリ・音を保存する `runrom`、セーブ作成 `mksave.py`、
   処理時間の内訳 `prof.py`、文字のはみ出し・枠かぶり・色の混ざり・重なりの検査 `textcheck.py`
-  〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要〉、文字列の幅 `textwidth.py` など）
+  〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要。計測用 ROM は NMI の転送が終わった走査線も
+  $7F:DBFA（最大）と $7F:DA00〜（直近 32 フレーム）に残す〉、文字列の幅 `textwidth.py` など）
+- NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる
+  （残りは次のフレーム）。転送キューはリングで、勇者の絵は先頭に入れて 1 回で届ける
 
 フォントは東雲フォント（パブリックドメイン、`tools/font/SHINONOME_COPYRIGHT.txt`）と、戦闘パネルの小さい文字に
 美咲ゴシック第2（フリーソフトウエア、`tools/font/MISAKI_COPYRIGHT.txt`）を使っています。
