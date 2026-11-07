@@ -93,6 +93,11 @@ static void set_scroll(void) {
   scroll[1] = (u16)y;          /* BG1 vertical */
 }
 
+/* the area name is a high-priority BG3 box: above sprites, so it would cover the king */
+static void label_hide(void) {
+  if (label_w) { box_hide(BX_LABEL); label_w = 0; }
+}
+
 static void draw_label(void) {
   u16 w = msg_width(AREAN_0 + sel) + 12;
   s16 tx, ty;
@@ -318,8 +323,9 @@ static u8 after_battle(void) {
   u8 cleared = map_area;
   if (!res.win || res.mirage) return MA_NONE;
   if (res.orb != 255) orb_scene(res.orb);
-  if (res.king) { ending(); return MA_TITLE; }
+  if (res.king) { label_hide(); ending(); return MA_TITLE; }
   if (res.opened != 255) {
+    label_hide();
     show_area_story(cleared);
     sel = res.opened;
     sv.cursor = sel;
@@ -365,13 +371,16 @@ u8 map_scene(u8 mode) {
   if (sel == AR_MIRAGE && !mirage_open()) sel = sv.area_open;
   map_setup();
   if (mode == MS_NEWGAME) {
+    label_hide();
     king_opening();
     name_entry();
     map_setup();
   }
   if (!(sv.story & ST_OPENING)) {
     sv.story |= ST_OPENING;
+    label_hide();
     king_opening2();
+    draw_label();
     save_write();
   }
   if (mode == MS_AFTER) {

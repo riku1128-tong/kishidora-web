@@ -660,28 +660,33 @@ class Gfx:
                 data += G.tile4([0 if px[tc * 8 + x, tr * 8 + y][3] == 0 else 1 + cache(px[tc * 8 + x, tr * 8 + y][:3]) for y in range(8) for x in range(8)])
         self.a.add('MENU_OBJ', bytes(data))
         self.a.add('MENU_OBJ_PAL', G.palette_bytes(pal), compress=False)
-        # king chibi: 64x96 -> 2x3 cells of 32x32 in a 16-tile wide block (tiles 64..255)
+        # king chibi: pixel art drawn at 4x (king_chibi.json "scale": 4) -> its own pixels, 52x79,
+        # centred at the bottom of 64x96 = 2x3 cells of 32x32 in a 16-tile wide block (tiles 64..255).
+        # One 15-colour palette per cell row (OBJ palettes 1-3): the white hair would take a single
+        # palette's colours and leave the pink ears and blue eyes grey.
         im = self.img('assets/story/king_chibi.png')
-        w = 64
-        h = round(im.height * w / im.width)
-        im = im.resize((w, h), Image.LANCZOS)
-        h = min(96, h)
+        sc = int(json.loads(self.wb.read('assets/story/king_chibi.json')).get('scale', 4))
+        im = im.resize((im.width // sc, im.height // sc), Image.NEAREST)
+        h = min(96, im.height)
         canvas = Image.new('RGBA', (64, 96), (0, 0, 0, 0))
-        canvas.alpha_composite(im.crop((0, 0, 64, h)), (0, 96 - h))
+        canvas.alpha_composite(im.crop((0, im.height - h, min(64, im.width), im.height)), ((64 - min(64, im.width)) // 2, 96 - h))
         canvas = G.snap(canvas)
         cp = canvas.load()
-        cols = [cp[x, y][:3] for y in range(96) for x in range(64) if cp[x, y][3]]
-        kp = G.make_palette(cols, 15)
-        kc = G.Cache(kp)
+        pals = []
+        for r in range(3):
+            cols = [cp[x, y][:3] for y in range(r * 32, r * 32 + 32) for x in range(64) if cp[x, y][3]]
+            pals.append(G.make_palette(cols, 15) if cols else [(0, 0, 0)])
+        caches = [G.Cache(p) for p in pals]
         block = Image.new('RGBA', (128, 96), (0, 0, 0, 0))
         block.alpha_composite(canvas, (0, 0))
         bp = block.load()
         kd = bytearray()
         for tr in range(12):
+            kc = caches[tr // 4]
             for tc in range(16):
                 kd += G.tile4([0 if bp[tc * 8 + x, tr * 8 + y][3] == 0 else 1 + kc(bp[tc * 8 + x, tr * 8 + y][:3]) for y in range(8) for x in range(8)])
         self.a.add('KING_OBJ', bytes(kd))
-        self.a.add('KING_PAL', G.palette_bytes(kp), compress=False)
+        self.a.add('KING_PAL', b''.join(G.palette_bytes(p) for p in pals), compress=False)
         os.makedirs(PREVIEW, exist_ok=True)
         canvas.save(os.path.join(PREVIEW, 'king.png'))
 

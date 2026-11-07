@@ -6,7 +6,7 @@
 #define BX_TALK 10
 #define T_TALK 625
 #define KING_X 96
-#define KING_Y 52
+#define KING_Y 46           /* feet just above the message window (row 18) */
 
 static u8 king_on;
 
@@ -22,13 +22,13 @@ static void king_sprites(void) {
   if (!king_on) return;
   for (r = 0; r < 3; ++r)
     for (c = 0; c < 2; ++c)
-      spr_add(KING_X + c * 32, KING_Y + r * 32, MK_ATTR(MK_T_KING + r * 64 + c * 4, MK_PAL_KING, 3), 1);
+      spr_add(KING_X + c * 32, KING_Y + r * 32, MK_ATTR(MK_T_KING + r * 64 + c * 4, MK_PAL_KING + r, 3), 1);   /* a palette per row */
 }
 
 void king_load(void) {
   unpack(ASSET_KING_OBJ, 0x8000);
   queue_vram_big(MK_OBJ_VRAM + MK_T_KING * 16, 0x8000, 0x7f, 192 * 32);
-  load_pal(ASSET_KING_PAL, 128 + MK_PAL_KING * 16);
+  load_pal(ASSET_KING_PAL, 128 + MK_PAL_KING * 16);   /* OBJ palettes 1-3 */
 }
 
 /* pages first..first+n-1; speaker = text id or 0; king = show the king chibi */
@@ -40,14 +40,14 @@ void talk(u16 first, u8 n, u16 speaker, u8 king) {
   if (king) king_load();
   mk_sprites = king_sprites;
   for (i = 0; i < n && !skip; ++i) {
-    win_open(BX_TALK, 1, 19, 30, 8, T_TALK, PAL_W);
+    win_open(BX_TALK, 1, 18, 30, 8, T_TALK, PAL_W);   /* rows 18-25: the map's key help (26-27) stays whole */
     if (speaker) says(BX_TALK, 10, 5, TXT_SPEAKER, speaker);
     say(BX_TALK, 14, speaker ? 20 : 10, first + i);
     tb_flush(BX_TALK);
     for (;;) {
       oam_next = 0;
       king_sprites();
-      if ((frame >> 4) & 1) spr_add(232, 204, MK_ATTR(MK_T_DOWN, MK_PAL_MENU, 3), 0);
+      if ((frame >> 4) & 1) spr_add(232, 196, MK_ATTR(MK_T_DOWN, MK_PAL_MENU, 3), 0);
       oam_finish();
       frame_wait();
       if (pad_new & BTN_A) { se_play(SE_OK); break; }
