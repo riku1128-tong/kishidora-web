@@ -1,0 +1,180 @@
+# UI text (id<TAB>text). \n = new line, {name} = hero name, {n} = number, {s} = text argument
+# colours: {yellow} {red} {gray} {blue} {green} {c0}(normal)
+T_NEWGAME	はじめから
+T_CONTINUE	つづきから
+T_COPYRIGHT	© LPP GAME LAB, 2026
+T_PRESS_START	PUSH START
+T_DIFF_TITLE	難易度を選んでね
+T_DIFF_0	イージー
+T_DIFF_1	ノーマル
+T_DIFF_2	ハード
+T_DIFF_3	エクストラ
+T_DIFF_4	ルナティック
+T_DIFF_D	被ダメージ {n}%・ミラクルの回復 {s}倍
+T_DIFF_D2	ガード {n}・ジャスト {s} フレーム
+T_NAME_TITLE	そなたの名は？
+T_NAME_HELP	1〜6 字。STARTで けってい
+T_NAME_KANA	ひらがな
+T_NAME_KATA	カタカナ
+T_NAME_ABC	英数
+T_NAME_DEL	1字けす
+T_NAME_OK	けってい
+T_DEFAULT_NAME	ゆうしゃ
+T_NEXT	▼
+# map
+T_MAP_COINS	{n}
+T_MAP_CLEAR	クリア {n}/{s}
+T_MAP_TICKET	チケット {n}
+T_MAP_HELP	A:えらぶ  Y:メニュー
+T_MEN	{s} {n}
+T_MEN_MID	中ボス
+T_MEN_BOSS	ボス
+T_MEN_MAOU	魔王
+T_MEN_SECRET	裏ボス
+T_MEN_CLEAR	クリア
+T_MEN_WAVE	WAVE {n}
+T_MEN_TUTORIAL	チュートリアル
+T_MEN_TRAINING	カカシ（ガードの練習）
+T_MEN_TRAINING_D	倒れないカカシ。報酬はない
+T_MEN_TREASURE	宝の部屋（チケット {n}）
+T_MEN_LOCKED	まだ行けない
+T_MEN_GO	出撃
+T_MIRAGE_TITLE	蜃気楼の斜塔
+T_MIRAGE_BEST	最終到達 WAVE {n}
+T_MIRAGE_BEST_CLEAR	最終到達 WAVE {n}（制覇）
+T_MIRAGE_NONE	まだ挑戦していない
+T_MIRAGE_RULE	ボスが次々に現れる。WAVE の合間に宝箱を 1 つ選べる
+T_MIRAGE_GO	挑戦する
+# menu
+T_MENU_EQUIP	装備
+T_MENU_ITEMS	持ち物
+T_MENU_GACHA	ガチャ
+T_MENU_FORGE	鍛冶屋
+T_MENU_DEX	図鑑
+T_MENU_SAVE	セーブ
+T_MENU_OPTION	設定
+T_MENU_CLOSE	とじる
+T_SLOT_MAIN	MAIN
+T_SLOT_SUB	SUB
+T_SLOT_THIRD	THIRD
+T_SLOT_SHIELD	盾
+T_SLOT_EMPTY	なし
+T_EQUIP_TITLE	装備
+T_EQUIP_HELP	A:えらぶ B:もどる X:はずす
+T_EQUIP_PICK	どれを装備する？
+T_ITEMS_TITLE	持ち物 {n}/{s}
+T_ITEMS_SORT	ならび: {s}
+T_SORT_0	入手順
+T_SORT_1	種類
+T_SORT_2	レア度
+T_SORT_3	強さ
+T_SORT_4	属性
+T_ITEM_ATK	ATK {n}
+T_ITEM_HP	HP +{n}
+T_ITEM_DEF	DEF {n}
+T_ITEM_CRIT	会心 {n}%
+T_ITEM_STUN	スタン {n}
+T_ITEM_FX	効果 {s}
+T_ITEM_SKILLS	スキル
+T_ITEM_SELL	売る（{n} コイン）
+T_ITEM_SOLD	{n} コインで売った
+T_ITEM_FAV	お気に入り
+T_ITEM_EQUIPPED	装備中
+T_FX_MAIN_ONLY	MAIN にそうびすると はつどう
+T_SAVE_DONE	セーブしました
+T_SAVE_FAIL	セーブできませんでした
+T_YESNO_Y	はい
+T_YESNO_N	いいえ
+T_CONFIRM	よろしいですか？
+# gacha
+T_GACHA_TITLE	ガチャ
+T_GACHA_DESC	剣・槍・槌・盾のどれかが出る
+T_GACHA_RATE	N {n}%  R {s}%  SR 3%
+T_GACHA_1	1回ひく（{n} コイン）
+T_GACHA_10	10回ひく（{n} コイン）
+T_GACHA_NO_COIN	コインが足りない
+T_GACHA_FULL	持ち物がいっぱい
+T_GACHA_NEW	NEW!
+T_GACHA_TICKET	チケットも手に入れた！
+T_GACHA_RESULT	ガチャの結果
+# forge
+T_FORGE_TITLE	鍛冶屋
+T_FORGE_EVOLVE	進化
+T_FORGE_ENHANCE	強化
+T_FORGE_MATUP	素材の合成
+T_FORGE_SLOT	スロット
+T_FORGE_NEED	必要なもの
+T_FORGE_HAVE	持っている {n}
+T_FORGE_COINS	{n} コイン
+T_FORGE_DONE	{s} に進化した！
+T_FORGE_SHORT	素材が足りない
+T_FORGE_NO_COIN	コインが足りない
+T_FORGE_NO_SLOT	空いたスロットがない
+T_FORGE_PICK_SRC	強化に使う品は？
+T_FORGE_RESULT	結果：{s}
+T_FORGE_CANT	進化できない
+T_MATUP_DESC	{s} 3 個と {n} コインで 1 段上の素材にする
+T_MATS_TITLE	素材
+# battle
+T_WAVE	WAVE
+T_HP	HP
+T_ST	ST
+T_GUARD	ガード
+T_MEAT	肉
+T_NEXT_SKILL	NEXT
+T_ST_SHORT	ST がたりない
+T_LOCKED	ロック中
+T_RESULT_GUARD	GUARD
+T_RESULT_JUST	JUST!
+T_RESULT_MIRACLE	MIRACLE!!
+T_MISS	MISS
+T_WEAK	WEAK!!
+T_CRIT	会心！
+T_STUN	スタン！
+T_COMBO	{n} COMBO
+T_BOSS_WARN	WARNING
+T_STAGE_CLEAR	WAVE CLEAR
+T_VICTORY	VICTORY!
+T_GAMEOVER	GAME OVER
+T_RESULT_TITLE	リザルト
+T_RESULT_COINS	コイン +{n}
+T_RESULT_ITEMS	手に入れたもの
+T_RESULT_NONE	なし
+T_RESULT_MATS	素材
+T_RESULT_FIRST	初回クリア報酬
+T_RESULT_ORB	{s}を取り戻した！
+T_RESULT_OVER	持ち物がいっぱいで {n} コインになった
+T_RESULT_LOSE	ここまでに手に入れたものは持ち帰れる
+T_BATTLE_HELP	Y X A:スキル  B:ガード  R:肉
+T_PAUSE_TITLE	ポーズ
+T_PAUSE_RESUME	つづける
+T_PAUSE_LEAVE	あきらめて帰る
+T_PAUSE_HELP	ボタンのそうさ
+T_DRAIN	HP を吸収された！
+T_STDRAIN	ST を吸い取られた！
+T_LOCK	{s}を封じられた！
+T_LOCK_GUARDED	封印を防いだ！
+T_MEAT_ASK	お肉ちょーだい！
+T_MEAT_THANKS	わーいわーい！
+T_MEAT_GIFT	お礼に宝箱をもらった！
+T_FLEE	逃げてしまった…
+T_AWAKEN	覚醒!!
+T_TALK_NEXT	A:つぎへ
+T_TUT_1	敵との戦い方を\n練習しよう！
+T_MIRAGE_PICK	宝箱を 1 つえらぶ
+T_MIRAGE_WAVE	WAVE {n}/{s}
+T_MIRAGE_REACHED	最終到達 WAVE {n}
+T_MIRAGE_CLEARED	蜃気楼の斜塔を制覇した！
+T_MIRAGE_RECORD	記録更新！
+T_TREASURE_GET	{s}
+T_ENDING_THANKS	Thank you for playing!
+T_DEX_TITLE	図鑑
+T_DEX_MON	モンスター
+T_DEX_ITEM	武器と盾
+T_DEX_COUNT	{n}/{s}
+T_DEX_UNKNOWN	？？？
+T_DEX_KILLS	倒した数 {n}
+T_OPT_BGM	BGM の音量 {n}
+T_OPT_SE	効果音の音量 {n}
+T_OPT_DIFF	難易度 {s}
+T_OPT_GUARDLATE	ガードの遅れ補正 {n}

@@ -1,0 +1,8 @@
+build/obj/
+build/preview/
+build/*.map
+build/*.dbg
+__pycache__/
+*.pyc
+tools/harness/runrom
+build/kishidra.sfc
