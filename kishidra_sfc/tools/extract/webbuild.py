@@ -21,7 +21,7 @@ import struct
 import json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WEB = os.path.normpath(os.path.join(HERE, '..', '..', '..'))   # repository root (kishidora-web)
+WEB = os.environ.get('KISHIDORA_WEB') or os.path.normpath(os.path.join(HERE, '..', '..', '..'))   # the Safari web build (repository root)
 
 
 def _read_pack(blob, base=0):
