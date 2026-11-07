@@ -222,9 +222,13 @@ if __name__ == '__main__':
         shutil.rmtree(os.path.join(ROOT, 'build'), ignore_errors=True)
     elif what == 'data':
         build_data()
+    elif what == 'audio':
+        subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'make_audio.py')], check=True)
     elif what == 'rom':
         build_rom()
     else:
         if not os.path.exists(os.path.join(GEN, 'stamp.txt')):
             build_data()
+        if not os.path.exists(os.path.join(GEN, 'audio.s')):
+            subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'make_audio.py')], check=True)
         build_rom()

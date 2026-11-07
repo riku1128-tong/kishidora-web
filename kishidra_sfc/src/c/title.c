@@ -18,6 +18,7 @@ u8 title_scene(u8 has_save) {
   tb_flush(1);
   tm_main = 0x15;
   screen_on();
+  bgm_play(BGM_OPENING);
   for (;;) {
     for (i = 0; i < 2; ++i) box_pal(0, 1, (u8)(i * 2 + 1 + (i ? 1 : 0)), 12, 2, i == sel ? PAL_W_YELLOW : PAL_W);
     frame_wait();

@@ -7,3 +7,5 @@ __pycache__/
 tools/harness/runrom
 build/kishidra.sfc
 build/
+tools/audio/brr
+data/gen/audio/_tmp.*

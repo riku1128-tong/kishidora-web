@@ -128,6 +128,7 @@ static void map_setup(void) {
   mk_sprites = map_sprites;
   oam_next = 0; map_sprites(); oam_finish();
   screen_on();
+  bgm_play(BGM_OPENING);
 }
 
 /* ---------------------------------------------------------------- stage list */
