@@ -66,10 +66,11 @@ C_BANKS = {
     'battle_core.c': 3, 'battle_hit.c': 4,
     'battle_view.c': 5, 'battle_fx.c': 6,
     'adventure.c': 7, 'rewards.c': 7, 'save.c': 8, 'inventory.c': 8,
-    'map.c': 9, 'menu.c': 10, 'equip.c': 10, 'gacha.c': 11, 'forge.c': 12, 'mirage.c': 13, 'dex.c': 14,
+    'map.c': 9, 'menu.c': 10, 'equip.c': 10, 'gacha.c': 11, 'forge.c': 12, 'debug.c': 13, 'dex.c': 14,
     'sound.c': 1, 'tables.c': 15,
 }
 C_BANK_LAST = 31          # banks $81..$9F can hold C code
+DBG = ['-g'] if os.environ.get('PROFILE') else []   # symbols in build/kishidra.dbg for the profiler
 
 
 def c_functions(path):
@@ -115,9 +116,9 @@ def build_rom():
         for f in bank_funcs[b]:
             if f != 'main':
                 defs += ['-D', '%s=%s__b' % (f, f)]
-        run([tool('cc65'), '-O', '-Oirs', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b,
+        run([tool('cc65'), '-O', '-Oirs', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b] + DBG + [
              '--rodata-name', 'RODATA', '--bss-name', 'BSS', '--data-name', 'DATA', '-o', s] + inc + defs + [c])
-        run([tool('ca65'), '--cpu', '65816', '-o', o, s])
+        run([tool('ca65'), '--cpu', '65816'] + DBG + ['-o', o, s])
         objs.append(o)
     # trampolines: _f (low WRAM) -> jsl f__t (bank) -> jsr _f__b -> rtl
     tr = ['.p816', '.smart -']
@@ -132,9 +133,11 @@ def build_rom():
     open(tp, 'w').write('\n'.join(tr) + '\n')
     sfiles.append(tp)
     asm_inc = ['-I', os.path.join(SRC, 'asm'), '-I', GEN, '--bin-include-dir', GEN]
+    if os.environ.get('PROFILE'):
+        asm_inc += ['-D', 'PROFILE=1']   # PC sampler (tools/harness/prof.py)
     for s in sfiles:
         o = os.path.join(OBJ, 'a_' + os.path.splitext(os.path.basename(s))[0] + '.o')
-        run([tool('ca65'), '--cpu', '65816'] + asm_inc + ['-o', o, s])
+        run([tool('ca65'), '--cpu', '65816'] + DBG + asm_inc + ['-o', o, s])
         objs.append(o)
     cfg = os.path.join(OBJ, 'kishidra.cfg')
     open(cfg, 'w').write(linker_cfg(sorted(set(banks.values()))))

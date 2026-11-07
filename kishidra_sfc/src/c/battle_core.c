@@ -41,6 +41,8 @@ u8 b_meat_gifts;
 u8 b_history[3], b_nhist;
 u8 b_last_special;
 u16 b_kills[N_MON];
+u8 b_seen[(N_MON + 7) / 8];
+u8 b_sp_done[(N_SPECIAL + 7) / 8];
 
 static u16 guard_press, hit_time;
 static u8 attack_queue[ENEMY_MAX], aq_n;
@@ -83,6 +85,13 @@ const DiffRule *rules(void) { return &diff_rules[b_difficulty]; }
 u8 is_castle(void) { return b_area == AR_CASTLE && b_men != T_MONEY_MEN; }
 u8 is_money(void) { return b_area == AR_CASTLE && b_men == T_MONEY_MEN; }   /* 金策: 魔王城の地下 */
 u8 is_secret(void) { return b_area == AR_SECRET; }
+
+/* the dex marks every foe on the field (not the training dummy) */
+static void mark_seen(void) {
+  u8 i;
+  if (b_mode == BM_TRAINING) return;
+  for (i = 0; i < b_ne; ++i) b_seen[b_e[i].mon >> 3] |= (u8)(1 << (b_e[i].mon & 7));
+}
 u8 is_treasure(void) { return b_men == D_TREASURE_MEN && areas[b_area].treasure; }
 
 u8 foe_targetable(const Foe *e) { return !e->gone && e->dying == 0 && e->fleeing == 0; }
@@ -438,6 +447,7 @@ static void start_stage(void) {
   if (b_target == 255) b_target = 0;
   if (has_boss()) { b_phase = PH_WARN; b_phase_timer = D_BOSS_WARN_FRAMES; }
   else { b_phase = PH_SLIDE; b_phase_timer = D_SLIDE_IN_FRAMES; }
+  mark_seen();
   ev_post(EV_STAGE_START, 0, b_stage, has_boss(), 0, 0);
 }
 
@@ -456,6 +466,8 @@ static void start_run(void) {
   b_reward_got = 0;
   for (i = 0; i < N_MAT; ++i) b_mats[i] = 0;
   for (i = 0; i < N_MON; ++i) b_kills[i] = 0;
+  memset(b_seen, 0, sizeof(b_seen));
+  memset(b_sp_done, 0, sizeof(b_sp_done));
   b_men_kills = 0;
   b_boss_specials = 0;
   b_turns_total = 0;
@@ -1011,7 +1023,7 @@ static void form_frame(void) {
     }
   }
   if (t == t2) ev_post(EV_FORM_DARK, b_form_who, 0, 0, 0, 0);
-  else if (t == t3) { form_swap(); ev_post(EV_FORM_SWAP, b_form_who, b_e[b_form_who].mon, 0, 0, 0); }
+  else if (t == t3) { form_swap(); mark_seen(); ev_post(EV_FORM_SWAP, b_form_who, b_e[b_form_who].mon, 0, 0, 0); }
   else if (t == t4) ev_post(EV_FORM_RISE, b_form_who, forms_index(b_e[b_form_who].mon), 0, 0, 0);
   else if (t >= t5) {
     ev_post(EV_FORM_END, b_form_who, 0, 0, 0, 0);

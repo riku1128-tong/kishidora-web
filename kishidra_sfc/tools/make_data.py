@@ -424,6 +424,92 @@ class Gen:
         for i, k in enumerate(self.mirage_kinds):
             self.define('MK_' + k.upper(), i)
 
+
+    # ------------------------------------------------------------ dex (dex_data.gd)
+    def build_dex(self):
+        s, T, c = self.s, self.T, self.c
+        castle, secret = s.num('AREA_CASTLE'), s.num('AREA_SECRET')
+        order = []
+
+        def add(m):
+            if m and m != 'MON_NONE' and m in s.enemies and m in self.mon_index and m not in order and m != 'MON_KAKASHI':
+                order.append(m)
+        for a in s.tables['AREA_TABLE']:
+            for m in s.pools.get(a['id'], []):
+                add(m)
+            add(a.get('mid', ''))
+            if a['id'] == castle:
+                for m in s.num('CASTLE_BOSSES') + s.num('CASTLE_FINAL') + s.num('MAOU_FORMS'):
+                    add(m)
+            if a['id'] == secret:
+                add(s.num('AWAKEN_MON'))
+            add(a.get('boss', ''))
+        add(s.num('TREASURE_GUARD'))
+        for r in s.tables['ENEMY_TABLE']:
+            if r['kind'] == 'EK_LUCKY':
+                add(r['id'])
+        add(s.num('TUTORIAL_MON'))
+        for r in s.tables['ENEMY_TABLE']:
+            add(r['id'])
+        assert len(order) == len(s.tables['ENEMY_TABLE']) == 93, len(order)
+        c.append('const u8 dex_mon[N_DEX_MON] = { %s };' % ', '.join(str(self.mon_index[m]) for m in order))
+        self.define('N_DEX_MON', len(order))
+        # weapons: type (sword, spear, hammer), rarity, atk, id; shields: rarity, def, id
+        tord = {'WT_SWORD': 0, 'WT_SPEAR': 1, 'WT_HAMMER': 2}
+        wps = sorted(self.weapon_ids + [s.num('FUUIN_ID')],
+                     key=lambda k: (tord[s.weapons[k]['wtype']], RARITIES.index(s.weapons[k]['rarity']), s.weapons[k]['atk'], k))
+        shs = sorted(self.shield_ids, key=lambda k: (RARITIES.index(s.shields[k]['rarity']), s.shields[k]['def'], k))
+        c.append('const u8 dex_item[N_DEX_ITEM] = { %s };' % ', '.join(str(self.item_index[k]) for k in wps + shs))
+        self.define('N_DEX_WP', len(wps))
+        self.define('N_DEX_SH', len(shs))
+        self.define('N_DEX_ITEM', len(wps) + len(shs))
+        # where each monster appears: AREA_TABLE bits (raw pool, mid, boss; castle forms; secret)
+        mask = {m: 0 for m in self.mon_ids}
+        for i, a in enumerate(s.tables['AREA_TABLE']):
+            ms = list(s.pools.get(a['id'], [])) + [a.get('mid', ''), a.get('boss', '')]
+            if a['id'] == castle:
+                ms += s.num('CASTLE_BOSSES') + s.num('CASTLE_FINAL') + s.num('MAOU_FORMS')
+            if a['id'] == secret:
+                ms.append(s.num('AWAKEN_MON'))
+            for m in ms:
+                if m in mask:
+                    mask[m] |= 1 << i
+        assert len(s.tables['AREA_TABLE']) <= 16
+        c.append('const u16 mon_areas[N_MON] = { %s };' % ', '.join(str(mask[m]) for m in self.mon_ids))
+        # BGM heard on the monster's card (DexData.monster_bgm, mapped onto the SFC tracks)
+        forms = s.num('MAOU_FORMS')
+        zako_any = set()
+        for a in s.tables['AREA_TABLE']:
+            zako_any |= set(s.zako_pool(a['id']))
+        mids = {a.get('mid', '') for a in s.tables['AREA_TABLE']}
+
+        def bgm(m):
+            if m == s.num('AWAKEN_MON'):
+                return 4                      # ペコラータ
+            if m in forms:
+                return 3 if forms.index(m) == 2 else 2
+            if s.enemies[m]['kind'] == 'EK_BOSS' or (m in mids and m not in zako_any):
+                return 1
+            return 0
+        c.append('const u8 mon_bgm[N_MON] = { %s };   /* 0 zako, 1 boss, 2 maou, 3 maou final, 4 peko */' %
+                 ', '.join(str(bgm(m)) if m in s.enemies else '0' for m in self.mon_ids))
+        # evolution: from (reverse of items[].evolve); 254 = the target is not in this game
+        frm = [255] * len(self.item_ids)
+        to_gone = [0] * len(self.item_ids)
+        for a, b in s.tables['WEAPON_EVOLVE_TABLE'] + s.tables['SHIELD_EVOLVE_TABLE']:
+            if a in self.item_index and b in self.item_index:
+                frm[self.item_index[b]] = self.item_index[a]
+            elif a in self.item_index:
+                to_gone[self.item_index[a]] = 1
+        c.append('const u8 item_evo_from[N_ITEM] = { %s };' % ', '.join(str(v) for v in frm))
+        c.append('const u8 item_evo_lost[N_ITEM] = { %s };   /* evolves into an item of another world */' %
+                 ', '.join(str(v) for v in to_gone))
+        self.text('T_RACE_SECRET', T['SECRET_RACE_LABEL'])
+        for i, t in enumerate(TARGETS):
+            self.text('TGTN_%d' % i, descs.TARGET[t])
+        for i, z in enumerate(SIZES):
+            self.text('SZN_%d' % i, z[3:])
+
     # ------------------------------------------------------------ enemy stats
     def build_estats(self):
         s = self.s
@@ -633,11 +719,14 @@ class Gen:
 
     def build_ui_text(self):
         path = os.path.join(ROOT, 'src', 'text', 'ui.txt')
+        seen = set()
         for line in open(path, encoding='utf-8'):
             line = line.rstrip('\n')
             if not line or line.startswith('#'):
                 continue
             k, _, v = line.partition('\t')
+            assert k.strip() not in seen, 'ui.txt: %s is defined twice' % k.strip()
+            seen.add(k.strip())
             self.text(k.strip(), v.replace('\\n', '\n'))
 
     def write_text(self):
@@ -714,6 +803,7 @@ def main():
     g.build_consts()
     g.build_tables()
     g.build_estats()
+    g.build_dex()
     g.build_story()
     g.build_name_grid()
     g.build_difficulty_text()

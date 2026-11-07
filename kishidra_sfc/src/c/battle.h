@@ -113,6 +113,8 @@ extern u8 b_meat_gifts;
 extern u8 b_history[3], b_nhist;
 extern u8 b_last_special;      /* special id of the last attack (255 none) */
 extern u16 b_kills[N_MON];
+extern u8 b_seen[(N_MON + 7) / 8];     /* monsters met this run (dex) */
+extern u8 b_sp_done[(N_SPECIAL + 7) / 8];   /* specials fired this run (dex) */
 
 /* core */
 void battle_start(u8 area, u8 men, const Loadout *lo);

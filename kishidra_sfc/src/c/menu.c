@@ -291,8 +291,8 @@ static void options_scene(void) {
 }
 
 /* ---------------------------------------------------------------- root */
-enum { M_EQUIP, M_ITEMS, M_FORGE, M_SHOP, M_STATUS, M_DIFF, M_OPTION, M_TITLE, M_N };
-static const u16 menu_text[M_N] = { T_MENU_EQUIP, T_MENU_ITEMS, T_MENU_FORGE, T_MENU_SHOP, T_MENU_STATUS, T_MENU_DIFF, T_MENU_OPTION, T_MENU_TITLE };
+enum { M_EQUIP, M_ITEMS, M_FORGE, M_SHOP, M_DEX, M_STATUS, M_DIFF, M_OPTION, M_TITLE, M_N };
+static const u16 menu_text[M_N] = { T_MENU_EQUIP, T_MENU_ITEMS, T_MENU_FORGE, T_MENU_SHOP, T_MENU_DEX, T_MENU_STATUS, T_MENU_DIFF, T_MENU_OPTION, T_MENU_TITLE };
 
 static void root_row(u16 i, u8 y) {
   say(BX_LIST, 14, y, menu_text[i]);
@@ -310,7 +310,7 @@ u8 menu_scene(void) {
     mk_screen();
     head(T_MENU_HEAD);
     mk_draw = root_row; mk_moved = 0; mk_header = 0; mk_sprites = 0;
-    win_open(BX_LIST, 8, 4, 16, 18, T_LIST, PAL_W);
+    win_open(BX_LIST, 8, 3, 16, 20, T_LIST, PAL_W);
     screen_on();
     k = list_run(&l, BTN_Y | BTN_X | BTN_START);
     if (k & (BTN_B | BTN_Y | BTN_X | BTN_START)) break;
@@ -324,6 +324,7 @@ u8 menu_scene(void) {
       if (a == 255) { mk_screen(); screen_on(); mk_notice(T_NO_SHOP, 0); fade_out(); }
       else shop_scene(a, 0);
       break;
+    case M_DEX: dex_scene(); break;
     case M_STATUS: specials_scene(); break;
     case M_DIFF:
       d = difficulty_select(sv.difficulty, 1);

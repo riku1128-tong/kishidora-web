@@ -14,6 +14,9 @@ void equip_scene(void);
 void shop_scene(u8 area, u8 goods);
 void result_scene(u8 outcome);
 void forge_scene(u16 start);
+void dex_scene(void);
+void debug_scene(void);
+u16 mon_gfx_get(u8 m, u8 k);   /* battle_view.c */
 u16  pick_item(u8 filter, u16 title, u16 start);   /* menu.c; NO_ITEM = cancelled */
 extern u16 pick_exclude;
 u8 title_scene(u8 has_save);

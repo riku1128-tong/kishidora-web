@@ -112,7 +112,7 @@ u8 is_cleared(u8 area, u8 men) {
 
 u8 men_open(u8 area, u8 men) {
   if (area > sv.area_open || men < 1 || men > men_count(area)) return 0;
-  return men == 1 || is_cleared(area, men - 1);
+  return men == 1 || (sv.story & ST_DEBUG_OPEN) || is_cleared(area, men - 1);
 }
 
 u8 area_done(u8 area) { return is_cleared(area, men_count(area)); }

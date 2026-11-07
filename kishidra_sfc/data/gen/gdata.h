@@ -1183,6 +1183,10 @@
 #define MIRAGE_WAVES                 18
 #define ESTAT_SIZE                   24
 #define ESTAT_MEN_MAX                20
+#define N_DEX_MON                    93
+#define N_DEX_WP                     197
+#define N_DEX_SH                     43
+#define N_DEX_ITEM                   240
 #define N_KING_ASK                   2
 #define N_KING_OPEN                  9
 #define N_KING_RET                   6

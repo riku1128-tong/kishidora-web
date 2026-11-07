@@ -12,6 +12,8 @@ BG3_TILE_VRAM = $6000
 NBOX = 12
 
 .segment "LOWBSS"
+t_numbuf: .res 24         ; decimal digits (2 bytes each, up to 10) + end
+t_minw:   .res 2          ; minimum digits ({n3}: 3, zero padded)
 _tb:        .res NBOX*8      ; x, y, w, h, tile lo, tile hi, pal, flags (bit0 opaque, bit1 frame)
 _targ_num:  .res 4           ; {n}
 _targ_num2: .res 4           ; {m}
@@ -37,7 +39,6 @@ t_tmp2:   .res 2
 t_dst:    .res 3             ; canvas pointer (long)
 t_plane:  .res 2             ; 0 = plane 0 (text), 1 = plane 1 (shadow)
 t_pal:    .res 2
-t_numbuf: .res 12
 t_numptr: .res 2
 t_nest:   .res 2
 t_tx:     .res 2
@@ -766,9 +767,18 @@ draw_string:
   cmp #3
   bne @not_num
   jsr push_src
+  stz t_minw
   jsr num_to_codes
   jmp @loop
 @not_num:
+  cmp #12
+  bne @not_num3
+  jsr push_src
+  lda #3
+  sta t_minw
+  jsr num_to_codes
+  jmp @loop
+@not_num3:
   cmp #11
   bne @not_num2
   jsr push_src
@@ -776,6 +786,7 @@ draw_string:
   sta t_tmp
   lda _targ_num2+2
   sta t_tmp2
+  stz t_minw
   jsr num_codes2
   jmp @loop
 @not_num2:
@@ -870,6 +881,14 @@ num_codes2:
   lda t_tmp
   ora t_tmp2
   bne @div
+@pad:
+  cpx t_minw
+  bcs @padded
+  lda #0
+  pha
+  inx
+  bra @pad
+@padded:
   ldy #0
 @out:
   pla

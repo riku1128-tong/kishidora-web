@@ -22,6 +22,7 @@ typedef struct {
 
 /* story flags */
 #define ST_OPENING 1
+#define ST_DEBUG_OPEN 4      /* debug: every area and STAGE open (L x3 on the map) */
 #define ST_MIRAGE_RULES 2
 
 typedef struct {

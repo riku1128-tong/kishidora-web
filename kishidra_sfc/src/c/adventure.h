@@ -63,6 +63,13 @@ u16  mat_up_max(u8 m);
 u32  item_value(u8 id);
 void adv_tutorial_loadout(Loadout *lo);
 void commit_tutorial(void);
+/* debug (debug_screens.gd) */
+void debug_open_all(void);
+void debug_goods(void);
+void debug_dex_all(void);
+u8   debug_give(u8 id, const u8 *sk, u8 nsk);   /* 1 = given */
+u16  debug_give_all(void);                      /* one of every weapon and shield */
+u8   debug_dex_count(u8 what);                  /* 0 monsters, 1 weapons + shields, 2 specials */
 #define MEN_TUTORIAL 250
 #define MEN_TRAINING 251
 #endif

@@ -179,7 +179,14 @@ reset_fast:
   jsl spc_boot_far
   ; enable NMI + auto joypad
   lda RDNMI
+.ifdef PROFILE
+  lda #16
+  sta VTIMEL
+  stz VTIMEL+1
+  lda #$a1             ; + V-IRQ: the PC sampler
+.else
   lda #$81
+.endif
   sta NMITIMEN
   ; C environment: DBR=$7E, 8-bit regs, software stack
   AXY8
@@ -788,7 +795,11 @@ c_main_tramp:
 
 .segment "VECTORS"
   ; native: unused, unused, COP, BRK, ABORT, NMI, unused, IRQ
+.ifdef PROFILE
+  .word 0, 0, .loword(brk_trap), .loword(brk_trap), .loword(nmi_dummy), .loword(nmi_vec), 0, .loword(irq_prof)
+.else
   .word 0, 0, .loword(brk_trap), .loword(brk_trap), .loword(nmi_dummy), .loword(nmi_vec), 0, .loword(irq_dummy)
+.endif
   ; emulation: unused, unused, COP, unused, ABORT, NMI, RESET, IRQ/BRK
   .word 0, 0, .loword(nmi_dummy), 0, .loword(nmi_dummy), .loword(nmi_dummy), .loword(reset), .loword(irq_dummy)
 
@@ -798,6 +809,47 @@ nmi_vec:
 nmi_dummy:
 irq_dummy:
   rti
+.ifdef PROFILE
+; profiling build (PROFILE=1 python build.py rom): a V-IRQ every 16 lines stores the
+; interrupted PC/PB in a ring at $7F:F000 (index at $7F:EFFE) for tools/harness/prof.py
+irq_prof:
+  rep #$30
+  .a16
+  .i16
+  pha
+  phx
+  lda f:$7fefff-1
+  and #$0ffc
+  tax
+  lda 6,s
+  sta f:$7ff000,x
+  lda 8,s
+  and #$00ff
+  sta f:$7ff002,x
+  txa
+  clc
+  adc #4
+  sta f:$7fefff-1
+  sep #$20
+  .a8
+  lda f:TIMEUP
+  lda f:prof_line
+  clc
+  adc #16
+  cmp #224
+  bcc :+
+  sbc #224
+:
+  sta f:prof_line
+  sta f:VTIMEL
+  rep #$30
+  plx
+  pla
+  rti
+.segment "LOWBSS"
+prof_line: .res 1
+.segment "STARTUP"
+.endif
 ; BRK/COP: a crash. Red backdrop and stop (the stack keeps the address for debugging)
 brk_trap:
   sei

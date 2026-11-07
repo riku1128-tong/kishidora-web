@@ -214,6 +214,7 @@ void use_skill(u8 slot) {
     ev_post(EV_ST_GAIN, 0, b_st, b_st - st0, 0, 0);
   }
   b_last_special = sp;
+  if (sp != 255) b_sp_done[sp >> 3] |= (u8)(1 << (sp & 7));
   ev_post(EV_ATTACK, 0, slot, sk, sp, cost);
 }
 

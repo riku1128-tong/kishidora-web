@@ -30,6 +30,7 @@ def main():
     ap.add_argument('--tickets', type=int, default=0)
     ap.add_argument('--ending', action='store_true', help='the ending has been seen')
     ap.add_argument('--main', type=int, default=0, help='inventory index equipped as MAIN')
+    ap.add_argument('--dex', type=int, default=0, help='dex: every Nth monster / item / special unknown (0 = all unknown)')
     ap.add_argument('--mats', type=int, default=0)
     ap.add_argument('--items', nargs='*', default=[])
     ap.add_argument('--clear', nargs='*', default=[], help='AREA:MASK (stage bits)')
@@ -64,9 +65,15 @@ def main():
     body += struct.pack('<8B', 1 if a.ending else 0, 1, 1, 0, 6, 1, 8, 8)  # ending, tut, tut_clears, sort, guard_late, story, vols
     body += struct.pack('<4H', a.main, 0xffff, 0xffff, 1)
     body += b''.join(struct.pack('<H', a.mats) for _ in range(n_mat))
-    body += b'\0' * (32 + (n_sp + 7) // 8 + (n_mon + 7) // 8)
-    body += b'\0' * (2 * n_mon)
-    body += b'\0' * n_item
+    def bits(n):
+        b = bytearray((n + 7) // 8)
+        for i in range(n):
+            if a.dex and i % a.dex:
+                b[i >> 3] |= 1 << (i & 7)
+        return bytes(b)
+    body += bits(n_item) + bytes(32 - (n_item + 7) // 8) + bits(n_sp) + bits(n_mon)
+    body += b''.join(struct.pack('<H', (i * 7) % 130 if a.dex and i % a.dex else 0) for i in range(n_mon))
+    body += bytes((i % 5) if a.dex and i % a.dex else 0 for i in range(n_item))
     body += struct.pack('<BBH', 0, 0, 0)
     body += struct.pack('<H', len(inv))
     for iid, sk, slots in inv:

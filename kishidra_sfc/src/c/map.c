@@ -23,7 +23,7 @@ static u8 nodes[N_AREA], nnodes;
 static s16 scroll_y;
 static u8 label_tx, label_ty, label_w;
 
-static u8 mirage_open(void) { return area_done(AR_CASTLE); }
+static u8 mirage_open(void) { return area_done(AR_CASTLE) || (sv.story & ST_DEBUG_OPEN); }
 
 static void make_nodes(void) {
   u8 a;
@@ -152,7 +152,7 @@ static void make_rows(u8 a) {
     rows[nrows].kind = RK_TREASURE; rows[nrows].men = D_TREASURE_MEN; rows[nrows].open = sv.tickets > 0;
     ++nrows;
   }
-  if (a == AR_CASTLE && area_done(AR_CASTLE)) {    /* 金策: after the demon king */
+  if (a == AR_CASTLE && (area_done(AR_CASTLE) || (sv.story & ST_DEBUG_OPEN))) {    /* 金策: after the demon king */
     rows[nrows].kind = RK_MONEY; rows[nrows].men = T_MONEY_MEN; rows[nrows].open = 1; ++nrows;
   }
   if (area_has_shop(a)) {
@@ -332,6 +332,32 @@ static u8 after_battle(void) {
   return MA_NONE;
 }
 
+/* ---------------------------------------------------------------- debug: L x3 / R x3 */
+static u8 lr_key, lr_n;
+static u16 lr_t;
+
+static void debug_open_map(void) {
+  if ((sv.story & ST_DEBUG_OPEN) && sv.area_open == AR_SECRET) { mk_notice(T_DBG_OPEN_ALREADY, 0); return; }
+  if (!mk_confirm(T_DBG_OPEN_ASK, T_DBG_NOUNDO)) return;
+  debug_open_all();
+  map_setup();
+  mk_notice(T_DBG_OPEN_DONE, 0);
+}
+
+/* three presses of the same shoulder button, each within 45 frames of the last */
+static void debug_keys(void) {
+  u8 k;
+  if (!(pad_new & (BTN_L | BTN_R))) return;
+  k = (pad_new & BTN_L) ? 1 : 2;
+  if (k != lr_key || (u16)(frame - lr_t) > 45) lr_n = 0;
+  lr_key = k; lr_t = frame;
+  if (++lr_n < 3) return;
+  lr_n = 0;
+  se_play(SE_OK);
+  if (k == 1) debug_open_map();
+  else { debug_scene(); map_setup(); }
+}
+
 u8 map_scene(u8 mode) {
   u8 a, i;
   sel = sv.cursor;
@@ -381,5 +407,6 @@ u8 map_scene(u8 mode) {
       if (menu_scene() == MA_TITLE) return MA_TITLE;
       map_setup();
     }
+    debug_keys();
   }
 }

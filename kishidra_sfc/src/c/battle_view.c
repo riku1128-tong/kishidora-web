@@ -1034,3 +1034,6 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   hdma_on = 0;
   return result;
 }
+
+/* monster picture assets for other screens (dex): 0 pose descriptor, 1 palette, 2 boss (BG) */
+u16 mon_gfx_get(u8 m, u8 k) { return mon_gfx[m][k]; }

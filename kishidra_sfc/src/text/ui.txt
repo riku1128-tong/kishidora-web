@@ -168,12 +168,6 @@ T_MIRAGE_CLEARED	蜃気楼の斜塔を制覇した！
 T_MIRAGE_RECORD	記録更新！
 T_TREASURE_GET	{s}
 T_ENDING_THANKS	Thank you for playing!
-T_DEX_TITLE	図鑑
-T_DEX_MON	モンスター
-T_DEX_ITEM	武器と盾
-T_DEX_COUNT	{n}/{s}
-T_DEX_UNKNOWN	？？？
-T_DEX_KILLS	倒した数 {n}
 T_OPT_BGM	BGM の音量 {n}
 T_OPT_SE	効果音の音量 {n}
 T_OPT_DIFF	難易度 {s}
@@ -348,3 +342,99 @@ T_NEW_ASK	はじめからにする？
 T_NEW_ASK2	{red}今の記録は消える
 T_MIRAGE_RULES	{gray}地上のボス 18 体と続けて戦う\n（1 WAVE に 1 体・お供なし）\n難易度は蜃気楼の中だけルナティック\nガードやジャストでもダメージを受ける\nWAVE の合間に宝箱を 1 つ選べる\nクリアで 500000 コイン
 T_RES_TUT_GIFT	チュートリアルのごほうび！
+
+# dex (図鑑)
+T_DEX_HEAD	図鑑
+T_DEX_TAB_0	モンスター
+T_DEX_TAB_1	武器
+T_DEX_TAB_2	盾
+T_DEX_TAB_3	必殺技
+T_DEX_TAB_4	スキル
+T_DEX_FOUND	見つけた {n} / {m}
+T_DEX_HAVE	持っている {n} / {m}
+T_DEX_FILTER	{gray}種類：{c0}{s}
+T_DEX_ALL	全部
+T_DEX_SPECIAL	特殊
+T_DEX_NO	{gray}No.{n3}
+T_DEX_UNKNOWN	？？？
+T_DEX_UNKNOWN_GRAY	{gray}？？？
+T_DEX_COUNT	{gray}×{n}
+T_DEX_KEYS	{gray}A:くわしく B:もどる L/R:タブ
+T_DEX_KEYS_F	{gray}A:くわしく B:もどる L/R:タブ SELECT:種類
+T_DEX_CARD_KEYS	{gray}←→  B:もどる
+T_DEX_NOT_YET	まだ見つけていない。
+T_DEX_DOT	・
+T_DEX_ZOKUSEI	属性
+T_DEX_SIZE	サイズ
+T_DEX_WEAK_W	弱点の武器：
+T_DEX_WEAK_E	弱点の属性：
+T_DEX_NONE	なし
+T_DEX_PLACE	出る所：
+T_DEX_PLACE_TUT	チュートリアル
+T_DEX_Q	？
+T_DEX_KILLS	倒した数 {n}
+T_DEX_STUN	スタン {n}
+T_DEX_HP	最大HP +{n}
+T_DEX_GUARD	ふつうのガードでダメージ {n}% カット
+T_DEX_EL_NONE	属性なし
+T_DEX_EL	属性 {s}
+T_DEX_EL_X2	{s}の敵に2倍
+T_DEX_EVO_FROM	進化前：
+T_DEX_EVO_TO	進化後：
+T_DEX_GOT	手に入れた数 {n}・持っている数 {m}
+T_DEX_STAR	{yellow}＊
+T_DEX_HITS	{n}回 {m}%
+T_DEX_ST	{gray}ST {n}
+T_DEX_SP_POWER	威力 {n}% ×{m}回 {s}
+T_DEX_SP_READY_0	{gray}スキルが足りない
+T_DEX_SP_READY_1	装備を変えれば出せる
+T_DEX_SP_READY_2	{yellow}今の装備で出せる！
+T_DEX_SP_LEGEND	{yellow}黄：装備 {c0}白：持ち物 {gray}灰：ない {yellow}＊{gray}：今出せる
+T_DEX_SP_UNK1	まだ出したことがない
+T_DEX_SP_UNK2	スキルを順番に使うと出る
+T_DEX_SK_IN	{yellow}このスキルが入る必殺技
+
+# debug (R x3 / L x3 on the map)
+T_DBG_HEAD	デバッグ
+T_DBG_GIVE	武器・盾をもらう
+T_DBG_GIVE_D	好きな武器か盾を 1 つもらう\n（武器はスキルを選べる）
+T_DBG_GOODS	道具を全部もらう
+T_DBG_GOODS_D	フエルスロット・スロットリセット 99 個\n素材は全部 999 個、たからのチケット 9 枚
+T_DBG_GOODS_NOW	いま：フエルスロット {n}・リセット {m}
+T_DBG_GOODS_NOW2	　　　チケット {n} 枚・{s} {m} 個
+T_DBG_ALL	武器・盾を全種類もらう
+T_DBG_ALL_D	武器と盾を全種類 1 つずつもらう（240 種類）\n（持ち物がいっぱいになるとそこで止まる）
+T_DBG_BAG_NOW	いま：持ち物 {n}/{m}
+T_DBG_DEX	図鑑を全部うめる
+T_DBG_DEX_D	図鑑のモンスター・武器・盾・必殺技を\n全部「見た」にする（スキルの札はそのまま）
+T_DBG_DEX_NOW	いま：モンスター {n}/93・必殺技 {m}/13
+T_DBG_DEX_NOW2	　　　武器と盾 {n}/240
+T_DBG_OPEN	全部のエリアと STAGE を開く
+T_DBG_OPEN_D	月見の島まで、全部のエリアに行ける\nSTAGE はどれでも選べる（クリアの印は付かない）\n蜃気楼の斜塔と魔王城の地下も出る
+T_DBG_OPEN_ALL	{green}いま：全部開いている
+T_DBG_OPEN_NOW	いま：{n} / {m} のエリアまで
+T_DBG_NOUNDO	（元に戻せない）
+T_DBG_GOODS_ASK	道具を全部もらう？
+T_DBG_GOODS_DONE	道具を全部もらった
+T_DBG_ALL_ASK	武器・盾を全種類もらう？
+T_DBG_ALL_DONE	武器・盾を {n} 個もらった
+T_DBG_ALL_PART	{gray}（持ち物がいっぱいで、そこで止めた）
+T_DBG_DEX_ASK	図鑑を全部うめる？
+T_DBG_DEX_DONE	図鑑を全部うめた
+T_DBG_OPEN_ASK	全部のエリアと STAGE を開く？
+T_DBG_OPEN_DONE	全部のエリアと STAGE を開いた
+T_DBG_OPEN_ALREADY	もう全部開いている
+T_DBG_BAG_FULL	持ち物がいっぱい（売ってから）
+T_DBG_GIVE_ASK	{s}をもらう？
+T_DBG_GIVEN	持ち物に入れた
+T_DBG_PICK_HEAD	持ち物 {n}/{m}
+T_DBG_PICK_FULL	{red}持ち物 {n}/{m}（いっぱい）
+T_DBG_PICK_KEYS	{gray}A:もらう B:もどる SELECT:種類
+T_DBG_HAVE	{green}×{n}
+T_DBG_SLOT	スキル{n}：
+T_DBG_NONE	{gray}なし
+T_DBG_AUTO	おまかせ
+T_DBG_TAKE	もらう
+T_DBG_CANCEL	やめる
+T_DBG_NEED_SKILL	スキルを 1 つは選んで
+T_DBG_SK_NONE	{gray}なし（欄を空ける）

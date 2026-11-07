@@ -47,6 +47,13 @@ static void commit_kills(void) {
     b_kills[m] = 0;
   }
   for (m = 0; m < b_ne; ++m) bit_set(sv.found_mons, b_e[m].mon);
+  for (m = 0; m < sizeof(b_seen); ++m) sv.found_mons[m] |= b_seen[m];
+}
+
+/* specials fired this run -> dex (win, retreat and the mirage tower, as in Safari) */
+static void commit_specials(void) {
+  u8 m;
+  for (m = 0; m < sizeof(b_sp_done); ++m) sv.found_sp[m] |= b_sp_done[m];
 }
 
 static void commit_rewards(void) {
@@ -84,6 +91,7 @@ void commit_win(void) {
   res.opened = 255;
   commit_rewards();
   commit_kills();
+  commit_specials();
   if (is_treasure()) {
     if (sv.tickets) --sv.tickets;
     men_clear(b_area, b_men);
@@ -109,7 +117,7 @@ void commit_lose(void) {
   save_write();
 }
 
-void commit_leave(void) { commit_lose(); }
+void commit_leave(void) { commit_specials(); commit_lose(); }
 
 /* mirage: score = wave * 2 + clear; ties go to fewer turns */
 void commit_mirage(u8 clear) {
@@ -137,6 +145,7 @@ void commit_mirage(u8 clear) {
     res.coins = MIRAGE_COINS;
   }
   commit_kills();
+  commit_specials();
   save_write();
 }
 
@@ -415,4 +424,55 @@ void commit_tutorial(void) {
   }
   b_nitems = res.nitems;
   save_write();
+}
+
+/* ---------------------------------------------------------------- debug (debug_screens.gd) */
+void debug_open_all(void) {
+  sv.area_open = AR_SECRET;
+  sv.story |= ST_DEBUG_OPEN;
+  save_write();
+}
+
+void debug_goods(void) {
+  u8 m;
+  for (m = 0; m < N_MAT; ++m) mat_add(m, D_MAT_MAX);   /* goods clamp at T_GOODS_MAX */
+  sv.tickets = D_TICKET_MAX;
+  save_write();
+}
+
+void debug_dex_all(void) {
+  u8 i;
+  for (i = 0; i < N_DEX_MON; ++i) bit_set(sv.found_mons, dex_mon[i]);
+  for (i = 0; i < N_DEX_ITEM; ++i) bit_set(sv.found_items, dex_item[i]);
+  for (i = 0; i < N_SPECIAL; ++i) bit_set(sv.found_sp, i);
+  save_write();
+}
+
+u8 debug_dex_count(u8 what) {
+  u8 i, n = 0;
+  if (what == 0) { for (i = 0; i < N_DEX_MON; ++i) n += bit_get(sv.found_mons, dex_mon[i]); }
+  else if (what == 1) { for (i = 0; i < N_DEX_ITEM; ++i) n += bit_get(sv.found_items, dex_item[i]); }
+  else { for (i = 0; i < N_SPECIAL; ++i) n += bit_get(sv.found_sp, i); }
+  return n;
+}
+
+u8 debug_give(u8 id, const u8 *sk, u8 nsk) {
+  if (inv_add(id, sk, nsk, -1, 0) == NO_ITEM) return 0;
+  save_write();
+  return 1;
+}
+
+u16 debug_give_all(void) {
+  u16 n = 0;
+  u8 i, id, nsk, sk[3];
+  for (i = 0; i < N_DEX_ITEM; ++i) {
+    if (sv.ninv + 1 >= D_INV_MAX) break;    /* keep one place: a full bag cannot start a stage */
+    id = dex_item[i];
+    nsk = 0;
+    if (!item_is_shield(id) && id != ITEM_FUUIN) roll_skills(items[id].type, sk, &nsk);
+    if (inv_add(id, sk, nsk, -1, 0) == NO_ITEM) break;
+    ++n;
+  }
+  save_write();
+  return n;
 }

@@ -11,6 +11,7 @@ void result_scene(u8 outcome) {
   else if (b_mode == BM_TRAINING) { memset(&res, 0, sizeof(res)); res.orb = res.opened = 255; }
   else if (b_mirage) commit_mirage(outcome == 1);
   else if (outcome == 1) commit_win();
+  else if (outcome == 2) commit_leave();
   else commit_lose();
   for (i = 0; i < N_MAT; ++i) bags += b_mats[i];
   mk_screen();
