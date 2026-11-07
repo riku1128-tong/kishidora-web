@@ -172,7 +172,7 @@ static void mk_item_name(u8 bx, u16 x, u8 y, const Inv *it, u8 fixed) {
   u16 px;
   say(bx, x, y, ITEMN_0 + it->id);
   if (!n) return;
-  px = (x + msg_width(ITEMN_0 + it->id) + 7) & ~7;
+  px = (x + msg_width(ITEMN_0 + it->id) + 2 + 7) & ~7;   /* at least 2 px, then its own tile */
   if (fixed) px = MAX(px, (x + 112 + 7) & ~7);
   sayn(bx, px, y, TXT_PLUS, n);
 }

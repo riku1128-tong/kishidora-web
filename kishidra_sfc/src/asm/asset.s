@@ -314,9 +314,10 @@ CFUNC asset_map
   dey
   bra @e
 @done:
-  A8
-  lda _ea+2
+  lda _ea+2            ; A16: the high byte must not reach X
+  and #$0003
   tax
+  A8
   lda bgbits,x
   ora _bgmap_dirty
   sta _bgmap_dirty

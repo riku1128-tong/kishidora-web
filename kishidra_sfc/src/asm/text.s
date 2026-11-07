@@ -1030,8 +1030,8 @@ draw_run:
 @samepal:
   jmp @loop
 @glyph:
-  ; kinsoku: when the next glyph must not start a line (、。！？）… small kana), this glyph
-  ; wraps if the two do not fit together
+  ; kinsoku: when the glyphs after this one must not start a line (、。！？）… small kana, also
+  ; runs such as …… or ！！), this glyph wraps if it does not fit together with all of them
   sta t_code
   stz t_pair
   lda _text_wrap
@@ -1039,18 +1039,29 @@ draw_run:
   lda t_flags
   and #8
   bne @draw
-  lda [t_src]
+  phy
+  ldy #0
+@kin:
+  lda [t_src],y
   cmp #16
-  bcc @draw
+  bcc @kin_end
   sec
   sbc #16
   tax
   lda f:font_width,x
   and #$00ff
   bit #$0080
-  beq @draw
+  beq @kin_end
   and #$007f
+  clc
+  adc t_pair
   sta t_pair
+  iny
+  iny
+  cpy #8               ; up to 4 glyphs
+  bcc @kin
+@kin_end:
+  ply
 @draw:
   lda t_code
   jsr draw_glyph

@@ -32,7 +32,10 @@ u8 title_scene(u8 has_save) {
     if (pad_new & (BTN_A | BTN_START)) {
       se_play(SE_OK);
       if (sel == 1 && has_save) {
-        if (!mk_confirm(T_NEW_ASK, T_NEW_ASK2)) continue;
+        if (!mk_confirm(T_NEW_ASK, T_NEW_ASK2)) {
+          oam_next = 0; oam_finish();   /* its cursor goes with the dialog */
+          continue;
+        }
       }
       break;
     }

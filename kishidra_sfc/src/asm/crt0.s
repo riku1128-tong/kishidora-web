@@ -16,6 +16,7 @@
 .export _pad_lat, _rep_lat, _bg3_vram, _nmi_pc, _brk_info
 .export _ea, _oam, _cgram, _cgram_dirty, _scroll, _tm_main, _tm_sub, _bright, _joy, _joy_new, _joy_rep
 .export _frame, _bgmap_dirty, _nmi_ready, _vq_count, _vq_head, _vq, _bgmode, _cgadsub, _cgwsel, _coldata, _hdma_on
+.export _spr_q, _spr_on, _mq, _mq_on, _nmi_late
 .export _bg1map, _bg2map, _bg3map, _oam_hide, _lag
 .export vq_push, _hdma_tab1, _hdma_tab2, _mosaic
 
@@ -56,6 +57,9 @@ skip:
 .endmacro
 
 
+SPR_SLOTS = 10            ; must match src/c/sfc.h
+MQ_SLOTS = 4
+
 .segment "LOWBSS"
 _ea:          .res 32      ; argument block for engine calls (16 words)
 _oam:         .res 544
@@ -94,6 +98,15 @@ nmi_tmp:      .res 2
 nmi_budget:   .res 2
 vq_lock:      .res 1
 nmi_front:    .res 1
+; sent before everything else, with the OAM: the tiles of the sprite poses this OAM draws
+; (battle: hero, zako), so a pose never shows with another pose's tiles.  C keeps them within
+; the budget.  vaddr(2) src(2) bank(1) size(2, 0 = empty) -(1)
+_spr_q:       .res 8*SPR_SLOTS
+_spr_on:      .res 1       ; any slot set
+; text canvases that change with the BG3 map: both go in the same NMI or both wait
+_mq:          .res 8*MQ_SLOTS
+_mq_on:       .res 1
+_nmi_late:    .res 1       ; the BG3 map (with _mq) did not fit the last NMI: the queue waited too
 
 .segment "BSS"
 _bg1map: .res 2048
@@ -101,6 +114,7 @@ _bg2map: .res 2048
 _bg3map: .res 2048
 
 VQ_MAX = 24
+VQ_ENTRY = 48
 
 ; BG tilemap VRAM word addresses (must match src/c/sfc.h)
 BG1MAP_VRAM = $7000
@@ -380,9 +394,10 @@ nmi_fast:
 
 ; upload OAM, palettes, tilemaps and queued DMA within one byte budget, so that the uploads end
 ; inside vblank (NTSC: lines 225-261, about 157 bytes of DMA a line; measured with PROFILE=1,
-; see nmi_vline): OAM, CGRAM, the BG3 map,
-; one of the BG1 / BG2 maps when 2KB are left, then queue entries with what is left.  What does
-; not fit stays dirty / queued for the next NMI.
+; see nmi_vline): OAM and the pose tiles it draws (_spr_q), CGRAM, the BG3 map together with the
+; canvases that change with it (_mq), one of the BG1 / BG2 maps when 2KB are left, then queue
+; entries with what is left (none while the BG3 map waits: a canvas would show under the old
+; map).  What does not fit stays dirty / queued for the next NMI.
 NMI_BUDGET = 4864
 nmi_uploads:
   .a8
@@ -403,9 +418,52 @@ nmi_uploads:
   stx DAS0L
   lda #$01
   sta MDMAEN
-  ; palette
+;-- the pose tiles of this OAM
+  lda _spr_on
+  beq @nospr
+  stz _spr_on
+  ldx #0
+@spr:
+  A16
+  lda _spr_q+5,x
+  beq @spr_next
+  sta DAS0L
+  eor #$ffff
+  sec
+  adc nmi_budget
+  sta nmi_budget
+  lda _spr_q+0,x
+  sta VMADDL
+  lda _spr_q+2,x
+  sta A1T0L
+  lda #$1801
+  sta DMAP0
+  stz _spr_q+5,x
+  A8
+  lda _spr_q+4,x
+  sta A1B0
+  lda #$80
+  sta VMAIN
+  lda #$01
+  sta MDMAEN
+  A16
+@spr_next:
+  txa
+  clc
+  adc #8
+  tax
+  A8
+  cpx #8*SPR_SLOTS
+  bne @spr
+@nospr:
+;-- palette (when it fits)
   lda _cgram_dirty
   beq @nopal
+  A16
+  lda nmi_budget
+  cmp #512
+  A8
+  bcc @nopal
   stz CGADD
   ldx #$2200
   stx DMAP0
@@ -424,16 +482,96 @@ nmi_uploads:
   sta nmi_budget
   A8
 @nopal:
-  ; tilemaps (whole maps): BG3, then BG1 or BG2
+;-- the BG3 map and the canvases that change with it: together or not at all
+  A16
+  lda _bgmap_dirty
+  and #$0004
+  beq :+
+  lda #2048
+:
+  sta nmi_tmp          ; bytes needed
+  A8
+  lda _mq_on
+  beq @mq_summed
+  ldx #0
+  A16
+@mqsum:
+  lda _mq+5,x
+  clc
+  adc nmi_tmp
+  sta nmi_tmp
+  txa
+  clc
+  adc #8
+  tax
+  cpx #8*MQ_SLOTS
+  bne @mqsum
+  A8
+@mq_summed:
+  stz _nmi_late
+  A16
+  lda nmi_tmp
+  bne :+
+  A8
+  jmp @maps            ; nothing for BG3
+:
+  .a16
+  cmp nmi_budget
+  bcc @group
+  beq @group
+  A8
+  lda #1               ; next NMI (the queue waits too: a canvas must not come before its map)
+  sta _nmi_late
+  jmp @maps
+@group:
+  .a16
+  lda nmi_budget
+  sec
+  sbc nmi_tmp
+  sta nmi_budget
+  A8
+  lda _mq_on
+  beq @nomq
+  stz _mq_on
+  ldx #0
+@mq:
+  A16
+  lda _mq+5,x
+  beq @mq_next
+  sta DAS0L
+  lda _mq+0,x
+  sta VMADDL
+  lda _mq+2,x
+  sta A1T0L
+  lda #$1801
+  sta DMAP0
+  stz _mq+5,x
+  A8
+  lda _mq+4,x
+  sta A1B0
+  lda #$80
+  sta VMAIN
+  lda #$01
+  sta MDMAEN
+  A16
+@mq_next:
+  txa
+  clc
+  adc #8
+  tax
+  A8
+  cpx #8*MQ_SLOTS
+  bne @mq
+@nomq:
+  lda _bgmap_dirty
+  bit #$04
+  beq @maps
   lda #$80
   sta VMAIN
   ldx #$1801
   stx DMAP0
   lda #$7e
   sta A1B0
-  lda _bgmap_dirty
-  bit #$04
-  beq @nobg3
   ldx #BG3MAP_VRAM
   stx VMADDL
   ldx #.loword(_bg3map)
@@ -445,13 +583,9 @@ nmi_uploads:
   lda _bgmap_dirty
   and #$fb
   sta _bgmap_dirty
-  A16
-  lda nmi_budget
-  sec
-  sbc #2048
-  sta nmi_budget
-  A8
-@nobg3:
+;-- one of the BG1 / BG2 maps when 2KB are left
+@maps:
+  .a8
   A16
   lda nmi_budget
   cmp #2048
@@ -460,6 +594,14 @@ nmi_uploads:
   lda _bgmap_dirty
   and #$03
   beq @maps_done
+  pha
+  lda #$80
+  sta VMAIN
+  ldx #$1801
+  stx DMAP0
+  lda #$7e
+  sta A1B0
+  pla
   cmp #$03
   bne @one
   lda _frame           ; both dirty: take turns
@@ -500,7 +642,10 @@ nmi_uploads:
   sta nmi_budget
   A8
 @maps_done:
+  lda _nmi_late
+  bne :+
   jsr vq_run
+:
   rts
 
 .ifdef PROFILE
@@ -608,18 +753,26 @@ vq_run:
   jmp @done
 :
   A16
-  lda _vq+5,y        ; size
+  lda _vq+5,y        ; size, and the time to set up an entry (about 48 bytes of DMA)
+  clc
+  adc #VQ_ENTRY
   cmp nmi_tmp
   bcc @fits
   beq @fits
   ; does not fit: if nothing but OAM went this frame, still do it (large single entry)
   lda nmi_tmp
   cmp #NMI_BUDGET - 544
-  bne @stop
+  beq @fits
+  jmp @stop
 @fits:
   lda nmi_tmp
   sec
   sbc _vq+5,y
+  bcs :+
+  lda #0
+:
+  sec
+  sbc #VQ_ENTRY
   bcs :+
   lda #0
 :

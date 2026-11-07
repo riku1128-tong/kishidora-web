@@ -666,13 +666,27 @@ class Gen:
 
     TUT_GOALS = ['', 'skill', 'skill2', 'meat', 'defeat', 'guard', 'just', 'miracle', 'special', 'target']
 
+    def fit_lines(self, lines, maxw=236):
+        """a line wider than the tutorial window (236 px of text) breaks after its last '、' that
+        fits, not where the wrap happens to fall (e.g. inside a word)"""
+        out = []
+        for ln in lines:
+            while self.tx.width(ln) > maxw:
+                cut = [k + 1 for k, ch in enumerate(ln) if ch == '、' and self.tx.width(ln[:k + 1]) <= maxw and k + 1 < len(ln)]
+                if not cut:
+                    break
+                out.append(ln[:cut[-1]])
+                ln = ln[cut[-1]:]
+            out.append(ln)
+        return out
+
     def build_tutorial(self):
         T = self.T
         steps = T['TUTORIAL_STEPS']
         goals = []
         for i, st in enumerate(steps):
             self.text('TUTT_%d' % i, st['title'])
-            self.text('TUTL_%d' % i, '\n'.join(st['lines']))
+            self.text('TUTL_%d' % i, '\n'.join(self.fit_lines(st['lines'])))
             self.text('TUTH_%d' % i, st.get('hint', '') or ' ')
             goals.append(self.TUT_GOALS.index(st.get('goal', '')))
         self.define('N_TUT_STEP', len(steps))
@@ -683,10 +697,10 @@ class Gen:
         tt = T['TUTORIAL_TEXT']
         for k in ('retry', 'giveup', 'clear', 'hint_title'):
             self.text('TUTX_' + k.upper(), tt[k])
-        self.text('TUTX_GIVEUP_LINES', '\n'.join(tt['giveup_lines']))
-        self.text('TUTX_GUARD_NG', '\n'.join(tt['guard_ng']))
-        self.text('TUTX_HINT_LINES', '\n'.join(tt['hint_lines']))
-        self.text('TUTX_TARGET_HINT', '\n'.join(tt['target_hint_lines']))
+        self.text('TUTX_GIVEUP_LINES', '\n'.join(self.fit_lines(tt['giveup_lines'])))
+        self.text('TUTX_GUARD_NG', '\n'.join(self.fit_lines(tt['guard_ng'])))
+        self.text('TUTX_HINT_LINES', '\n'.join(self.fit_lines(tt['hint_lines'])))
+        self.text('TUTX_TARGET_HINT', '\n'.join(self.fit_lines(tt['target_hint_lines'])))
         s = self.s
         for i, sk in enumerate(s.num('TUTORIAL_SUB_SKILLS')[:3]):
             self.define('TUTORIAL_SUB_SKILL_%d' % i, 255 if sk == 'SK_NONE' else self.skill_index[sk])

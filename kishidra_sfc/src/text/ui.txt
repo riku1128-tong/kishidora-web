@@ -440,14 +440,14 @@ T_DBG_GOODS_D	フエルスロット・スロットリセット 99 個\n素材は
 T_DBG_GOODS_NOW	いま：フエルスロット {n}・リセット {m}
 T_DBG_GOODS_NOW2	　　　チケット {n} 枚・{s} {m} 個
 T_DBG_ALL	武器・盾を全種類もらう
-T_DBG_ALL_D	武器と盾を全種類 1 つずつもらう（240 種類）\n持ち物がいっぱいになると、そこで止まる
+T_DBG_ALL_D	武器と盾を全種類 1 つずつもらう\n（240 種類。持ち物がいっぱいになると、\nそこで止まる）
 T_DBG_BAG_NOW	いま：持ち物 {n}/{m}
 T_DBG_DEX	図鑑を全部うめる
 T_DBG_DEX_D	図鑑のモンスター・武器・盾・必殺技を\n全部「見た」にする\n（スキルの札はそのまま）
 T_DBG_DEX_NOW	いま：モンスター {n}/93・必殺技 {m}/13
 T_DBG_DEX_NOW2	　　　武器と盾 {n}/240
 T_DBG_OPEN	全部のエリアと STAGE を開く
-T_DBG_OPEN_D	月見の島まで、全部のエリアに行ける\nSTAGE はどれでも選べる（クリアの印は付かない）\n蜃気楼の斜塔と魔王城の地下も出る
+T_DBG_OPEN_D	月見の島まで、全部のエリアに行ける\nSTAGE はどれでも選べる（印は付かない）\n蜃気楼の斜塔と魔王城の地下も出る
 T_DBG_OPEN_ALL	{green}いま：全部開いている
 T_DBG_OPEN_NOW	いま：{n} / {m} のエリアまで
 T_DBG_NOUNDO	（元に戻せない）

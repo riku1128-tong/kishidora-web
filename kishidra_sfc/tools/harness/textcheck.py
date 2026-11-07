@@ -10,6 +10,7 @@ Prints one line per distinct finding: script, the step (last 'shot' name or pres
 box, text id name, x, y."""
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -79,7 +80,14 @@ def expand(script):
 
 
 def run(script, names):
-    td = tempfile.mkdtemp()
+    td = tempfile.mkdtemp()                       # the WRAM dumps (128KB each): removed when done
+    try:
+        return check(script, names, td)
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+
+def check(script, names, td):
     lines, labels = expand(script)
     lines = [l.replace('@', td + '/w') + '.bin' if l.startswith('wram @') else l for l in lines]
     sc = os.path.join(td, 's.txt')

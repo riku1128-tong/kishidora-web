@@ -43,6 +43,12 @@ void tb_rect_now(u8 box);
 void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour);   /* filled pixels in the canvas */
 void tb_flush(u8 box);
 void tb_flush_rows(u8 box, u8 r0, u8 nr);
+extern u8 tb_front;               /* set: tb_flush queues ahead of what is queued */
+void tb_flush_sync(u8 box);       /* in the same NMI as the BG3 map (call mq_room first) */
+void tb_flush_rows_sync(u8 box, u8 r0, u8 nr);
+void mq_room(u16 bytes);          /* before changing a box flushed with tb_flush_sync */
+u8 mq_fits(u16 bytes);
+u16 mq_bytes(void);
 void tb_text(u8 box);
 void tb_codes(u8 box);
 u16  text_width(void);

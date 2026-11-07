@@ -101,9 +101,10 @@ static u16 frame_ct;
 static u8 lose_t, win_t;
 static u8 sp_frame_t;
 static u8 last_attack_sp;
+static u8 pause_req;           /* START during a cut-in: the menu opens after it */
 static u8 prof_ready;
 
-typedef struct { s16 x, y; u32 v; u8 t, col; } Num;
+typedef struct { s16 x, y; u8 t, col, n, dig[8]; } Num;   /* digits worked out once (32-bit division is slow) */
 #define NUM_MAX 8
 static Num nums[NUM_MAX];
 typedef struct { s16 x, y; u8 t, cell; } Fx;
@@ -111,10 +112,15 @@ typedef struct { s16 x, y; u8 t, cell; } Fx;
 static Fx fxs[FX_MAX];
 
 static void num_add(s16 x, s16 y, u32 v, u8 col) {
-  u8 i;
+  u8 i, n = 0, d[8];
+  Num *p;
   for (i = 0; i < NUM_MAX; ++i) if (!nums[i].t) break;
   if (i == NUM_MAX) i = 0;
-  nums[i].x = x; nums[i].y = y; nums[i].v = v; nums[i].t = 45; nums[i].col = col;
+  p = &nums[i];
+  do { d[n++] = (u8)(v % 10); v /= 10; } while (v && n < 8);
+  for (i = 0; i < n; ++i) p->dig[i] = d[n - 1 - i];   /* most significant first */
+  p->n = n;
+  p->x = x; p->y = y; p->t = 45; p->col = col;
 }
 
 static void fx_add(s16 x, s16 y, u8 cell) {
@@ -154,23 +160,56 @@ static void pose_fill(Actor *a) {
 
 static u16 rd16(const u8 *p) { return p[0] | ((u16)p[1] << 8); }
 
-/* queue the tiles of zako pose p of slot k */
-static void zako_upload(u8 k, u8 p) {
-  Actor *a = &act[k];
-  const u8 *d = zdesc[a->slot] + a->off[p];
-  u16 aid = rd16(d + 1), size;
-  u16 buf = 0x4800 + a->slot * 0x0800;   /* $7F:3800-$3FFF is the canvas of BG3 tiles 896-1023 */
-  size = unpack(aid, buf);
-  if (size > 2048) size = 2048;
-  queue_vram(OBJ_VRAM(STRIP_ZAKO + a->slot), buf, 0x7f, size);
-  a->cur = p;
+/* a new pose: its tiles go with the OAM that draws it (pose_tiles) */
+static void zako_upload(u8 k, u8 p) { act[k].cur = p; }
+static void hero_upload(u8 p) { hero_pose_now = p; }
+
+/* the tiles of the poses to draw, unpacked and sent in the NMI that also sends this OAM
+ * (crt0.s _spr_q: slot 0 hero, 1-3 zako), so a pose never shows with another pose's tiles.  The
+ * NMI has 4320 bytes after the OAM; the BG3 map waits for this unless it already waited (then
+ * the pose waits a frame), the palette too. */
+#define SPR_ROOM (4864 - 544)
+static void pose_tiles(void) {
+  s16 room = SPR_ROOM - (s16)spr_bytes();
+  u16 size, buf;
+  u8 i;
+  const u8 *d;
+  Actor *a;
+  if (cgram_dirty) room -= 512;
+  if (nmi_late) room -= ((bgmap_dirty & 4) ? 2048 : 0) + (s16)mq_bytes();
+  if (hero_pose_now != 255 && hero_pose_now != hero_shown) {
+    d = hdesc + hero_off[hero_pose_now];
+    size = (u16)d[3] * 2048;
+    if (size > 4096) size = 4096;
+    room += (s16)(spr_q[5] | ((u16)spr_q[6] << 8));     /* replaced */
+    if ((s16)size <= room) {
+      unpack(rd16(d + 1), 0x2000);
+      spr_put(0, OBJ_VRAM(STRIP_HERO), 0x2000, 0x7f, size);
+      hero_shown = hero_pose_now;
+      room -= (s16)size;
+    } else room -= (s16)(spr_q[5] | ((u16)spr_q[6] << 8));
+  }
+  for (i = 0; i < b_ne; ++i) {
+    a = &act[i];
+    if (a->boss || a->cur == 255 || a->cur == a->shown) continue;
+    if ((s16)2048 > room + (s16)(spr_q[(1 + a->slot) * 8 + 5] | ((u16)spr_q[(1 + a->slot) * 8 + 6] << 8))) continue;   /* next frame */
+    room += (s16)(spr_q[(1 + a->slot) * 8 + 5] | ((u16)spr_q[(1 + a->slot) * 8 + 6] << 8));
+    d = zdesc[a->slot] + a->off[a->cur];
+    buf = 0x4800 + a->slot * 0x0800;   /* $7F:3800-$3FFF is the canvas of BG3 tiles 896-1023 */
+    size = unpack(rd16(d + 1), buf);
+    if (size > 2048) size = 2048;
+    spr_put(1 + a->slot, OBJ_VRAM(STRIP_ZAKO + a->slot), buf, 0x7f, size);
+    a->shown = a->cur;
+    room -= (s16)size;
+  }
 }
 
-static void hero_upload(u8 p) {
-  const u8 *d = hdesc + hero_off[p];
-  u16 aid = rd16(d + 1), size = unpack(aid, 0x2000);
-  queue_vram_front(OBJ_VRAM(STRIP_HERO), 0x2000, 0x7f, MIN(size, 4096));   /* one NMI: a pose never shows half new */
-  hero_pose_now = p;
+/* every pose's tiles in VRAM (battle start, screen off) */
+static u8 poses_waiting(void) {
+  u8 i;
+  if (hero_pose_now != hero_shown) return 1;
+  for (i = 0; i < b_ne; ++i) if (!act[i].boss && act[i].cur != act[i].shown) return 1;
+  return spr_on;
 }
 
 /* boss: tiles to the free buffer now, map written when the tiles have arrived */
@@ -291,7 +330,8 @@ static void misc_setup(void) {
   panel_icons();
 }
 
-/* skill icon of slot s (current) into misc strip tiles 2+s*2 */
+/* skill icon of slot s (current) into misc strip tiles 2+s*2, with the OAM that shows it
+ * (_spr_q slots 4-9: the icon changes together with its card's sprites and text) */
 static u8 skill_icon_shown[3];
 static u8 skill_sel[N_SKILL];
 static void skill_icons_update(void) {
@@ -305,8 +345,8 @@ static void skill_icons_update(void) {
     skill_icon_shown[s] = sk;
     if (sk == SK_NONE) continue;
     src = at + (u16)sk * 128;
-    queue_vram(OBJ_VRAM(STRIP_MISC) + (2 + s * 2) * 16, src, bank, 64);
-    queue_vram(OBJ_VRAM(STRIP_MISC) + (18 + s * 2) * 16, src + 64, bank, 64);
+    spr_put(4 + s * 2, OBJ_VRAM(STRIP_MISC) + (2 + s * 2) * 16, src, bank, 64);
+    spr_put(5 + s * 2, OBJ_VRAM(STRIP_MISC) + (18 + s * 2) * 16, src + 64, bank, 64);
   }
 }
 
@@ -436,58 +476,35 @@ static void rows_restore(u8 y, u8 h) {
   bgmap_dirty |= 4;
 }
 
-/* the banner, hero and combo boxes: shown again after being hidden, their cells stay blank
- * until the new text is in VRAM (else the old text shows for a frame) */
-static u16 pend_cells[3][96];
-static u8 pend_on;             /* bit k: pend_cells[k] holds the cells of box pend_box[k] */
-static const u8 pend_box[3] = { BX_BANNER, BX_HERO, BX_COMBO };
-static void box_cells(u8 id, u16 *buf, u8 save) {
-  u8 *b = &tb[id * 8];
-  u8 y;
-  u16 i;
-  for (y = 0; y < b[3]; ++y) {
-    i = ((u16)(b[1] + y) << 5) + b[0];
-    if (save) { memcpy(buf, &bg3map[i], (u16)b[2] * 2); memset(&bg3map[i], 0, (u16)b[2] * 2); }
-    else memcpy(&bg3map[i], buf, (u16)b[2] * 2);
-    buf += b[2];
-  }
-  bgmap_dirty |= 4;
-}
-
-static void pend_show(u8 k) {           /* after the box's text is flushed */
-  box_cells(pend_box[k], pend_cells[k], 1);
-  pend_on |= 1 << k;
-}
-
-static void pend_drop(u8 k) { pend_on &= ~(1 << k); }
-
-static void pend_poll(void) {
-  u8 k, *b;
-  for (k = 0; k < 3; ++k) {
-    if (!(pend_on & (1 << k))) continue;
-    b = &tb[pend_box[k] * 8];
-    if (canvas_busy(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3])) continue;
-    box_cells(pend_box[k], pend_cells[k], 0);
-    pend_on &= ~(1 << k);
-  }
-}
-
+/* the banner, hero and combo boxes: their text goes in the NMI that takes their map cells
+ * (tb_flush_sync), so a message never shows the old text in its colours, the new text in the old
+ * colours, or the old text for a frame when the box is shown again */
 /* windows over the field (talk, tutorial, pause, mirage chests): modal_open, the text, then
  * modal_show.  The banners stop; the panel text and its sprites go while the window has its
  * tiles; the top bar and the HP numbers stay. */
+static void draw_sprites(void);
+static u8 panel_shown;         /* the panel text still shows (its tiles become the window's) */
 static void modal_open(u8 x, u8 y, u8 w, u8 h) {
   if (!modal_on) {
     banner_t = hero_msg_t = 0;
-    pend_on = 0;
     box_hide(BX_BANNER); box_hide(BX_HERO); box_hide(BX_COMBO);
-    box_hide(BX_TABS); box_hide(BX_CARDS); box_hide(BX_NEXT);
     modal_on = 1;
+    panel_shown = 1;
+    flash_t = 0; cgadsub = 0; coldata[0] = coldata[1] = coldata[2] = 0;   /* colour math stops too */
+    canvas_wait(TL_WIN, 352);  /* no upload of the panel text may read these tiles once the window is in them */
   }
   box(BX_PANEL, x, y, w, h, TL_WIN, PAL_W, BOX_WINDOW);
 }
 
+/* the window's text is in its canvas: the panel text and its sprites go, the window comes
+ * (the panel shows until now: its tiles in VRAM are still its own) */
 static void modal_show(void) {
   u8 *b = &tb[BX_PANEL * 8];
+  if (panel_shown) {
+    box_hide(BX_TABS); box_hide(BX_CARDS); box_hide(BX_NEXT);
+    draw_sprites();
+    panel_shown = 0;
+  }
   rows_hold(b[1], b[3]);
   tb_flush(BX_PANEL);
   canvas_wait(TL_WIN, (u16)b[2] * b[3]);
@@ -500,7 +517,9 @@ static void modal_close(void) {
   box_hide(BX_PANEL);
   modal_on = 0;
   hud_panel_boxes();
+  tb_front = 1;                /* ahead of what is queued (a wave's boss tiles) */
   draw_panel();
+  tb_front = 0;
   rows_hold(18, 10);
   canvas_wait(TL_TABS, 320);
   rows_restore(18, 10);
@@ -602,7 +621,7 @@ static void draw_panel(void) {
     say(BX_TABS, x + 8, 4, TXT_BTN_Y + c);
     if (sk == SK_NONE) {
       panel_part(c, 0, 1); panel_part(c, 1, 1);
-      say_small_mid(BX_CARDS, c, 16, TXT_NONE_GRAY, small_width(TXT_NONE_GRAY));
+      say_small_mid(BX_CARDS, c, 28, TXT_NONE_GRAY, small_width(TXT_NONE_GRAY));   /* the name's place */
       continue;
     }
     panel_part(c, 0, 0); panel_part(c, 1, 0);
@@ -620,10 +639,12 @@ static void draw_panel(void) {
       targ_str = nm;
       say_small_mid(BX_CARDS, c, 28, can ? TXT_S : TXT_S_GRAY, small_width(nm));
     }
-    if (!is_locked(c)) {
+    if (!is_locked(c)) {         /* in the badge's disc (screen rows 164-171): the 8-dot digits */
       targ_num = cost;
-      w = msg_width(TXT_N_WHITE);
-      say(BX_CARDS, x + 48 - w / 2, 2, cost > b_st ? TXT_N_RED : TXT_N_WHITE);   /* inside the badge's disc */
+      w = small_width(TXT_N_WHITE);
+      text_small = 8;
+      say(BX_CARDS, x + 48 - w / 2, 4, cost > b_st ? TXT_N_RED : TXT_N_WHITE);
+      text_small = 0;
     }
     /* NEXT: the label, the next skill's cost (gray badge) and name */
     say(BX_NEXT, x + 8, 3, TXT_NEXT_LABEL);
@@ -641,46 +662,57 @@ static void draw_panel(void) {
   say(BX_CARDS, 192 + 8, 1, TXT_BTN_B);
   say_small_mid(BX_CARDS, 3, 28, TXT_GUARD_LABEL, small_width(TXT_GUARD_LABEL));
   say(BX_NEXT, 192 + 8, 3, TXT_BTN_R);
-  tb_flush(BX_TABS); tb_flush(BX_CARDS); tb_flush(BX_NEXT);
+  tb_flush(BX_TABS); tb_flush(BX_NEXT);
+  /* the cards (costs rows 0-1, names rows 3-4; row 2 is empty) with the map: a name or a cost
+   * never shows half old, or in the last colours; when that does not fit now, the queue */
+  if (!tb_front && mq_fits(2 * 32 * 2 * 16)) {   /* (modal_close holds the rows anyway: the queue's front) */
+    tb_flush_rows_sync(BX_CARDS, 0, 2); tb_flush_rows_sync(BX_CARDS, 3, 2);
+    tb_flush_rows(BX_CARDS, 2, 1);   /* blank, but a window may have left its text in these tiles */
+  } else tb_flush(BX_CARDS);
   panel_dirty = 0;
 }
 
 /* the banner (rows 4-6, above the enemies' bubbles and numbers) */
 static void banner(u16 msg, u8 pal, u8 t) {
-  u8 was = banner_t;
   if (modal_on) return;
+  mq_room(32 * 3 * 16);
   box(BX_BANNER, 0, 4, 32, 3, TL_BANNER, pal, 0);
   say_center(BX_BANNER, 6, msg);
-  tb_flush(BX_BANNER);
-  if (!was) pend_show(0);
+  tb_flush_sync(BX_BANNER);
   banner_t = t;
   banner_sp = 0;
 }
 
-/* a message over the hero's head (rows 7-8, x 0-119) */
-static void hero_msg(u16 msg, u8 pal) {
-  u8 was = hero_msg_t;
+/* a message over the hero's head (rows 7-8, x 0-119); ribbon: on a dark band from the left edge
+ * (the phone's skill ribbon) */
+static void hero_box(u16 msg, u8 pal, u8 ribbon) {
+  u16 w;
+  u8 tw = 15;
   if (modal_on) return;
-  box(BX_HERO, 0, 7, 15, 2, TL_HERO, pal, 0);
-  say_center(BX_HERO, 2, msg);
-  tb_flush(BX_HERO);
-  if (!was) pend_show(1);
+  mq_room(15 * 2 * 16);
+  w = msg_width(msg);
+  if (ribbon) { tw = (u8)((w + 20 + 7) >> 3); if (tw > 15) tw = 15; }
+  box_hide(BX_HERO);           /* the width changes: no cells of the last one stay */
+  box(BX_HERO, 0, 7, tw, 2, TL_HERO, pal, ribbon ? BOX_OPAQUE : 0);
+  say(BX_HERO, ribbon ? 8 : (w < 120 ? (120 - w) / 2 : 0), 2, msg);
+  tb_flush_sync(BX_HERO);
   hero_msg_t = 40;
 }
+
+static void hero_msg(u16 msg, u8 pal) { hero_box(msg, pal, 0); }
 
 /* special move: an opaque band with 必殺技 and the name, and a white flash (the phone's cut-in) */
 static void banner_cutin(u8 sp) {
   u16 w;
-  u8 was = banner_t;
   if (modal_on) return;
+  mq_room(32 * 3 * 16);
   box(BX_BANNER, 0, 4, 32, 3, TL_BANNER, PAL_T_YELLOW, BOX_OPAQUE);
   text_small = 8;
   w = msg_width(T_SP_CUTIN);
   say(BX_BANNER, (256 - w) / 2, 2, T_SP_CUTIN);
   text_small = 0;
   say_center(BX_BANNER, 10, SPN_0 + sp);
-  tb_flush(BX_BANNER);
-  if (!was) pend_show(0);
+  tb_flush_sync(BX_BANNER);
   banner_t = 50;
   banner_sp = 1;
   flash_t = 6;
@@ -688,39 +720,34 @@ static void banner_cutin(u8 sp) {
 
 /* the combo ribbon: "n HIT!" and, from 10 hits, the special's bonus (rows 2-3, left) */
 static void draw_combo(void) {
-  u16 p, w, x2 = 0, w2 = 0, rate = 0;
-  u8 was = combo_shown && combo_shown != 0xffff;
+  u16 pct, w, x2 = 0, rate = 0, frac = 0;
+  u8 cw;
   combo_shown = b_combo;
-  if (!b_combo) { box_hide(BX_COMBO); pend_drop(2); combo_w = 0; return; }
+  if (!b_combo) { box_hide(BX_COMBO); combo_w = 0; return; }
   targ_num = b_combo;
   w = msg_width(TXT_COMBO);
-  p = combo_pct(b_combo);
-  if (p > 100) {
-    targ_num = p / 100;
-    targ_num2 = p % 100;
-    if (targ_num2 % 10 == 0) targ_num2 /= 10;
-    rate = targ_num2 ? TXT_COMBO_RATE_D : TXT_COMBO_RATE;
-    text_small = 8;
-    w2 = msg_width(rate);
-    text_small = 0;
+  pct = combo_pct(b_combo);
+  if (pct > 100) {
+    frac = pct % 100;
+    if (frac % 10 == 0) frac /= 10;
+    rate = frac ? TXT_COMBO_RATE_D : TXT_COMBO_RATE;
     x2 = (6 + w + 13) & ~7;
   }
-  /* a dark ribbon: 8 tiles, 14 with the bonus; a new width maps the tiles anew, so the
-   * ribbon then waits for its text */
-  p = rate ? 14 : 8;
-  if (p != combo_w) { was = 0; combo_w = (u8)p; box_hide(BX_COMBO); }
+  /* a dark ribbon: 8 tiles, 14 with the bonus */
+  mq_room(14 * 2 * 16);
+  cw = rate ? 14 : 8;
+  if (cw != combo_w) { combo_w = cw; box_hide(BX_COMBO); }
   box(BX_COMBO, 0, 2, combo_w, 2, TL_COMBO, PAL_W, BOX_OPAQUE);
-  (void)w2;
   if (rate) {
-    targ_num = p / 100;
+    targ_num = pct / 100;      /* 1.1 / 1.25 / 1.5 / 2 */
+    targ_num2 = frac;
     text_small = 8;
     say(BX_COMBO, x2, 5, rate);
     text_small = 0;
   }
   targ_num = b_combo;
   say(BX_COMBO, 6, 2, TXT_COMBO);
-  tb_flush(BX_COMBO);
-  if (!was) pend_show(2);
+  tb_flush_sync(BX_COMBO);
 }
 
 /* ---------------------------------------------------------------- talk window (over the field) */
@@ -933,7 +960,7 @@ static void on_event(Ev *e) {
     if (e->c != 255) { banner_cutin((u8)e->c); se_play(SE_SPECIAL); }
     else if (e->a < 3) {
       u8 wt = items[b_w[e->a].item].type;
-      hero_msg(SKILLN_0 + e->b, PAL_T_WHITE);        /* the skill's name (the phone's ribbon) */
+      hero_box(SKILLN_0 + e->b, PAL_T_WHITE, 1);     /* the skill's name on the phone's ribbon */
       se_play(e->b == SK_KICK ? SE_KICK : (e->b == SK_SAKEBU ? SE_SHOUT : (wt == WT_SPEAR ? SE_SPEAR : (wt == WT_HAMMER ? SE_HAMMER : SE_SLASH))));
     }
     hp_dirty = 1; panel_dirty = 1;
@@ -945,6 +972,8 @@ static void on_event(Ev *e) {
     break;
   case EV_MEAT:
     se_play(SE_EAT);
+    targ_num = D_MEAT_ST_RECOVER;  /* the phone shows the configured amount */
+    hero_msg(TXT_ST_PLUS, PAL_BLUE);
     hp_dirty = 1; panel_dirty = 1;
     break;
   case EV_ST_SHORT:
@@ -973,7 +1002,7 @@ static void on_event(Ev *e) {
     banner(T_FLEE, PAL_T_WHITE, 40);
     break;
   case EV_REWARD:
-    if (e->v) { num_add(foe_x(e->enemy), FOOT_Y - 52, e->v, 4); se_play(SE_COIN); }
+    if (e->v) { num_add(foe_x(e->enemy), FOOT_Y - 12, e->v, 4); se_play(SE_COIN); }   /* below the damage numbers */
     if (e->a != ITEM_NONE) se_play(SE_DROP);
     top_dirty = 1;
     break;
@@ -1116,15 +1145,13 @@ static void draw_meta(const u8 *d, u8 strip, s16 x, s16 y, u8 pal, u8 prio) {
   meta_add();
 }
 
-static void draw_number(s16 x, s16 y, u32 v, u8 col) {
-  u8 dig[8], n = 0, i;
-  u16 base = STRIP_TILE(STRIP_FX) + (col == 1 || col == 4 ? 32 : 0);
-  do { dig[n++] = (u8)(v % 10); v /= 10; } while (v && n < 8);
-  x -= n * 4;
-  for (i = 0; i < n; ++i) {
-    u8 d = dig[n - 1 - i];
-    spr_add(x + i * 8, y, ATTR(base + d, OBJ_FX, 3), 0);
-    spr_add(x + i * 8, y + 8, ATTR(base + 16 + d, OBJ_FX, 3), 0);
+static void draw_number(const Num *p, s16 y) {
+  u8 i, n = p->n;
+  u16 base = STRIP_TILE(STRIP_FX) + (p->col == 1 || p->col == 4 ? 32 : 0);
+  s16 x = p->x - n * 4;
+  for (i = 0; i < n; ++i, x += 8) {
+    spr_add(x, y, ATTR(base + p->dig[i], OBJ_FX, 3), 0);
+    spr_add(x, y + 8, ATTR(base + 16 + p->dig[i], OBJ_FX, 3), 0);
   }
 }
 
@@ -1160,8 +1187,11 @@ static void skill_sprites(void) {
     sig[3 + i] = sk == SK_NONE || is_locked(i) ? 0 : (skill_cost(sk) > b_st ? 2 : 1);
     sig[6 + i] = b_w[i].nsk > 1 ? 1 : 0;
   }
-  if (memcmp(sig, sk_sig, 9) && !canvas_busy(TL_TABS, 320)) {   /* together with the card text */
+  /* together with the card text: once the queue has it (what waits with the map goes in the
+   * NMI that takes this OAM) */
+  if (memcmp(sig, sk_sig, 9) && !vq_busy(TL_TABS * 16, (TL_TABS + 320) * 16)) {
     memcpy(sk_sig, sig, 9);
+    skill_icons_update();
     ent = sk_spr;
     for (i = 0; i < 3; ++i) {
       x = i * 64;
@@ -1244,16 +1274,13 @@ static void draw_sprites(void) {
   Fx *f;
   const s8 *sp;
   /* fx and numbers first (front) */
-  for (i = 0, n = nums; i < NUM_MAX; ++i, ++n) if (n->t) {
-    draw_number(n->x, n->y - (45 - n->t) / 3, n->v, n->col);
-    --n->t;
-  }
-  for (i = 0, f = fxs; i < FX_MAX; ++i, ++f) if (f->t) {
+  for (i = 0, n = nums; i < NUM_MAX; ++i, ++n) if (n->t)
+    draw_number(n, n->y - (u8)(45 - n->t) / 3);
+  for (i = 0, f = fxs; i < FX_MAX; ++i, ++f) if (f->t)
     spr_add(f->x, f->y, ATTR(STRIP_TILE(STRIP_CELLS) + f->cell * 4, OBJ_FX, 3), 1);
-    --f->t;
-  }
   if (!modal_on) skill_sprites();
   for (i = 0, e = b_e, a = act; i < b_ne; ++i, ++e, ++a) overlay_sprites(i, e, a);
+  pose_tiles();
   /* shield (in front of the hero or behind, as the pose says) and the hero */
   p = hero_shown == 255 ? 0 : hero_shown;
   sp = hero_shield_pos[p];
@@ -1276,12 +1303,13 @@ static void animate(void) {
   Actor *a;
   Foe *e;
   ++frame_ct;
+  for (i = 0; i < NUM_MAX; ++i) if (nums[i].t) --nums[i].t;
+  for (i = 0; i < FX_MAX; ++i) if (fxs[i].t) --fxs[i].t;
   if (hero_slide < 0) hero_slide += 2;
   if (hero_hurt) --hero_hurt;
   if (hero_parry) --hero_parry;
   want = hero_pose();
   if (want != hero_pose_now) hero_upload(want);
-  if (hero_shown != hero_pose_now && !vq_busy(0x2000, 0x3000)) hero_shown = hero_pose_now;
   for (i = 0; i < b_ne; ++i) {
     a = &act[i];
     e = &b_e[i];
@@ -1300,7 +1328,6 @@ static void animate(void) {
       if (want != a->cur && !boss_pending) boss_upload(i, want);
     } else {
       if (want != a->cur) zako_upload(i, want);
-      if (a->shown != a->cur && !vq_busy(0x4800 + a->slot * 0x0800, 0x5000 + a->slot * 0x0800)) a->shown = a->cur;
     }
   }
   /* boss map once its tiles are in VRAM; position via BG1 scroll */
@@ -1339,9 +1366,8 @@ static void animate(void) {
     hdma_on = 0xc0;
   }
   if (!modal_on) {
-    if (banner_t && banner_t != 255) { if (--banner_t == 0) { box_hide(BX_BANNER); pend_drop(0); } }
-    if (hero_msg_t) { if (--hero_msg_t == 0) { box_hide(BX_HERO); pend_drop(1); } }
-    pend_poll();
+    if (banner_t && banner_t != 255) { if (--banner_t == 0) box_hide(BX_BANNER); }
+    if (hero_msg_t) { if (--hero_msg_t == 0) box_hide(BX_HERO); }
   }
   if (warn_t && --warn_t == 0) top_dirty = 1;
   /* colour math: the special's white flash, WARNING's three red flashes */
@@ -1359,10 +1385,11 @@ static void animate(void) {
 }
 
 /* ---------------------------------------------------------------- mirage chest choice */
-static u8 mirage_cursor, mirage_shown;
+static u8 mirage_cursor, mirage_shown, mirage_prev;
 static void mirage_draw(void) {
   u8 i;
-  if (mirage_shown) {            /* cursor moved: rows 2-8 again (one NMI) */
+  if (mirage_shown) {            /* cursor moved: the two lines it left and entered, in one NMI */
+    mq_room(2 * 2 * 28 * 16);
     tb_clear(BX_PANEL);
   } else modal_open(2, 4, 28, 10);
   say(BX_PANEL, 10, TOP_Y_B, T_MIRAGE_PICK);
@@ -1372,8 +1399,11 @@ static void mirage_draw(void) {
     if (i == mirage_cursor) say(BX_PANEL, 16, TOP_Y_B + 16 + i * 16, TXT_CURSOR);
     says(BX_PANEL, 30, TOP_Y_B + 16 + i * 16, TXT_MIRAGE_ITEM, MIRN_0 + k);
   }
-  if (mirage_shown) tb_flush_rows(BX_PANEL, 2, 7);
-  else { modal_show(); mirage_shown = 1; }
+  if (mirage_shown) {            /* line i: tile rows 3+2i, 4+2i */
+    tb_flush_rows_sync(BX_PANEL, 3 + 2 * mirage_prev, 2);
+    tb_flush_rows_sync(BX_PANEL, 3 + 2 * mirage_cursor, 2);
+  } else { modal_show(); mirage_shown = 1; }
+  mirage_prev = mirage_cursor;
 }
 
 /* ---------------------------------------------------------------- main loop */
@@ -1421,11 +1451,11 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   banner_t = hero_msg_t = banner_sp = warn_t = flash_t = 0;
   combo_shown = 0;
   combo_w = 0;
-  pend_on = 0;
   talk_open = 0;
   boss_pending = 0;
   mirage_shown = 0;
   modal_on = 0;
+  pause_req = 0;
   battle_start(area, men, lo);
   hero_setup();
   misc_setup();
@@ -1437,11 +1467,9 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   cgram[0] = 0x0c63;   /* backdrop behind the HUD rows */
   while (ev_pop(&e)) on_event(&e);
   animate();
-  skill_icons_update();
   draw_top(); draw_hpst(); draw_panel();
-  while (vq_count) wait_frame();   /* the panel sprites go with their text */
-  hero_shown = hero_pose_now;
-  for (i = 0; i < b_ne; ++i) act[i].shown = act[i].cur;
+  while (vq_count || mq_on) wait_frame();   /* the panel sprites go with their text */
+  do { draw_sprites(); wait_frame(); } while (poses_waiting());   /* the poses' tiles (screen off) */
   draw_sprites();
   screen_on();
   tut_open = tut_wait = tut_due = 0;
@@ -1484,15 +1512,18 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
           if (battle_set_target(t)) { se_play(SE_CURSOR); break; }
         }
       }
-      if (pad_new & BTN_START) {     /* the battle waits while the menu is open */
+      if (pad_new & BTN_START) pause_req = 1;
+      /* the battle waits while the menu is open; it opens after a special's cut-in or WARNING */
+      if (pause_req && !flash_t && !(banner_sp && banner_t) && warn_t <= 66) {
+        pause_req = 0;
         if (pause_menu()) { result = 2; break; }
       }
     }
+    if (b_phase != PH_FIGHT) pause_req = 0;
     battle_step();
     while (ev_pop(&e)) on_event(&e);
     if (b_phase == PH_REWARD && !b_npending && mirage_cursor < 255 && !mirage_shown) { mirage_cursor = 0; mirage_draw(); }
     animate();
-    skill_icons_update();
     if (top_dirty) draw_top();
     if (hp_dirty) draw_hpst();
     if (panel_dirty || panel_can != battle_can_command()) draw_panel();

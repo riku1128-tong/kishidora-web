@@ -1,18 +1,68 @@
 #include "ui.h"
 
 /* upload rows r0..r0+nr-1 of a box canvas ($7F:tile*16) in chunks the NMI can take */
+u8 tb_front;                    /* tb_flush: ahead of what is queued */
 void tb_flush_rows(u8 id, u8 r0, u8 nr) {
   u8 *b = &tb[id * 8];
   u16 w = b[2], t0 = (b[4] | ((u16)b[5] << 8)) + r0 * w;
   u16 bytes = nr * w * 16, src = t0 * 16, vaddr = bg3_vram + t0 * 8, c;
   while (bytes) {
     c = bytes > 2048 ? 2048 : bytes;
-    queue_vram(vaddr, src, 0x7f, c);
+    if (tb_front) queue_vram_front(vaddr, src, 0x7f, c);
+    else queue_vram(vaddr, src, 0x7f, c);
     vaddr += c >> 1; src += c; bytes -= c;
   }
 }
 
 void tb_flush(u8 id) { tb_flush_rows(id, 0, tb[id * 8 + 3]); }
+
+/* canvases that change in the same NMI as the BG3 map (crt0.s _mq): a box redrawn in another
+ * colour (or shown again) never shows the old text in the new colours, or the new in the old.
+ * At most MQ_CAP bytes wait at a time (the map's 2KB and these fit in one NMI). */
+#define MQ_CAP 2272
+static u16 q_size(u8 *q, u8 k) { return q[k * 8 + 5] | ((u16)q[k * 8 + 6] << 8); }
+
+u16 mq_bytes(void) {
+  u8 k;
+  u16 n = 0;
+  if (!mq_on) return 0;
+  for (k = 0; k < MQ_SLOTS; ++k) n += q_size(mq, k);
+  return n;
+}
+
+u8 mq_fits(u16 bytes) {
+  u8 k;
+  for (k = 0; k < MQ_SLOTS; ++k) if (!q_size(mq, k)) return mq_bytes() + bytes <= MQ_CAP;
+  return 0;
+}
+
+/* before changing a box whose text goes with the map: room for it (else the map now) */
+void mq_room(u16 bytes) {
+  while (!mq_fits(bytes)) wait_frame();
+}
+
+static u8 mq_add(u16 vaddr, u16 src, u16 size) {
+  u8 k, *e, f = 255;
+  for (k = 0; k < MQ_SLOTS; ++k) {
+    e = &mq[k * 8];
+    if (!q_size(mq, k)) { if (f == 255) f = k; continue; }
+    if ((e[0] | ((u16)e[1] << 8)) == vaddr && q_size(mq, k) == size) return 1;   /* sent from WRAM then */
+  }
+  if (f == 255 || mq_bytes() + size > MQ_CAP) return 0;
+  e = &mq[f * 8];
+  e[0] = (u8)vaddr; e[1] = (u8)(vaddr >> 8); e[2] = (u8)src; e[3] = (u8)(src >> 8); e[4] = 0x7f;
+  e[5] = (u8)size; e[6] = (u8)(size >> 8);
+  mq_on = 1;
+  return 1;
+}
+
+void tb_flush_rows_sync(u8 id, u8 r0, u8 nr) {
+  u8 *b = &tb[id * 8];
+  u16 w = b[2], t0 = (b[4] | ((u16)b[5] << 8)) + r0 * w;
+  if (!mq_add(bg3_vram + t0 * 8, t0 * 16, nr * w * 16)) tb_flush_rows(id, r0, nr);   /* too big: the queue */
+}
+
+void tb_flush_sync(u8 id) { tb_flush_rows_sync(id, 0, tb[id * 8 + 3]); }
 
 /* A box canvas must not change while the NMI still has to upload it (the screen would show a
  * half-drawn canvas for a frame): wait until no queued upload reads tiles t0..t0+n-1. */
@@ -30,10 +80,25 @@ u8 vq_busy(u16 lo, u16 hi) {
   return 0;
 }
 
-u8 canvas_busy(u16 t0, u16 n) { return vq_busy(t0 * 16, (t0 + n) * 16); }
+/* the canvas of tiles t0..t0+n-1 is not in VRAM yet (queued, or waiting with the map) */
+u8 canvas_busy(u16 t0, u16 n) {
+  u8 k;
+  u16 lo = t0 * 16, hi = (t0 + n) * 16, s;
+  if (mq_on) for (k = 0; k < MQ_SLOTS; ++k) {
+    s = mq[k * 8 + 2] | ((u16)mq[k * 8 + 3] << 8);
+    if (q_size(mq, k) && s < hi && s + q_size(mq, k) > lo) return 1;
+  }
+  return vq_busy(lo, hi);
+}
 
 void canvas_wait(u16 t0, u16 n) {
   while (canvas_busy(t0, n)) wait_frame();
+}
+
+/* before writing a canvas: no queued upload is part way through it (an upload waiting with the
+ * map goes in one NMI and reads the canvas then, so it may change meanwhile) */
+static void canvas_free(u16 t0, u16 n) {
+  while (vq_busy(t0 * 16, (t0 + n) * 16)) wait_frame();
 }
 
 void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour) {
@@ -43,12 +108,12 @@ void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour) {
 
 void tb_clear(u8 id) {
   u8 *b = &tb[id * 8];
-  canvas_wait(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3]);
+  canvas_free(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3]);
   tb_clear_now(id);
 }
 
 void box(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal, u8 flags) {
-  canvas_wait(tile, (u16)w * h);
+  canvas_free(tile, (u16)w * h);
   ea[0] = x | ((u16)y << 8);
   ea[1] = w | ((u16)h << 8);
   ea[2] = tile;

@@ -33,6 +33,23 @@ u16 copy_asset(u16 id, void *dst, u16 max) {
   return ea[2];
 }
 
+/* tiles that change with the OAM of this frame (crt0.s _spr_q): call right before the frame's
+ * wait, after the OAM that shows them is built; the caller keeps them within the NMI's budget */
+void spr_put(u8 k, u16 vaddr, u16 src, u8 bank, u16 size) {
+  u8 *e = &spr_q[k * 8];
+  e[0] = (u8)vaddr; e[1] = (u8)(vaddr >> 8); e[2] = (u8)src; e[3] = (u8)(src >> 8); e[4] = bank;
+  e[5] = (u8)size; e[6] = (u8)(size >> 8);
+  spr_on = 1;
+}
+
+u16 spr_bytes(void) {
+  u8 k;
+  u16 n = 0;
+  if (!spr_on) return 0;      /* the NMI took them all */
+  for (k = 0; k < SPR_SLOTS; ++k) n += spr_q[k * 8 + 5] | ((u16)spr_q[k * 8 + 6] << 8);
+  return n;
+}
+
 void queue_vram(u16 vaddr, u16 src, u8 bank, u16 size) {
   ea[0] = vaddr; ea[1] = src; ea[2] = bank; ea[3] = size; ea[4] = 0;
   while (!vram_queue()) wait_frame();
@@ -92,6 +109,8 @@ void sys_init(void) {
   set_bg3_palettes();
   oam_clear();
   oam_hide = 0;
+  memset(spr_q, 0, sizeof(spr_q)); spr_on = 0;
+  memset(mq, 0, sizeof(mq)); mq_on = 0;
 }
 
 void screen_off(void) {
@@ -100,7 +119,7 @@ void screen_off(void) {
 
 /* the first frame shows a finished screen: everything queued is in VRAM first */
 void screen_on(void) {
-  while (vq_count) wait_frame();
+  while (vq_count || spr_on || mq_on) wait_frame();
   bright = 15;
   wait_frame();
   force_blank(0);

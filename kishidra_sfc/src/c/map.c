@@ -22,6 +22,7 @@ static u8 sel;              /* selected node: area index, AR_MIRAGE = tower */
 static u8 nodes[N_AREA], nnodes;
 static s16 scroll_y;
 static u8 label_tx, label_ty, label_w;
+static u8 label_off;            /* a window covers the map: the label stays hidden */
 
 static u8 mirage_open(void) { return area_done(AR_CASTLE) || (sv.story & ST_DEBUG_OPEN); }
 
@@ -102,6 +103,7 @@ static void label_hide(void) {
 static void draw_label(void) {
   u16 w = msg_width(AREAN_0 + sel) + 12;
   s16 tx, ty;
+  if (label_off) return;
   if (label_w) win_close(BX_LABEL);
   label_w = (u8)((w + 7) >> 3);
   tx = ((s16)areas[sel].x - (s16)w / 2) >> 3;
@@ -276,8 +278,8 @@ static u8 area_window(void) {
   l.y = 24;
   l.lh = LINE_C;
   for (r = 0; r < nrows; ++r) if (rows[r].open && rows[r].kind == RK_MEN) l.cur = r;   /* newest open stage */
-  mk_sprites = 0;          /* map sprites would show through the low-priority window */
   for (;;) {
+    mk_sprites = 0;        /* map sprites would show through the low-priority window (map_setup sets them) */
     mk_draw = row_draw;
     mk_moved = 0;
     mk_header = win_header;
@@ -292,9 +294,7 @@ static u8 area_window(void) {
     if (sv.ninv >= D_INV_MAX) { mk_notice(T_INV_FULL, T_INV_FULL2); continue; }
     win_close(BX_WIN);
     if (rows[r].kind == RK_TUT) { map_men = MEN_TUTORIAL; return MA_BATTLE; }   /* fixed tutorial gear */
-    label_hide();                  /* a piece of it would stick out beside the sortie window */
     k = sortie();
-    draw_label();
     if (k == 1) { map_men = rows[r].men; return MA_BATTLE; }
   }
 }
@@ -415,10 +415,14 @@ u8 map_scene(u8 mode) {
     }
     if (pad_new & BTN_A) {
       se_play(SE_OK);
+      label_hide();                /* under the windows a piece of the label would stick out */
+      label_off = 1;
       a = sel == AR_MIRAGE ? mirage_window() : area_window();
+      label_off = 0;
       mk_sprites = map_sprites;
       if (a == MA_BATTLE) { save_write(); fade_out(); return MA_BATTLE; }
       if (a == MA_REDRAW) map_setup();
+      else draw_label();
       draw_top();
     }
     if (pad_new & (BTN_Y | BTN_X | BTN_START)) {
