@@ -1069,6 +1069,10 @@
 #define ASSET_FX_CELLS                     1065
 #define ASSET_HUD_TILES                    1066
 #define ASSET_HUD_PAL                      1067
+#define ASSET_MENU_OBJ                     1068
+#define ASSET_MENU_OBJ_PAL                 1069
+#define ASSET_KING_OBJ                     1070
+#define ASSET_KING_PAL                     1071
 #define TITLE_NTILES                       897
 #define TITLE_W                            32
 #define TITLE_H                            28
@@ -1140,5 +1144,5 @@
 #define N_SHIELD_GFX                       43
 #define HUD_GLYPH0                         39
 #define HUD_NTILES                         54
-#define N_GFX_ASSETS 1068
+#define N_GFX_ASSETS 1072
 #endif

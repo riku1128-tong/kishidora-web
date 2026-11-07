@@ -25,6 +25,7 @@ extern u16 hero_name[8];
 void tb_open(u8 box);
 void tb_clear(u8 box);
 void tb_flush(u8 box);
+void tb_flush_rows(u8 box, u8 r0, u8 nr);
 void tb_text(u8 box);
 void tb_codes(u8 box);
 u16  text_width(void);

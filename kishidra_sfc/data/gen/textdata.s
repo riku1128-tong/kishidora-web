@@ -820,6 +820,40 @@ text_base:
   .byte $9f, $00, $9e, $00, $7d, $00, $2b, $01, $f2, $00, $51, $00, $cb, $01, $ef, $00, $87, $00, $fd, $00, $08, $01, $f2, $00, $7f, $00, $d8, $00, $07, $01, $08, $01, $7f, $00, $0a, $01, $07, $01, $af, $01, $0b, $01, $01, $00, $df, $01, $e0, $01, $2b, $01, $e1, $01, $12, $01, $52, $01, $89, $00, $7c, $00, $cf, $00, $0b, $01, $01, $00, $f2, $00, $53, $00, $f3, $00, $d2, $00, $4e, $01, $a4, $01, $ef, $00, $e2, $01, $9e, $00, $fd, $00, $52, $01, $d2, $00, $f3, $00, $a1, $00, $0b, $01, $00, $00
   .byte $2e, $01, $2b, $01, $b3, $00, $e3, $01, $07, $01, $af, $01, $0b, $01, $b3, $01, $b4, $01, $51, $00, $de, $00, $d2, $00, $23, $01, $15, $01, $af, $01, $0b, $01, $01, $00, $f2, $00, $2b, $01, $f2, $00, $55, $00, $07, $01, $af, $01, $0b, $01, $01, $00, $87, $01, $51, $00, $e4, $01, $e5, $01, $e6, $01, $a3, $00, $06, $01, $af, $01, $0b, $01, $f2, $00, $e1, $00, $ed, $00, $8b, $01, $f4, $00, $fa, $00, $7c, $00, $7f, $00, $e7, $01, $a1, $00, $07, $01, $cf, $00, $af, $01, $00, $00
   .byte $2f, $00, $9e, $00, $9f, $00, $00, $00
+  .byte $f2, $00, $51, $00, $8c, $01, $ef, $00, $e2, $01, $7c, $00, $f3, $00, $01, $00, $9f, $00, $a2, $00, $0a, $01, $5e, $02, $15, $01, $51, $00, $8e, $01, $d8, $00, $01, $00, $5f, $02, $7d, $00, $a1, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $02, $00, $51, $00, $60, $02, $61, $02, $0a, $01, $01, $00, $44, $01, $9f, $00, $fa, $00, $7c, $00, $2e, $01, $7d, $00, $d7, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $8e, $01, $50, $00, $d8, $00, $b3, $01, $b4, $01, $51, $00, $62, $02, $d7, $00, $63, $02, $d8, $00, $01, $00, $38, $01, $89, $00, $52, $01, $64, $02, $c3, $01, $7c, $00, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $65, $02, $d8, $00, $b6, $01, $08, $01, $6c, $01, $6d, $01, $06, $01, $01, $00, $37, $01, $fb, $00, $89, $00, $55, $00, $f7, $00, $54, $00, $07, $01, $89, $00, $7d, $00, $ae, $01, $01, $00, $7f, $00, $51, $00, $f2, $00, $7f, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $14, $01, $a1, $00, $f6, $00, $f3, $00, $f2, $00, $f2, $00, $d8, $00, $0a, $01, $01, $00, $b3, $01, $b4, $01, $0a, $01, $23, $01, $89, $00, $19, $01, $7c, $00, $89, $00, $4e, $00, $93, $00, $af, $01, $0b, $01, $00, $00
+  .byte $03, $01, $51, $00, $b8, $01, $06, $01, $7d, $00, $d7, $00, $ef, $00, $87, $00, $38, $01, $d1, $00, $08, $01, $7c, $00, $12, $01, $2b, $01, $01, $00, $66, $02, $1d, $02, $06, $01, $67, $02, $55, $00, $07, $01, $8f, $01, $90, $01, $d8, $00, $01, $00, $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $91, $01, $92, $01, $ed, $00, $28, $01, $51, $00, $b3, $01, $b4, $01, $ef, $00, $01, $00, $87, $00, $7d, $00, $d1, $00, $7c, $00, $50, $00, $06, $01, $01, $00, $89, $00, $08, $01, $f3, $00, $fb, $00, $89, $00, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $bf, $01, $55, $00, $7f, $00, $7d, $00, $37, $01, $fb, $00, $89, $00, $4e, $00, $93, $00, $0b, $01, $01, $00, $ed, $00, $d2, $00, $68, $02, $d8, $00, $b8, $01, $06, $01, $7d, $00, $d7, $00, $d2, $00, $01, $00, $07, $01, $89, $00, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $93, $01, $94, $01, $d8, $00, $0a, $01, $b3, $01, $b4, $01, $51, $00, $a4, $01, $69, $02, $06, $01, $01, $00, $fb, $00, $07, $01, $89, $00, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $5e, $02, $15, $01, $d8, $00, $29, $00, $25, $00, $57, $00, $33, $00, $06, $01, $b6, $01, $08, $01, $f3, $00, $fb, $00, $89, $00, $7d, $00, $f3, $00, $01, $00, $6a, $02, $27, $02, $4e, $02, $6b, $02, $06, $01, $52, $01, $f3, $00, $01, $00, $6c, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $6d, $02, $d8, $00, $b6, $01, $08, $01, $81, $01, $96, $01, $ed, $00, $28, $01, $51, $00, $b3, $01, $b4, $01, $ef, $00, $01, $00, $87, $00, $7d, $00, $d1, $00, $7c, $00, $7f, $00, $51, $00, $6a, $02, $27, $02, $ef, $00, $01, $00, $6e, $02, $7c, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $f2, $00, $e1, $00, $0a, $01, $53, $01, $7d, $00, $07, $01, $6a, $02, $27, $02, $6f, $02, $4e, $00, $93, $00, $af, $01, $0b, $01, $01, $00, $70, $02, $71, $02, $af, $01, $0b, $01, $00, $00
+  .byte $9e, $00, $72, $02, $86, $01, $2a, $02, $15, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $f6, $00, $fa, $00, $7c, $00, $4e, $00, $93, $00, $86, $01, $01, $00, $11, $00, $38, $01, $12, $01, $51, $00, $b3, $01, $b4, $01, $ef, $00, $73, $02, $87, $00, $4e, $00, $93, $00, $86, $01, $01, $00, $74, $02, $75, $02, $0a, $01, $02, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $03, $01, $0a, $01, $95, $00, $51, $00, $b3, $01, $b4, $01, $ef, $00, $01, $00, $76, $02, $fb, $00, $d8, $00, $2a, $02, $15, $01, $4e, $00, $93, $00, $86, $01, $01, $00, $77, $02, $51, $00, $97, $01, $98, $01, $ed, $00, $6a, $02, $27, $02, $4e, $02, $6b, $02, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $6a, $02, $27, $02, $4e, $02, $6b, $02, $fb, $00, $cf, $00, $a1, $00, $d8, $00, $d2, $00, $01, $00, $50, $00, $06, $01, $78, $02, $f3, $00, $4e, $00, $93, $00, $af, $01, $0b, $01, $00, $00
+  .byte $d2, $00, $fa, $00, $7f, $00, $50, $00, $06, $01, $89, $00, $08, $01, $a0, $01, $ed, $00, $01, $00, $79, $02, $a3, $00, $7a, $02, $19, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $6d, $02, $7b, $02, $d8, $00, $b6, $01, $08, $01, $8e, $01, $d8, $00, $01, $00, $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $8e, $01, $50, $00, $d8, $00, $b3, $01, $b4, $01, $51, $00, $62, $02, $d7, $00, $63, $02, $d8, $00, $01, $00, $38, $01, $89, $00, $52, $01, $64, $02, $c3, $01, $7c, $00, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $65, $02, $d8, $00, $b6, $01, $08, $01, $9b, $01, $98, $01, $06, $01, $01, $00, $37, $01, $fb, $00, $89, $00, $55, $00, $f7, $00, $54, $00, $07, $01, $89, $00, $7d, $00, $ae, $01, $01, $00, $7f, $00, $51, $00, $f2, $00, $7f, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $14, $01, $a1, $00, $f6, $00, $f3, $00, $f2, $00, $f2, $00, $d8, $00, $0a, $01, $01, $00, $b3, $01, $b4, $01, $0a, $01, $23, $01, $89, $00, $19, $01, $7c, $00, $89, $00, $4e, $00, $93, $00, $af, $01, $0b, $01, $00, $00
+  .byte $fb, $00, $7d, $00, $fb, $00, $2b, $01, $95, $00, $51, $00, $b3, $01, $b4, $01, $06, $01, $01, $00, $f2, $00, $f2, $00, $d8, $00, $b6, $01, $fa, $00, $7c, $00, $a4, $01, $69, $02, $ef, $00, $01, $00, $7c, $02, $f7, $00, $08, $01, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $f2, $00, $51, $00, $a4, $01, $69, $02, $ef, $00, $d6, $01, $fa, $00, $52, $01, $01, $00, $65, $02, $d8, $00, $5f, $02, $7d, $00, $a1, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $7d, $02, $f6, $01, $07, $01, $06, $01, $f3, $00, $f2, $00, $f2, $00, $d8, $00, $01, $00, $b3, $01, $b4, $01, $0a, $01, $23, $01, $89, $00, $19, $01, $7c, $00, $89, $00, $4e, $00, $93, $00, $af, $01, $0b, $01, $00, $00
+  .byte $7f, $00, $89, $00, $a1, $00, $f2, $00, $7f, $00, $0a, $01, $2b, $01, $01, $00, $65, $02, $51, $00, $81, $01, $96, $01, $06, $01, $37, $01, $fb, $00, $89, $00, $4e, $00, $93, $00, $0b, $01, $01, $00, $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $f6, $00, $fa, $00, $7c, $00, $4e, $00, $93, $00, $86, $01, $01, $00, $12, $00, $38, $01, $12, $01, $51, $00, $b3, $01, $b4, $01, $ef, $00, $73, $02, $87, $00, $4e, $00, $93, $00, $86, $01, $01, $00, $74, $02, $75, $02, $0a, $01, $02, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $03, $01, $0a, $01, $49, $00, $51, $00, $b3, $01, $b4, $01, $ef, $00, $01, $00, $76, $02, $fb, $00, $d8, $00, $2a, $02, $15, $01, $4e, $00, $93, $00, $86, $01, $01, $00, $77, $02, $51, $00, $9e, $01, $9f, $01, $a0, $01, $ed, $00, $6a, $02, $27, $02, $4e, $02, $6b, $02, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $7e, $02, $7f, $02, $80, $02, $ed, $00, $76, $02, $fb, $00, $52, $01, $19, $01, $7c, $00, $7f, $00, $f2, $00, $5d, $01, $2b, $01, $01, $00, $7b, $02, $51, $00, $6c, $01, $6d, $01, $d8, $00, $49, $00, $51, $00, $b3, $01, $b4, $01, $51, $00, $01, $00, $a4, $01, $69, $02, $ef, $00, $7c, $02, $f7, $00, $7c, $00, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $2a, $02, $fa, $00, $52, $01, $19, $01, $08, $01, $4e, $00, $93, $00, $0b, $01, $00, $00
+  .byte $38, $01, $89, $00, $d8, $00, $13, $00, $38, $01, $12, $01, $51, $00, $b3, $01, $b4, $01, $ef, $00, $01, $00, $be, $01, $d7, $00, $67, $01, $fb, $00, $7c, $00, $4e, $00, $93, $00, $86, $01, $00, $00
+  .byte $7d, $02, $08, $01, $0a, $01, $81, $02, $11, $00, $38, $01, $af, $01, $0b, $01, $01, $00, $02, $00, $cf, $00, $86, $01, $01, $00, $76, $00, $2f, $00, $51, $00, $8c, $01, $d8, $00, $2f, $02, $3e, $01, $82, $02, $06, $01, $ab, $01, $7c, $00, $4e, $00, $93, $00, $86, $01, $00, $00
   .byte $4e, $01, $a4, $01, $ef, $00, $e2, $01, $fb, $00, $7c, $00, $87, $01, $bc, $00, $bd, $00, $b6, $00, $66, $00, $22, $00, $20, $00, $34, $00, $00, $00
   .byte $d5, $00, $00, $00
   .byte $e8, $01, $e9, $01, $86, $01, $86, $01, $00, $00
@@ -2666,423 +2700,491 @@ text_table:
   .byte $c1
   .word $bdb0
   .byte $c1
-  .word $bdce
+  .word $bde0
   .byte $c1
-  .word $bdd2
+  .word $be02
   .byte $c1
-  .word $bddc
+  .word $be2c
   .byte $c1
-  .word $bdea
+  .word $be62
   .byte $c1
-  .word $bdf4
+  .word $be74
   .byte $c1
-  .word $bdfe
+  .word $bea0
   .byte $c1
-  .word $be08
+  .word $bee4
   .byte $c1
-  .word $be12
+  .word $bf16
   .byte $c1
-  .word $be1c
+  .word $bf4c
   .byte $c1
-  .word $be3a
+  .word $bf5e
   .byte $c1
-  .word $be58
+  .word $bf82
   .byte $c1
-  .word $be76
+  .word $bfc4
   .byte $c1
-  .word $be92
+  .word $bffe
   .byte $c1
-  .word $bea2
+  .word $c024
   .byte $c1
-  .word $bee2
+  .word $c036
   .byte $c1
-  .word $bfa2
+  .word $c06e
   .byte $c1
-  .word $c022
+  .word $c0aa
   .byte $c1
-  .word $c04e
+  .word $c0d0
   .byte $c1
-  .word $c088
-  .byte $c1
-  .word $c08e
-  .byte $c1
-  .word $c094
-  .byte $c1
-  .word $c09c
-  .byte $c1
-  .word $c0a2
-  .byte $c1
-  .word $c0ae
-  .byte $c1
-  .word $c0ba
-  .byte $c1
-  .word $c0e4
-  .byte $c1
-  .word $c0fa
-  .byte $c1
-  .word $c10c
+  .word $c0f4
   .byte $c1
   .word $c116
   .byte $c1
-  .word $c120
+  .word $c140
   .byte $c1
-  .word $c128
+  .word $c176
   .byte $c1
-  .word $c134
+  .word $c188
   .byte $c1
-  .word $c142
+  .word $c1b4
   .byte $c1
-  .word $c16a
+  .word $c1ea
   .byte $c1
-  .word $c18e
+  .word $c20e
   .byte $c1
-  .word $c19e
+  .word $c23a
   .byte $c1
-  .word $c1c2
+  .word $c274
   .byte $c1
-  .word $c1cc
+  .word $c2ac
   .byte $c1
-  .word $c1d6
+  .word $c2ea
   .byte $c1
-  .word $c1dc
-  .byte $c1
-  .word $c1e6
-  .byte $c1
-  .word $c1f0
-  .byte $c1
-  .word $c1fa
-  .byte $c1
-  .word $c1fe
-  .byte $c1
-  .word $c202
-  .byte $c1
-  .word $c212
-  .byte $c1
-  .word $c220
-  .byte $c1
-  .word $c23c
-  .byte $c1
-  .word $c244
-  .byte $c1
-  .word $c24c
-  .byte $c1
-  .word $c252
-  .byte $c1
-  .word $c258
-  .byte $c1
-  .word $c260
-  .byte $c1
-  .word $c268
-  .byte $c1
-  .word $c276
-  .byte $c1
-  .word $c286
-  .byte $c1
-  .word $c29e
-  .byte $c1
-  .word $c2ba
-  .byte $c1
-  .word $c2d4
-  .byte $c1
-  .word $c2e2
-  .byte $c1
-  .word $c2e8
-  .byte $c1
-  .word $c2f6
-  .byte $c1
-  .word $c30e
-  .byte $c1
-  .word $c32e
+  .word $c330
   .byte $c1
   .word $c342
   .byte $c1
-  .word $c37e
+  .word $c36a
   .byte $c1
-  .word $c388
+  .word $c3a2
   .byte $c1
-  .word $c38e
+  .word $c3c0
   .byte $c1
-  .word $c396
+  .word $c3c4
   .byte $c1
-  .word $c39e
+  .word $c3ce
   .byte $c1
-  .word $c3a6
+  .word $c3dc
   .byte $c1
-  .word $c3ac
-  .byte $c1
-  .word $c3b4
-  .byte $c1
-  .word $c3ba
-  .byte $c1
-  .word $c3c2
-  .byte $c1
-  .word $c3cc
-  .byte $c1
-  .word $c3d4
-  .byte $c1
-  .word $c3e0
-  .byte $c1
-  .word $c3e4
-  .byte $c1
-  .word $c3ea
+  .word $c3e6
   .byte $c1
   .word $c3f0
   .byte $c1
-  .word $c414
+  .word $c3fa
   .byte $c1
-  .word $c426
+  .word $c404
   .byte $c1
-  .word $c436
+  .word $c40e
   .byte $c1
-  .word $c444
+  .word $c42c
   .byte $c1
-  .word $c44c
+  .word $c44a
   .byte $c1
-  .word $c452
+  .word $c468
   .byte $c1
-  .word $c45a
+  .word $c484
   .byte $c1
-  .word $c460
+  .word $c494
   .byte $c1
-  .word $c466
+  .word $c4d4
   .byte $c1
-  .word $c472
+  .word $c594
   .byte $c1
-  .word $c47e
-  .byte $c1
-  .word $c48a
-  .byte $c1
-  .word $c496
-  .byte $c1
-  .word $c4a2
-  .byte $c1
-  .word $c4ac
-  .byte $c1
-  .word $c4b4
-  .byte $c1
-  .word $c4c8
-  .byte $c1
-  .word $c4dc
-  .byte $c1
-  .word $c4e8
-  .byte $c1
-  .word $c4f0
-  .byte $c1
-  .word $c514
-  .byte $c1
-  .word $c524
-  .byte $c1
-  .word $c53c
-  .byte $c1
-  .word $c542
-  .byte $c1
-  .word $c54a
-  .byte $c1
-  .word $c55c
-  .byte $c1
-  .word $c564
-  .byte $c1
-  .word $c582
-  .byte $c1
-  .word $c5a6
-  .byte $c1
-  .word $c5be
-  .byte $c1
-  .word $c5d8
-  .byte $c1
-  .word $c5ea
-  .byte $c1
-  .word $c5fc
-  .byte $c1
-  .word $c606
-  .byte $c1
-  .word $c61e
-  .byte $c1
-  .word $c62c
-  .byte $c1
-  .word $c634
-  .byte $c1
-  .word $c63a
+  .word $c614
   .byte $c1
   .word $c640
   .byte $c1
-  .word $c64c
+  .word $c67a
   .byte $c1
-  .word $c656
+  .word $c680
   .byte $c1
-  .word $c662
+  .word $c686
   .byte $c1
-  .word $c672
+  .word $c68e
   .byte $c1
-  .word $c67e
-  .byte $c1
-  .word $c690
+  .word $c694
   .byte $c1
   .word $c6a0
   .byte $c1
-  .word $c6b2
+  .word $c6ac
   .byte $c1
-  .word $c6c8
+  .word $c6d6
   .byte $c1
-  .word $c6da
+  .word $c6ec
   .byte $c1
-  .word $c6e4
+  .word $c6fe
   .byte $c1
-  .word $c6f2
+  .word $c708
   .byte $c1
-  .word $c724
+  .word $c712
   .byte $c1
-  .word $c72a
+  .word $c71a
+  .byte $c1
+  .word $c726
   .byte $c1
   .word $c734
   .byte $c1
-  .word $c73a
+  .word $c75c
   .byte $c1
-  .word $c740
+  .word $c780
   .byte $c1
-  .word $c748
+  .word $c790
   .byte $c1
-  .word $c74c
-  .byte $c1
-  .word $c756
-  .byte $c1
-  .word $c768
-  .byte $c1
-  .word $c772
-  .byte $c1
-  .word $c77e
-  .byte $c1
-  .word $c78a
-  .byte $c1
-  .word $c79e
-  .byte $c1
-  .word $c7a8
-  .byte $c1
-  .word $c7b6
+  .word $c7b4
   .byte $c1
   .word $c7be
   .byte $c1
   .word $c7c8
   .byte $c1
+  .word $c7ce
+  .byte $c1
   .word $c7d8
   .byte $c1
-  .word $c7e8
+  .word $c7e2
   .byte $c1
-  .word $c7fe
+  .word $c7ec
   .byte $c1
-  .word $c810
+  .word $c7f0
   .byte $c1
-  .word $c824
+  .word $c7f4
+  .byte $c1
+  .word $c804
+  .byte $c1
+  .word $c812
   .byte $c1
   .word $c82e
   .byte $c1
-  .word $c83c
+  .word $c836
   .byte $c1
-  .word $c84c
+  .word $c83e
+  .byte $c1
+  .word $c844
+  .byte $c1
+  .word $c84a
   .byte $c1
   .word $c852
   .byte $c1
-  .word $c858
+  .word $c85a
   .byte $c1
   .word $c868
   .byte $c1
-  .word $c87a
+  .word $c878
   .byte $c1
-  .word $c8a2
+  .word $c890
   .byte $c1
-  .word $c8c8
+  .word $c8ac
+  .byte $c1
+  .word $c8c6
+  .byte $c1
+  .word $c8d4
+  .byte $c1
+  .word $c8da
+  .byte $c1
+  .word $c8e8
   .byte $c1
   .word $c900
   .byte $c1
-  .word $c908
+  .word $c920
   .byte $c1
-  .word $c912
+  .word $c934
   .byte $c1
-  .word $c922
+  .word $c970
   .byte $c1
-  .word $c932
+  .word $c97a
   .byte $c1
-  .word $c948
+  .word $c980
   .byte $c1
-  .word $c960
+  .word $c988
   .byte $c1
-  .word $c972
+  .word $c990
   .byte $c1
-  .word $c982
+  .word $c998
   .byte $c1
-  .word $c994
+  .word $c99e
   .byte $c1
-  .word $c9a4
+  .word $c9a6
   .byte $c1
-  .word $c9bc
+  .word $c9ac
   .byte $c1
-  .word $c9ce
+  .word $c9b4
   .byte $c1
-  .word $c9d8
+  .word $c9be
   .byte $c1
-  .word $c9e4
+  .word $c9c6
   .byte $c1
-  .word $ca02
+  .word $c9d2
+  .byte $c1
+  .word $c9d6
+  .byte $c1
+  .word $c9dc
+  .byte $c1
+  .word $c9e2
+  .byte $c1
+  .word $ca06
   .byte $c1
   .word $ca18
   .byte $c1
-  .word $ca2a
+  .word $ca28
   .byte $c1
-  .word $ca42
+  .word $ca36
   .byte $c1
-  .word $ca5c
+  .word $ca3e
   .byte $c1
-  .word $ca68
+  .word $ca44
   .byte $c1
-  .word $ca6c
+  .word $ca4c
   .byte $c1
-  .word $ca9a
+  .word $ca52
   .byte $c1
-  .word $caa0
+  .word $ca58
   .byte $c1
-  .word $caac
+  .word $ca64
   .byte $c1
-  .word $cab6
+  .word $ca70
   .byte $c1
-  .word $cabe
+  .word $ca7c
   .byte $c1
-  .word $cac6
+  .word $ca88
   .byte $c1
-  .word $cad4
+  .word $ca94
   .byte $c1
-  .word $cae8
+  .word $ca9e
   .byte $c1
-  .word $cafa
+  .word $caa6
+  .byte $c1
+  .word $caba
+  .byte $c1
+  .word $cace
+  .byte $c1
+  .word $cada
+  .byte $c1
+  .word $cae2
   .byte $c1
   .word $cb06
   .byte $c1
-  .word $cb1c
+  .word $cb16
   .byte $c1
   .word $cb2e
   .byte $c1
-  .word $cb38
+  .word $cb34
   .byte $c1
-  .word $cb40
+  .word $cb3c
   .byte $c1
-  .word $cb46
+  .word $cb4e
   .byte $c1
-  .word $cb4c
+  .word $cb56
   .byte $c1
-  .word $cb52
+  .word $cb74
   .byte $c1
-  .word $cb5a
+  .word $cb98
   .byte $c1
-  .word $cb64
+  .word $cbb0
   .byte $c1
-  .word $cb6a
+  .word $cbca
   .byte $c1
-  .word $cb70
+  .word $cbdc
   .byte $c1
-  .word $cb90
+  .word $cbee
   .byte $c1
-  .word $cb96
+  .word $cbf8
   .byte $c1
-  .word $cb9a
+  .word $cc10
+  .byte $c1
+  .word $cc1e
+  .byte $c1
+  .word $cc26
+  .byte $c1
+  .word $cc2c
+  .byte $c1
+  .word $cc32
+  .byte $c1
+  .word $cc3e
+  .byte $c1
+  .word $cc48
+  .byte $c1
+  .word $cc54
+  .byte $c1
+  .word $cc64
+  .byte $c1
+  .word $cc70
+  .byte $c1
+  .word $cc82
+  .byte $c1
+  .word $cc92
+  .byte $c1
+  .word $cca4
+  .byte $c1
+  .word $ccba
+  .byte $c1
+  .word $cccc
+  .byte $c1
+  .word $ccd6
+  .byte $c1
+  .word $cce4
+  .byte $c1
+  .word $cd16
+  .byte $c1
+  .word $cd1c
+  .byte $c1
+  .word $cd26
+  .byte $c1
+  .word $cd2c
+  .byte $c1
+  .word $cd32
+  .byte $c1
+  .word $cd3a
+  .byte $c1
+  .word $cd3e
+  .byte $c1
+  .word $cd48
+  .byte $c1
+  .word $cd5a
+  .byte $c1
+  .word $cd64
+  .byte $c1
+  .word $cd70
+  .byte $c1
+  .word $cd7c
+  .byte $c1
+  .word $cd90
+  .byte $c1
+  .word $cd9a
+  .byte $c1
+  .word $cda8
+  .byte $c1
+  .word $cdb0
+  .byte $c1
+  .word $cdba
+  .byte $c1
+  .word $cdca
+  .byte $c1
+  .word $cdda
+  .byte $c1
+  .word $cdf0
+  .byte $c1
+  .word $ce02
+  .byte $c1
+  .word $ce16
+  .byte $c1
+  .word $ce20
+  .byte $c1
+  .word $ce2e
+  .byte $c1
+  .word $ce3e
+  .byte $c1
+  .word $ce44
+  .byte $c1
+  .word $ce4a
+  .byte $c1
+  .word $ce5a
+  .byte $c1
+  .word $ce6c
+  .byte $c1
+  .word $ce94
+  .byte $c1
+  .word $ceba
+  .byte $c1
+  .word $cef2
+  .byte $c1
+  .word $cefa
+  .byte $c1
+  .word $cf04
+  .byte $c1
+  .word $cf14
+  .byte $c1
+  .word $cf24
+  .byte $c1
+  .word $cf3a
+  .byte $c1
+  .word $cf52
+  .byte $c1
+  .word $cf64
+  .byte $c1
+  .word $cf74
+  .byte $c1
+  .word $cf86
+  .byte $c1
+  .word $cf96
+  .byte $c1
+  .word $cfae
+  .byte $c1
+  .word $cfc0
+  .byte $c1
+  .word $cfca
+  .byte $c1
+  .word $cfd6
+  .byte $c1
+  .word $cff4
+  .byte $c1
+  .word $d00a
+  .byte $c1
+  .word $d01c
+  .byte $c1
+  .word $d034
+  .byte $c1
+  .word $d04e
+  .byte $c1
+  .word $d05a
+  .byte $c1
+  .word $d05e
+  .byte $c1
+  .word $d08c
+  .byte $c1
+  .word $d092
+  .byte $c1
+  .word $d09e
+  .byte $c1
+  .word $d0a8
+  .byte $c1
+  .word $d0b0
+  .byte $c1
+  .word $d0b8
+  .byte $c1
+  .word $d0c6
+  .byte $c1
+  .word $d0da
+  .byte $c1
+  .word $d0ec
+  .byte $c1
+  .word $d0f8
+  .byte $c1
+  .word $d10e
+  .byte $c1
+  .word $d120
+  .byte $c1
+  .word $d12a
+  .byte $c1
+  .word $d132
+  .byte $c1
+  .word $d138
+  .byte $c1
+  .word $d13e
+  .byte $c1
+  .word $d144
+  .byte $c1
+  .word $d14c
+  .byte $c1
+  .word $d156
+  .byte $c1
+  .word $d15c
+  .byte $c1
+  .word $d162
+  .byte $c1
+  .word $d182
+  .byte $c1
+  .word $d188
+  .byte $c1
+  .word $d18c
   .byte $c1
 .segment "BANKC2"
 font_glyphs:

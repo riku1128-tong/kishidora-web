@@ -13,7 +13,7 @@
 .import RODATA_LOAD_BANK
 
 .export __STARTUP__ : absolute = 1
-.export _pad_lat, _rep_lat
+.export _pad_lat, _rep_lat, _bg3_vram
 .export _ea, _oam, _cgram, _cgram_dirty, _scroll, _tm_main, _tm_sub, _bright, _joy, _joy_new, _joy_rep
 .export _frame, _bgmap_dirty, _nmi_ready, _vq_count, _vq, _bgmode, _cgadsub, _cgwsel, _coldata, _hdma_on
 .export _bg1map, _bg2map, _bg3map, _oam_hide, _lag
@@ -74,6 +74,7 @@ _hdma_on:     .res 1       ; HDMAEN mask for channels 6/7
 _joy:         .res 2
 _joy_new:     .res 2
 _joy_rep:     .res 2
+_bg3_vram:    .res 2       ; BG3 tile base (word address) used by the text renderer
 _pad_lat:     .res 2       ; edges latched by wait_frame, consumed by frame_wait
 _rep_lat:     .res 2
 joy_held_t:   .res 1
@@ -719,6 +720,23 @@ CFUNC set_vram_layout
   ; OBJ: 8x8 / 32x32, name base $4000 (word), second table at $5000
   lda #$22
   sta f:OBSEL
+  A16
+  lda #$6000
+  sta f:_bg3_vram
+  plp
+  rtl
+
+; void menu_layout(void): BG3 tiles at $4000 (1024 text tiles), OBJ at $6000 (256 tiles)
+CFUNC menu_layout
+  php
+  A8
+  lda #$04
+  sta f:BG34NBA
+  lda #$23
+  sta f:OBSEL
+  A16
+  lda #$4000
+  sta f:_bg3_vram
   plp
   rtl
 

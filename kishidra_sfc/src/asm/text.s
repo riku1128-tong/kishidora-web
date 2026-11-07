@@ -5,6 +5,7 @@
 .importzp FONT_DIGIT0
 .import _ea, _bg3map, _bgmap_dirty
 .export _targ_num, _targ_num2, _targ_str, _hero_name, _tb
+.import _bg3_vram
 
 CANVAS_BANK = $7f
 BG3_TILE_VRAM = $6000
@@ -498,50 +499,7 @@ CFUNC tb_clear
   plp
   rtl
 
-; void tb_flush(u8 box): queue canvas -> VRAM
-CFUNC tb_flush
-  php
-  phb
-  AXY16
-  pha
-  A8
-  lda #$80
-  pha
-  plb
-  A16
-  pla
-  jsr box_load
-  lda t_base
-  asl
-  asl
-  asl
-  clc
-  adc #BG3_TILE_VRAM
-  sta _ea+0
-  lda t_base
-  asl
-  asl
-  asl
-  asl
-  sta _ea+2
-  lda #CANVAS_BANK
-  sta _ea+4
-  lda t_w
-  ldx t_h
-  jsr mul16x8
-  asl
-  asl
-  asl
-  asl
-  sta _ea+6
-  stz _ea+8
-  A8
-  sei
-  jsr vq_push
-  cli
-  plb
-  plp
-  rtl
+; tb_flush is in ui.c (chunked uploads through queue_vram)
 
 ; void tb_text(u8 box): ea0 = px, ea1 = py, ea2 = text id
 CFUNC tb_text

@@ -1,5 +1,19 @@
 #include "ui.h"
 
+/* upload rows r0..r0+nr-1 of a box canvas ($7F:tile*16) in chunks the NMI can take */
+void tb_flush_rows(u8 id, u8 r0, u8 nr) {
+  u8 *b = &tb[id * 8];
+  u16 w = b[2], t0 = (b[4] | ((u16)b[5] << 8)) + r0 * w;
+  u16 bytes = nr * w * 16, src = t0 * 16, vaddr = bg3_vram + t0 * 8, c;
+  while (bytes) {
+    c = bytes > 2048 ? 2048 : bytes;
+    queue_vram(vaddr, src, 0x7f, c);
+    vaddr += c >> 1; src += c; bytes -= c;
+  }
+}
+
+void tb_flush(u8 id) { tb_flush_rows(id, 0, tb[id * 8 + 3]); }
+
 void box(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal, u8 flags) {
   ea[0] = x | ((u16)y << 8);
   ea[1] = w | ((u16)h << 8);

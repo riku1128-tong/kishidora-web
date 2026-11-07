@@ -624,6 +624,66 @@ class Gfx:
         self.a.const('HUD_NTILES', len(tiles))
         self.a.add('HUD_PAL', G.palette_bytes(pal), compress=False)
 
+    def menu_obj(self):
+        """menu / map sprites (OBJ $6000): tiles 0-63 icons (palette MENU_OBJ_PAL), 64.. king chibi (32x32 cells, KING_PAL)"""
+        pal = [(16, 8, 8), (248, 248, 248), (248, 216, 64), (232, 64, 48), (160, 160, 176), (88, 56, 40), (120, 200, 248),
+               (96, 224, 96), (40, 32, 48), (255, 240, 180), (200, 120, 248), (248, 160, 40)]
+        sheet = Image.new('RGBA', (128, 32), (0, 0, 0, 0))
+        def tile(col, row, fn):
+            g = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
+            fn(ImageDraw.Draw(g))
+            sheet.alpha_composite(g, (col * 8, row * 8))
+        c = lambda i: pal[i] + (255,)
+        # 0 cursor arrow (right), 1 cursor arrow (down), 2 path dot, 3 new star
+        tile(0, 0, lambda d: d.polygon([(1, 0), (6, 4), (1, 7)], fill=c(2), outline=c(0)))
+        tile(1, 0, lambda d: d.polygon([(0, 1), (7, 1), (4, 6)], fill=c(2), outline=c(0)))
+        tile(2, 0, lambda d: (d.rectangle((2, 2, 5, 5), fill=c(0)), d.rectangle((3, 3, 4, 4), fill=c(9))))
+        tile(3, 0, lambda d: d.polygon([(3, 0), (4, 3), (7, 3), (5, 5), (6, 7), (3, 6), (1, 7), (2, 5), (0, 3), (3, 3)], fill=c(2), outline=c(0)))
+        # 4 marker: new (red), 5 open (white), 6 cleared (yellow), 7 tower (purple)
+        for i, col in enumerate((3, 1, 2, 10)):
+            tile(4 + i, 0, lambda d, col=col: (d.ellipse((0, 0, 7, 7), fill=c(0)), d.ellipse((1, 1, 6, 6), fill=c(col)), d.ellipse((3, 3, 4, 4), fill=c(0))))
+        # 8-9 / 24-25: 16x16 selection ring (yellow)
+        g = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        d = ImageDraw.Draw(g)
+        d.ellipse((0, 0, 15, 15), outline=c(0), width=3)
+        d.ellipse((1, 1, 14, 14), outline=c(2), width=1)
+        sheet.alpha_composite(g, (64, 0))
+        # 10 hand-shaped down pointer is the down arrow; 11 coin
+        tile(11, 0, lambda d: (d.ellipse((0, 0, 7, 7), fill=c(11), outline=c(5)), d.line((3, 2, 3, 5), fill=c(9))))
+        sheet = G.snap(sheet)
+        cache = G.Cache(pal)
+        px = sheet.load()
+        data = bytearray()
+        for tr in range(4):
+            for tc in range(16):
+                data += G.tile4([0 if px[tc * 8 + x, tr * 8 + y][3] == 0 else 1 + cache(px[tc * 8 + x, tr * 8 + y][:3]) for y in range(8) for x in range(8)])
+        self.a.add('MENU_OBJ', bytes(data))
+        self.a.add('MENU_OBJ_PAL', G.palette_bytes(pal), compress=False)
+        # king chibi: 64x96 -> 2x3 cells of 32x32 in a 16-tile wide block (tiles 64..255)
+        im = self.img('assets/story/king_chibi.png')
+        w = 64
+        h = round(im.height * w / im.width)
+        im = im.resize((w, h), Image.LANCZOS)
+        h = min(96, h)
+        canvas = Image.new('RGBA', (64, 96), (0, 0, 0, 0))
+        canvas.alpha_composite(im.crop((0, 0, 64, h)), (0, 96 - h))
+        canvas = G.snap(canvas)
+        cp = canvas.load()
+        cols = [cp[x, y][:3] for y in range(96) for x in range(64) if cp[x, y][3]]
+        kp = G.make_palette(cols, 15)
+        kc = G.Cache(kp)
+        block = Image.new('RGBA', (128, 96), (0, 0, 0, 0))
+        block.alpha_composite(canvas, (0, 0))
+        bp = block.load()
+        kd = bytearray()
+        for tr in range(12):
+            for tc in range(16):
+                kd += G.tile4([0 if bp[tc * 8 + x, tr * 8 + y][3] == 0 else 1 + kc(bp[tc * 8 + x, tr * 8 + y][:3]) for y in range(8) for x in range(8)])
+        self.a.add('KING_OBJ', bytes(kd))
+        self.a.add('KING_PAL', G.palette_bytes(kp), compress=False)
+        os.makedirs(PREVIEW, exist_ok=True)
+        canvas.save(os.path.join(PREVIEW, 'king.png'))
+
     def mon_table(self):
         """gfx.h: per monster index -> descriptor / palette asset, is boss"""
         import re
@@ -671,6 +731,7 @@ def main():
     g.skill_icons()
     g.fx()
     g.hud()
+    g.menu_obj()
     g.write()
 
 

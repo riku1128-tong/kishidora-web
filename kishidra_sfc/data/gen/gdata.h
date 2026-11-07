@@ -394,6 +394,21 @@
 #define ITEM_SECRET_REWARD_SHIELD    237
 #define ITEM_REWARD_SHIELD_ID        230
 #define ITEM_TUTORIAL_SUB_WEAPON     61
+#define START_SKILL_0                1
+#define START_SKILL_1                37
+#define START_SKILL_2                255
+#define TUTORIAL_RELIEF_SKILL_0      15
+#define TUTORIAL_RELIEF_SKILL_1      16
+#define TUTORIAL_RELIEF_SKILL_2      14
+#define DIFF_EASY                    0
+#define DIFF_NORMAL                  1
+#define DIFF_HARD                    2
+#define DIFF_EXTRA                   3
+#define DIFF_LUNATIC                 4
+#define COIN_CAP                     999999999UL
+#define MIRAGE_COINS                 500000UL
+#define MIRAGE_FIRST_MAT             3
+#define MIRAGE_FIRST_MAT_N           3
 /* params.h defines (D_) */
 #define D_FPS                        60
 #define D_SCREEN_COLS                32
@@ -1179,6 +1194,8 @@
 #define N_CREDIT                     2
 #define PRICE_IT_FUERU               3000
 #define PRICE_IT_RESET               500
+#define NAME_GRID_W                  10
+#define NAME_GRID_H                  9
 #define TEXT_LAST_BANK               193
 #include "gtypes.h"
 #endif

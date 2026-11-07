@@ -129,6 +129,15 @@ class Gen:
         for k in ['START_WEAPON', 'EQUIP_SHIELD', 'TUTORIAL_RELIEF_WEAPON', 'TUTORIAL_REWARD_SHIELD', 'SECRET_REWARD_SHIELD', 'REWARD_SHIELD_ID',
                   'TUTORIAL_SUB_WEAPON']:
             self.define('ITEM_' + k, self.item_index[s.num(k)])
+        for k in ['START_SKILLS', 'TUTORIAL_RELIEF_SKILLS']:
+            for i, sk in enumerate(s.num(k)[:3]):
+                self.define('%s_%d' % (k[:-1], i), 255 if sk == 'SK_NONE' else self.skill_index[sk])
+        for i, k in enumerate(['EASY', 'NORMAL', 'HARD', 'EXTRA', 'LUNATIC']):
+            self.define('DIFF_' + k, i)
+        self.define('COIN_CAP', '999999999UL')
+        self.define('MIRAGE_COINS', '%dUL' % self.T['MIRAGE_COINS']['surface'])
+        self.define('MIRAGE_FIRST_MAT', MATS.index(self.T['MIRAGE_FIRST_MAT']['surface']))
+        self.define('MIRAGE_FIRST_MAT_N', self.T['MIRAGE_FIRST_MAT_N'])
 
     # ------------------------------------------------------------ constants
     def build_consts(self):
@@ -200,6 +209,11 @@ class Gen:
                 to = evolve.get(k)
                 to_i = self.item_index.get(to, 255) if to else 255
                 el = T['SHIELD_EVOLVE_ELEMENT'].get(k, 'EL_NONE')
+                if k not in T['SHIELD_EVOLVE_ELEMENT'] and to:   # evolve_element(): from the target's guard effect
+                    fx = s.shields[to].get('effect', '')
+                    for e in T['DRAGON_ELEMENTS']:
+                        if fx == 'FX_GUARD_' + e[3:]:
+                            el = e
                 c.append('  { %d, %d, %d, 0, 0, %d, %d, %d, %d },  /* %s %s */' % (
                     3, RARITIES.index(sh['rarity']), ELEMENTS.index(el) if el in ELEMENTS else (254 if el == 'EL_ALL' else 255), self.effect_index[sh['effect']],
                     sh['hp'], sh['def'], to_i, k, sh['name']))
@@ -518,6 +532,16 @@ class Gen:
             lines = T['TALK'][k]
             self.text('TALK_' + k.upper(), '\n'.join(lines))
         self.text('NAME_KING', T['KING_NAME'])
+        # area clear stories (page lists), indexed by area
+        first = []
+        n = 0
+        for i, a in enumerate(self.area_ids):
+            pages = T['AREA_STORY'].get(a, [])
+            first.append((n, len(pages)))
+            for p in pages:
+                self.text('ASTORY_%d' % n, p)
+                n += 1
+        self.c.append('const u8 area_story[N_AREA][2] = { %s };' % ', '.join('{ %d, %d }' % f for f in first))
         self.text('NAME_SECRET_AWAKE', T['SECRET_AWAKE_NAME'])
         for i, f in enumerate(T['FORM_TEXT']):
             self.text('FORM_TEXT_%d' % i, f or ' ')
@@ -541,6 +565,27 @@ class Gen:
             self.define('PRICE_' + k, price)
         for i, k in enumerate(['失敗', '成功', '大成功', '奇跡']):
             self.text('ENHR_%d' % i, T['ENH_RESULT_NAMES'][i])
+
+    NAME_PAGES = [
+        'あいうえおかきくけこ' 'さしすせそたちつてと' 'なにぬねのはひふへほ' 'まみむめもや ゆ よ' 'らりるれろわをんー・'
+        'がぎぐげござじずぜぞ' 'だぢづでどばびぶべぼ' 'ぱぴぷぺぽぁぃぅぇぉ' 'ゃゅょっゎ！？～♪ ',
+        'アイウエオカキクケコ' 'サシスセソタチツテト' 'ナニヌネノハヒフヘホ' 'マミムメモヤ ユ ヨ' 'ラリルレロワヲンー・'
+        'ガギグゲゴザジズゼゾ' 'ダヂヅデドバビブベボ' 'パピプペポァィゥェォ' 'ャュョッヮヴ！？☆ ',
+        'ABCDEFGHIJ' 'KLMNOPQRST' 'UVWXYZ.-!?' 'abcdefghij' 'klmnopqrst' 'uvwxyz&+*/' '0123456789' '          ' '          ',
+    ]
+
+    def build_name_grid(self):
+        rows = []
+        for page in self.NAME_PAGES:
+            page = (page + ' ' * 90)[:90]
+            codes = [0 if ch == ' ' else self.tx.encode(ch)[0] for ch in page]
+            rows.append('{ %s }' % ', '.join(map(str, codes)))
+        self.c.append('const u16 name_grid[3][90] = { %s };' % ', '.join(rows))
+        self.define('NAME_GRID_W', 10)
+        self.define('NAME_GRID_H', 9)
+        # default hero name as glyph codes
+        dn = [self.tx.encode(ch)[0] for ch in self.T['PROFILE_NAME']][:6]
+        self.c.append('const u16 default_name[7] = { %s };' % ', '.join(map(str, dn + [0] * (7 - len(dn)))))
 
     def build_digits(self):
         self.tx.encode('0123456789')
@@ -629,6 +674,7 @@ def main():
     g.build_tables()
     g.build_estats()
     g.build_story()
+    g.build_name_grid()
     g.build_ui_text()
     g.write_text()
     g.write()

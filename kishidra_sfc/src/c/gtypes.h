@@ -57,5 +57,8 @@ extern const u8 enh_odds[6][4];
 extern const u16 price_table[N_R];
 extern const u8 gacha_rate[N_R];
 extern const u8 gacha_wt[4];
+extern const u8 area_story[N_AREA][2];
+extern const u16 name_grid[3][90];
+extern const u16 default_name[7];
 
 #endif

@@ -2,6 +2,7 @@
 #ifndef SFC_H
 #define SFC_H
 #include <stdint.h>
+#include <string.h>
 
 typedef uint8_t  u8;
 typedef uint16_t u16;
@@ -44,7 +45,9 @@ extern u8  coldata[3];
 extern u8  hdma_on;
 extern u8  hdma_tab1[32], hdma_tab2[32];
 extern u16 joy, joy_new, joy_rep;
-extern u16 pad_lat, rep_lat;   /* edges since the last frame_wait */
+extern u16 pad_lat, rep_lat;
+extern u16 bg3_vram;          /* BG3 tile base used by text boxes */
+void menu_layout(void);       /* BG3 tiles $4000 (1024), OBJ $6000 */   /* edges since the last frame_wait */
 extern u16 frame, lag;
 extern u8  bgmap_dirty;
 extern u8  oam_hide;
