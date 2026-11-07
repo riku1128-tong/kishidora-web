@@ -369,6 +369,31 @@ def script_constants(wb, path):
     return env
 
 
+def font_ttf(wb, out):
+    """write the M+ Rounded TTF embedded in the Godot font resource"""
+    import zstandard
+    d = wb.read('.godot/imported/MPLUSRounded1c-ExtraBold.ttf-9d74343956a030d0b46de2c37d3be9b7.fontdata')
+    mode, bs, total = struct.unpack_from('<III', d, 4)
+    nb = (total + bs - 1) // bs
+    sizes = struct.unpack_from('<%dI' % nb, d, 16)
+    p = 16 + 4 * nb
+    raw = bytearray()
+    dz = zstandard.ZstdDecompressor()
+    for sz in sizes:
+        raw += dz.decompress(d[p:p + sz], max_output_size=bs)
+        p += sz
+    for m in re.finditer(rb'\x00\x01\x00\x00\x00[\x08-\x20]', raw):
+        st = m.start()
+        nt = struct.unpack_from('>H', raw, st + 4)[0]
+        tables = [struct.unpack_from('>4sIII', raw, st + 12 + 16 * t) for t in range(nt)]
+        if all(tg.isalnum() or tg in (b'OS/2', b'cvt ') for tg, _, _, _ in tables):
+            end = max(o + l for _, _, o, l in tables)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            open(out, 'wb').write(bytes(raw[st:st + end]))
+            return out
+    raise ValueError('no TTF in font resource')
+
+
 _wb = None
 
 

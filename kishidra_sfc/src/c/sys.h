@@ -11,6 +11,8 @@ void asset_vram(void);      /* ea0 id, ea1 vram (display blanked) */
 void asset_pal(void);       /* ea0 id, ea1 first colour */
 void asset_map(void);       /* ea0 id, ea1 bg 0-2, ea2 add, ea3 row */
 void far_copy(void);        /* ea0 src, ea1 bank, ea2 dst, ea3 len */
+void asset_copy(void);      /* ea0 id, ea1 dst, ea2 max -> ea2 len */
+u16  copy_asset(u16 id, void *dst, u16 max);
 void estat_block(void);     /* ea0 area, ea1 men, ea3 dst -> ea2 count */
 
 void load_vram(u16 id, u16 vaddr);
@@ -46,6 +48,7 @@ u32  mul_pct(u32 v, u16 p);
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-extern u16 pad, pad_new, pad_rep;   /* input for this frame */
+extern u16 pad, pad_new, pad_rep;
+extern u16 dbg[8];   /* input for this frame */
 void frame_wait(void);              /* wait_frame + input + sound service */
 #endif

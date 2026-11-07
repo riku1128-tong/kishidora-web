@@ -145,7 +145,7 @@ T_RESULT_FIRST	初回クリア報酬
 T_RESULT_ORB	{s}を取り戻した！
 T_RESULT_OVER	持ち物がいっぱいで {n} コインになった
 T_RESULT_LOSE	ここまでに手に入れたものは持ち帰れる
-T_BATTLE_HELP	Y X A:スキル  B:ガード  R:肉
+T_BATTLE_HELP	{gray}B:ガード R:肉 ←→:ねらう START:ポーズ
 T_PAUSE_TITLE	ポーズ
 T_PAUSE_RESUME	つづける
 T_PAUSE_LEAVE	あきらめて帰る
@@ -178,3 +178,18 @@ T_OPT_BGM	BGM の音量 {n}
 T_OPT_SE	効果音の音量 {n}
 T_OPT_DIFF	難易度 {s}
 T_OPT_GUARDLATE	ガードの遅れ補正 {n}
+# battle HUD
+TXT_TOP_WAVE	WAVE {n}/{m}
+TXT_COINS	{yellow}●{c0}{n}
+TXT_FRAC	{n}/{m}
+TXT_BTN_Y	{yellow}Y
+TXT_BTN_X	{yellow}X
+TXT_BTN_A	{yellow}A
+TXT_COST	ST{n}
+TXT_COST_RED	{red}ST{n}
+TXT_SP_ARROW	{yellow}必
+TXT_NEXT_ARROW	{gray}▷
+TXT_HELP_MEAT	{yellow}R:肉でガードしてあげよう！
+TXT_CURSOR	{yellow}▶
+TXT_SPACE	 
+TXT_MIRAGE_ITEM	{s} {yellow}+{n}

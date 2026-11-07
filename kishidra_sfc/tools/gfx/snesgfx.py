@@ -196,7 +196,7 @@ def palette_bytes(pal, ncol=16, zero=(0, 0, 0)):
     return out
 
 
-def bg_image(img, npal=4, pal_base=2, tile_base=0, dedup=True, opaque_color0=None):
+def bg_image(img, npal=4, pal_base=2, tile_base=0, dedup=True, opaque_color0=None, blank0=True, max_tiles=None):
     """Convert an image (multiple of 8) to (tiles bytes, map words, palettes bytes, ntiles).
 
     opaque_color0: if set, colour index 0 is a real colour (the backdrop) and all pixels
@@ -223,6 +223,9 @@ def bg_image(img, npal=4, pal_base=2, tile_base=0, dedup=True, opaque_color0=Non
     tiles = []
     index = {}
     words = []
+    if blank0:   # tile 0 stays transparent so empty map cells show nothing
+        tiles.append((0,) * 64)
+        index[(0,) * 64] = 0
     for i, r in enumerate(raw):
         g = assign[i]
         idx = tuple(0 if c[3] == 0 else 1 + caches[g](c[:3]) for c in r)
@@ -244,9 +247,57 @@ def bg_image(img, npal=4, pal_base=2, tile_base=0, dedup=True, opaque_color0=Non
             index[idx] = key
             hv = (0, 0)
         words.append((tile_base + key) | ((pal_base + g) << 10) | (hv[0] << 14) | (hv[1] << 15))
+    if max_tiles and len(tiles) > max_tiles:
+        tiles, words = merge_tiles(tiles, words, pals, tile_base, max_tiles, 1 if blank0 else 0)
     data = b''.join(tile4(t) for t in tiles)
     paldata = b''.join(palette_bytes(p) for p in pals)
     return data, words, paldata, len(tiles), (W, H)
+
+
+def merge_tiles(tiles, words, pals, tile_base, max_tiles, keep):
+    """Merge the most similar tiles (same palette, colour distance) until max_tiles remain."""
+    import numpy as np
+    n = len(tiles)
+    pal_of = [None] * n
+    for w in words:
+        t = (w & 0x3ff) - tile_base
+        p = (w >> 10) & 7
+        pal_of[t] = p if pal_of[t] in (None, p) else -1
+    rgb = np.zeros((n, 64, 3), dtype=np.int32)
+    base = min(x for x in pal_of if x is not None and x >= 0)
+    for i, t in enumerate(tiles):
+        p = pal_of[i]
+        if p is None or p < 0:
+            continue
+        pl = pals[p - base]
+        for k, v in enumerate(t):
+            rgb[i, k] = (0, 0, 0) if v == 0 else pl[v - 1]
+    alive = list(range(n))
+    remap = list(range(n))
+    while len(alive) > max_tiles:
+        cand = [i for i in alive if i >= keep and pal_of[i] is not None and pal_of[i] >= 0]
+        a = rgb[cand].reshape(len(cand), -1)
+        best = None
+        for x, i in enumerate(cand):
+            d = np.abs(a[x + 1:] - a[x]).sum(axis=1)
+            same = np.array([pal_of[j] == pal_of[i] for j in cand[x + 1:]], dtype=bool)
+            if not same.any():
+                continue
+            d = np.where(same, d, 1 << 30)
+            y = int(d.argmin())
+            if best is None or d[y] < best[0]:
+                best = (int(d[y]), i, cand[x + 1 + y])
+        _, keep_i, drop = best
+        for k in range(n):
+            if remap[k] == drop:
+                remap[k] = keep_i
+        alive.remove(drop)
+    newidx = {old: new for new, old in enumerate(alive)}
+    out_w = []
+    for w in words:
+        t = remap[(w & 0x3ff) - tile_base]
+        out_w.append((w & ~0x3ff) | (tile_base + newidx[t]))
+    return [tiles[i] for i in alive], out_w
 
 
 # ---------------------------------------------------------------- LZSS

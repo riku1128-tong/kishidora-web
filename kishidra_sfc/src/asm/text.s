@@ -4,7 +4,7 @@
 .import text_table, font_glyphs, font_width, vq_push
 .importzp FONT_DIGIT0
 .import _ea, _bg3map, _bgmap_dirty
-.export _targ_num, _targ_str, _hero_name, _tb
+.export _targ_num, _targ_num2, _targ_str, _hero_name, _tb
 
 CANVAS_BANK = $7f
 BG3_TILE_VRAM = $6000
@@ -13,6 +13,7 @@ NBOX = 12
 .segment "LOWBSS"
 _tb:        .res NBOX*8      ; x, y, w, h, tile lo, tile hi, pal, flags (bit0 opaque, bit1 frame)
 _targ_num:  .res 4           ; {n}
+_targ_num2: .res 4           ; {m}
 _targ_str:  .res 2           ; {s} (text id)
 _hero_name: .res 16          ; {name}: up to 7 glyph codes + 0
 
@@ -141,8 +142,14 @@ box_map:
   xba
   asl
   asl
+  sta t_tmp2
+  lda t_flags
+  and #4               ; BOX_LOW: priority 0
+  bne :+
+  lda t_tmp2
   ora #$2000           ; priority
   sta t_tmp2           ; attribute bits
+:
   lda t_base
   sta t_row            ; running tile number
   ldy #0               ; row counter
@@ -692,6 +699,16 @@ draw_string:
   jsr num_to_codes
   jmp @loop
 @not_num:
+  cmp #11
+  bne @not_num2
+  jsr push_src
+  lda _targ_num2
+  sta t_tmp
+  lda _targ_num2+2
+  sta t_tmp2
+  jsr num_codes2
+  jmp @loop
+@not_num2:
   cmp #4
   bne @not_str
   jsr push_src
@@ -761,6 +778,7 @@ num_to_codes:
   sta t_tmp
   lda _targ_num+2
   sta t_tmp2
+num_codes2:
   ldx #0               ; digit count
 @div:
   ; (t_tmp2:t_tmp) / 10 -> quotient back, remainder in Y
@@ -1030,8 +1048,14 @@ glyph_pal:
   xba
   asl
   asl
+  sta t_attr
+  lda t_flags
+  and #4
+  bne :+
+  lda t_attr
   ora #$2000
   sta t_attr
+:
   lda t_py
   clc
   adc #12
@@ -1103,7 +1127,7 @@ glyph_pal:
   asl
   tax
   lda f:$7e0000+_bg3map,x
-  and #$e3ff
+  and #$c3ff
   ora t_attr
   sta f:$7e0000+_bg3map,x
   inc t_tx

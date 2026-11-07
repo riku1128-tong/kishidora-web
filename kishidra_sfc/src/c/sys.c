@@ -2,6 +2,7 @@
 #include "sound.h"
 
 u16 pad, pad_new, pad_rep;
+u16 dbg[8];
 u8 oam_next;
 static u16 seed = 0x2b7e;
 
@@ -23,6 +24,12 @@ void load_map(u16 id, u8 bg, u16 add, u8 row) {
 u16 unpack(u16 id, u16 dst7f) {
   ea[0] = id; ea[1] = dst7f;
   return asset_unpack();
+}
+
+u16 copy_asset(u16 id, void *dst, u16 max) {
+  ea[0] = id; ea[1] = (u16)dst; ea[2] = max;
+  asset_copy();
+  return ea[2];
 }
 
 void queue_vram(u16 vaddr, u16 src, u8 bank, u16 size) {
@@ -151,7 +158,7 @@ void frame_wait(void) {
   sound_service();
   wait_frame();
   pad = joy;
-  pad_new = joy_new;
-  pad_rep = joy_rep;
+  pad_new = pad_lat; pad_lat = 0;
+  pad_rep = rep_lat; rep_lat = 0;
   rnd();
 }

@@ -400,3 +400,36 @@ CFUNC estat_block
   plb
   plp
   rtl
+
+; void asset_copy(void): ea0 = raw asset id, ea1 = destination (in $7E), ea2 = max length -> copies, returns length in ea2
+CFUNC asset_copy
+  php
+  phb
+  AXY16
+  lda _ea+0
+  jsr asset_find
+  lda asset_size
+  cmp _ea+4
+  bcc :+
+  lda _ea+4
+:
+  sta _ea+4
+  lda _ea+2
+  sta fc_dst
+  A8
+  lda #$7e
+  sta fc_dst+2
+  A16
+  ldy #0
+  A8
+@l:
+  cpy _ea+4
+  beq @d
+  lda [lz_src],y
+  sta [fc_dst],y
+  iny
+  bra @l
+@d:
+  plb
+  plp
+  rtl

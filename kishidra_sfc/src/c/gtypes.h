@@ -23,7 +23,7 @@ typedef struct {
   s16 lock_atk;
   u16 stun_need, stun_step, stun_cap;
   u8 sp_every, flags, ability;
-  u8 pad[3];
+  u8 pad[1];
 } EStat;
 #define ROLE_ZAKO  0
 #define ROLE_MID   1
@@ -47,6 +47,7 @@ extern const u16 buff_value[N_BF];
 extern const u8 castle_bosses[9], castle_final[5], maou_forms[3];
 extern const u8 no_escort[N_MON];
 extern const u8 lucky_mons[N_LUCKY];
+extern const u8 claw_pct[N_MON];
 extern const u8 cand_list[];
 extern const u8 cand_off[4][6][2];
 extern const u8 skill_lot0[], skill_lot1[], skill_lot2[];

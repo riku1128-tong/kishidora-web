@@ -139,6 +139,12 @@ class Gen:
                 v = int(v)
             if isinstance(v, int):
                 self.define('D_' + k, v if -32768 <= v < 65536 else '%dL' % v)
+            elif isinstance(v, list) and v and all(isinstance(x, int) and not isinstance(x, bool) for x in v):
+                for i, x in enumerate(v):
+                    self.define('D_%s_%d' % (k, i), x if -32768 <= x < 65536 else '%dL' % x)
+        for r in s.tables['KIND_TABLE']:
+            for f in ('coin_min', 'coin_max', 'item_pct', 'n_pct', 'r_pct', 'sr_pct'):
+                self.define('D_%s_%s' % (r['id'], f.upper()), r[f])
         self.h.append('/* tuning.gd constants (T_) */')
         for k, v in T.items():
             if isinstance(v, bool):
@@ -146,6 +152,9 @@ class Gen:
             if isinstance(v, int) and not isinstance(v, bool):
                 if -2147483648 <= v < 4294967296:
                     self.define('T_' + k, v if -32768 <= v < 32768 else '%dL' % v)
+            elif isinstance(v, list) and v and all(isinstance(x, int) and not isinstance(x, bool) for x in v) and len(v) <= 16:
+                for i, x in enumerate(v):
+                    self.define('T_%s_%d' % (k, i), x if -32768 <= x < 32768 else '%dL' % x)
         dr = T['DIFFICULTY_RULES']
         self.diff = ['easy', 'normal', 'hard', 'extra', 'lunatic']
         self.c.append('const DiffRule diff_rules[%d] = {' % len(self.diff))
@@ -305,6 +314,21 @@ class Gen:
         c.append('const u8 no_escort[N_MON] = { %s };' % ', '.join('1' if m in noe else '0' for m in self.mon_ids))
         lucky = [m for m in self.mon_ids if s.enemies[m]['kind'] == 'EK_LUCKY']
         c.append('const u8 lucky_mons[%d] = { %s };' % (len(lucky), ', '.join(str(self.mon_index[m]) for m in lucky)))
+        by_el = {}
+        for a in s.tables['AREA_TABLE']:
+            b = a.get('boss', '')
+            r = s.enemies.get(b)
+            if not r or r['race'] != 'RC_DRAGON' or r['element'] == 'EL_NONE':
+                continue
+            lst = by_el.setdefault(r['element'], [])
+            if b not in lst:
+                lst.append(b)
+        claw = {}
+        for el, ids in by_el.items():
+            if len(ids) >= 2:
+                claw[ids[0]] = T['CLAW_WEAK_PCT']
+                claw[ids[-1]] = T['CLAW_STRONG_PCT']
+        c.append('const u8 claw_pct[N_MON] = { %s };' % ', '.join(str(claw.get(m, s.num('MAT_CLAW_BOSS_PCT'))) for m in self.mon_ids))
         self.define('N_LUCKY', len(lucky))
         # candidates (drops / gacha): non-evolved, non-plus rows per (type, rarity)
         evolved = {b for a, b in s.tables['WEAPON_EVOLVE_TABLE'] + s.tables['SHIELD_EVOLVE_TABLE']}
@@ -446,7 +470,7 @@ class Gen:
             idx[(ai, men)] = (len(data), len(out))
             for e in out:
                 data += struct.pack('<BBBBIHHhHHHBBB', *e)
-                data += b'\0' * (24 - 21)
+                data += b'\0' * (24 - struct.calcsize('<BBBBIHHhHHHBBB'))
         rows = []
         for ai in range(len(self.area_ids)):
             for men in range(0, 21):
@@ -457,6 +481,19 @@ class Gen:
         for i in range(0, len(data), 24):
             a.append('  .byte ' + ', '.join('$%02x' % b for b in data[i:i + 24]))
         open(os.path.join(GEN, 'estat.s'), 'w').write('\n'.join(a) + '\n')
+        # same data for the native (host) test build
+        hc = ['/* host test copy of estat.s */', 'const unsigned short estat_index_host[] = {']
+        for ai in range(len(self.area_ids)):
+            for men in range(0, 21):
+                off, n = idx.get((ai, men), (0, 0))
+                hc.append('  %d, %d,' % (off, n))
+        hc.append('};')
+        hc.append('const unsigned char estat_data_host[] = {')
+        for i in range(0, len(data), 24):
+            hc.append('  ' + ', '.join(str(b) for b in data[i:i + 24]) + ',')
+        hc.append('};')
+        os.makedirs(os.path.join(ROOT, 'tools', 'host', 'gen'), exist_ok=True)
+        open(os.path.join(ROOT, 'tools', 'host', 'gen', 'estat_host.c'), 'w').write('\n'.join(hc) + '\n')
         self.define('ESTAT_SIZE', 24)
         self.define('ESTAT_MEN_MAX', 20)
         assert len(data) < 65536
@@ -519,6 +556,18 @@ class Gen:
 
     def write_text(self):
         tx = self.tx
+        # keep every numbered family (SKILLN_0.., MONN_0..) contiguous so code can index NAME_0 + i
+        fam_order = {}
+        def fam(label):
+            m = re.match(r'^(.*)_(\d+)$', label)
+            return (m.group(1), int(m.group(2))) if m else (label, 0)
+        for label, codes, src in tx.strings:
+            fam_order.setdefault(fam(label)[0], len(fam_order))
+        tx.strings.sort(key=lambda r: (fam_order[fam(r[0])[0]], fam(r[0])[1]))
+        for f in fam_order:
+            nums = [fam(r[0])[1] for r in tx.strings if fam(r[0])[0] == f and re.match(r'^.*_\d+$', r[0])]
+            if nums and nums[0] == 0:
+                assert nums == list(range(len(nums))), f
         n = tx.write_font()
         h = ['/* generated by tools/make_data.py */', '#ifndef TEXT_H', '#define TEXT_H']
         for i, (label, codes, src) in enumerate(tx.strings):

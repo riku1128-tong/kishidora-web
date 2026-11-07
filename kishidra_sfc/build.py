@@ -63,7 +63,7 @@ def run(cmd, **kw):
 C_BANKS = {
     'main.c': 1, 'sys.c': 1, 'text.c': 1, 'ui.c': 1,
     'title.c': 2, 'story.c': 2, 'names.c': 2,
-    'battle_core.c': 3, 'battle_hit.c': 4, 'battle_enemy.c': 4,
+    'battle_core.c': 3, 'battle_hit.c': 4,
     'battle_view.c': 5, 'battle_fx.c': 6,
     'adventure.c': 7, 'rewards.c': 7, 'save.c': 8, 'inventory.c': 8,
     'map.c': 9, 'menu.c': 10, 'equip.c': 10, 'gacha.c': 11, 'forge.c': 12, 'mirage.c': 13, 'dex.c': 14,

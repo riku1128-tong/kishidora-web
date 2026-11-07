@@ -1,5 +1,6 @@
 /* runrom: headless libretro frontend for automated SFC ROM tests.
  * usage: runrom <core.so> <rom.sfc> <script.txt>
+ * build: gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl
  * script commands (one per line):
  *   wait N            run N frames with no input
  *   press BTN [N]     hold BTN for N frames (default 2) then release 1 frame
@@ -9,6 +10,7 @@
  *   wavend
  *   wram FILE         dump 128KB WRAM
  *   sram FILE         dump SRAM
+ *   vram FILE         dump 64KB VRAM
  *   loadsram FILE     load SRAM content (before first frame)
  * BTN: A B X Y L R START SELECT UP DOWN LEFT RIGHT (combine with +)
  */
@@ -117,6 +119,7 @@ int main(int argc, char **argv) {
     else if (!strcmp(cmd, "wavend")) { if (wavf) { wavhdr(wavf, wavbytes); fclose(wavf); wavf = NULL; } }
     else if (!strcmp(cmd, "wram")) dump(RETRO_MEMORY_SYSTEM_RAM, a1);
     else if (!strcmp(cmd, "sram")) dump(RETRO_MEMORY_SAVE_RAM, a1);
+    else if (!strcmp(cmd, "vram")) dump(RETRO_MEMORY_VIDEO_RAM, a1);
     else if (!strcmp(cmd, "loadsram")) { FILE *f = fopen(a1, "rb"); if (f) { fread(p_mem(RETRO_MEMORY_SAVE_RAM), 1, p_memsize(RETRO_MEMORY_SAVE_RAM), f); fclose(f); } }
     else fprintf(stderr, "unknown cmd %s\n", cmd);
   }

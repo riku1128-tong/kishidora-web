@@ -23,11 +23,18 @@ FONT_DIRS = ['/usr/share/fonts/X11/misc', os.path.join(HERE, '..', 'font')]
 FULL = 'shnmk12.pcf.gz'
 HALF = 'shnm6x12a.pcf.gz'
 GLYPH0 = 16
-CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10}
+CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10}
 
 # characters the source text uses that the 12-dot fonts lack
 SUBST = {'～': '〜', '〜': '〜', '－': 'ー', '−': '－', '♡': '♥', '–': '-', '—': 'ー', '‥': '…', '･': '・', '　': ' ', '❤': '♥', '♪': '♪',
          '①': '1', '②': '2', '③': '3', '④': '4', 'Ⅱ': 'II', '!': '！', '?': '？'}
+
+
+# hand-made glyphs for symbols missing from JIS X 0208 (rows of '#', 12 high)
+CUSTOM = {
+    '▶': (8, ['', '', '#', '##', '###', '####', '###', '##', '#', '', '', '']),
+    '▷': (8, ['', '', '#', '##', '#.#', '#..#', '#.#', '##', '#', '', '', '']),
+}
 
 
 class Glyphs:
@@ -51,6 +58,9 @@ class Glyphs:
         self._load()
         if ch == ' ':
             return 4, [0] * 12
+        if ch in CUSTOM:
+            w, rows = CUSTOM[ch]
+            return w, [sum(0x8000 >> i for i, c in enumerate(r) if c == '#') for r in rows]
         if ch in self.half and ord(ch) < 0x100:
             w, h, cell = self.half[ch]
             return w, [(r << (16 - w)) & 0xffff for r in cell[:12]]

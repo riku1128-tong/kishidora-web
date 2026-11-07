@@ -44,6 +44,7 @@ extern u8  coldata[3];
 extern u8  hdma_on;
 extern u8  hdma_tab1[32], hdma_tab2[32];
 extern u16 joy, joy_new, joy_rep;
+extern u16 pad_lat, rep_lat;   /* edges since the last frame_wait */
 extern u16 frame, lag;
 extern u8  bgmap_dirty;
 extern u8  oam_hide;

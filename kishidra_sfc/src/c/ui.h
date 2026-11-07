@@ -7,6 +7,7 @@
 #define BOX_OPAQUE 1
 #define BOX_FRAME  2
 #define BOX_WINDOW 3
+#define BOX_LOW 4
 #define PAL_T_WHITE 0
 #define PAL_T_YELLOW 1
 #define PAL_T_RED 2
@@ -17,7 +18,7 @@
 #define PAL_W_RED 7
 
 extern u8 tb[12 * 8];
-extern u32 targ_num;
+extern u32 targ_num, targ_num2;
 extern u16 targ_str;
 extern u16 hero_name[8];
 

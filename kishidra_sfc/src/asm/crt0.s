@@ -13,6 +13,7 @@
 .import RODATA_LOAD_BANK
 
 .export __STARTUP__ : absolute = 1
+.export _pad_lat, _rep_lat
 .export _ea, _oam, _cgram, _cgram_dirty, _scroll, _tm_main, _tm_sub, _bright, _joy, _joy_new, _joy_rep
 .export _frame, _bgmap_dirty, _nmi_ready, _vq_count, _vq, _bgmode, _cgadsub, _cgwsel, _coldata, _hdma_on
 .export _bg1map, _bg2map, _bg3map, _oam_hide, _lag
@@ -73,6 +74,8 @@ _hdma_on:     .res 1       ; HDMAEN mask for channels 6/7
 _joy:         .res 2
 _joy_new:     .res 2
 _joy_rep:     .res 2
+_pad_lat:     .res 2       ; edges latched by wait_frame, consumed by frame_wait
+_rep_lat:     .res 2
 joy_held_t:   .res 1
 _frame:       .res 2
 _lag:         .res 2
@@ -311,10 +314,13 @@ nmi_fast:
   tax
   eor _joy
   and JOY1L
+  sta nmi_tmp
+  ora _joy_new         ; edges accumulate until wait_frame latches them
   sta _joy_new
   stx _joy
   ; auto repeat: first after 16 frames, then every 4
-  lda _joy_new
+  lda nmi_tmp
+  ora _joy_rep
   sta _joy_rep
   txa
   beq @norep
@@ -610,6 +616,15 @@ CFUNC wait_frame
 @w:
   cmp _frame
   beq @w
+  ; latch joypad edges (the next NMI is a frame away)
+  lda _joy_new
+  ora _pad_lat
+  sta _pad_lat
+  lda _joy_rep
+  ora _rep_lat
+  sta _rep_lat
+  stz _joy_new
+  stz _joy_rep
   A8
   plb
   plp
@@ -661,8 +676,10 @@ CFUNC vram_queue
   eor #1
   plb
   plp
+  .i8
   ldx #0
   rtl
+  .i16
 
 ; void force_blank(unsigned char on): immediate INIDISP write
 CFUNC force_blank
@@ -699,8 +716,8 @@ CFUNC set_vram_layout
   sta f:BG12NBA
   lda #$06
   sta f:BG34NBA
-  ; OBJ: 16x16 / 32x32, name base $4000 (word), second table at $5000
-  lda #$62
+  ; OBJ: 8x8 / 32x32, name base $4000 (word), second table at $5000
+  lda #$22
   sta f:OBSEL
   plp
   rtl
@@ -712,7 +729,7 @@ c_main_tramp:
 
 .segment "VECTORS"
   ; native: unused, unused, COP, BRK, ABORT, NMI, unused, IRQ
-  .word 0, 0, .loword(nmi_dummy), .loword(nmi_dummy), .loword(nmi_dummy), .loword(nmi_vec), 0, .loword(irq_dummy)
+  .word 0, 0, .loword(brk_trap), .loword(brk_trap), .loword(nmi_dummy), .loword(nmi_vec), 0, .loword(irq_dummy)
   ; emulation: unused, unused, COP, unused, ABORT, NMI, RESET, IRQ/BRK
   .word 0, 0, .loword(nmi_dummy), 0, .loword(nmi_dummy), .loword(nmi_dummy), .loword(reset), .loword(irq_dummy)
 
@@ -722,3 +739,19 @@ nmi_vec:
 nmi_dummy:
 irq_dummy:
   rti
+; BRK/COP: a crash. Red backdrop and stop (the stack keeps the address for debugging)
+brk_trap:
+  sei
+  sep #$20
+  .a8
+  lda #$0f
+  sta f:INIDISP
+  lda #0
+  sta f:CGADD
+  lda #$1f
+  sta f:CGDATA
+  lda #0
+  sta f:CGDATA
+  sta f:NMITIMEN
+@hang:
+  bra @hang

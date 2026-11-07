@@ -5,4 +5,6 @@
 
 enum { SC_TITLE, SC_NEWGAME, SC_MAP, SC_BATTLE, SC_RESULT, SC_ENDING };
 u8 title_scene(void);
+#include "battle.h"
+u8 battle_scene(u8 area, u8 men, const Loadout *lo);
 #endif
