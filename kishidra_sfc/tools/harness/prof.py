@@ -105,7 +105,7 @@ def main():
     prev = None
     for i in range(chunks + 1):
         d = open('%s/w%d.bin' % (td, i), 'rb').read()
-        idx = (d[0x1effe] | d[0x1efff] << 8) & 0x0ffc
+        idx = (d[0x1dbfc] | d[0x1dbfd] << 8) & 0x0ffc
         if prev is not None:
             j = prev
             while j != idx:

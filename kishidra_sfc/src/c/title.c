@@ -5,6 +5,9 @@ u8 title_scene(u8 has_save) {
   u8 sel = has_save ? 0 : 1, i, shown = 255;
   screen_off();
   sys_init();
+  menu_layout();               /* 1024 BG3 tiles: the confirm dialog takes tiles from the top */
+  load_vram(ASSET_MENU_OBJ, MK_OBJ_VRAM);
+  load_pal(ASSET_MENU_OBJ_PAL, 128 + MK_PAL_MENU * 16);
   load_vram(ASSET_TITLE_TILES, VRAM_BG1_TILES);
   load_pal(ASSET_TITLE_PAL, 32);
   load_map(ASSET_TITLE_MAP, 0, 0, 0);

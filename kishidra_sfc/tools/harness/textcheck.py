@@ -19,7 +19,7 @@ CORE = os.environ.get('CORE', '/usr/lib/x86_64-linux-gnu/libretro/snes9x_libretr
 ROM = os.environ.get('ROM', os.path.join(ROOT, 'build', 'kishidra.sfc'))           # a PROFILE=1 build
 MAP = os.environ.get('MAP', os.path.splitext(ROM)[0] + '.map')                     # its link map
 KIND = {1: 'right', 2: 'bottom', 3: 'colour', 4: 'left', 5: 'top', 8: 'overlap'}
-PAL = ['white', 'yellow', 'red', 'gray', 'green', 'blue', 'gold', 'pal7']
+PAL = ['white', 'yellow', 'red', 'gray', 'green', 'blue', 'gold', 'purple']
 STEP = 10
 
 
@@ -33,6 +33,12 @@ def text_names():
 def bg3map_addr():
     m = re.search(r'(?:^|\s)_bg3map\s+([0-9A-F]{6})', open(MAP).read(), re.M)
     return int(m.group(1), 16) & 0xffff
+
+
+def nmi_ready_addr():
+    """_nmi_ready is the byte after _bgmap_dirty (crt0.s); the map lists only symbols C uses"""
+    m = re.search(r'(?:^|\s)_bgmap_dirty\s+([0-9A-F]{6})', open(MAP).read(), re.M)
+    return (int(m.group(1), 16) & 0xffff) + 1
 
 
 def shared_tiles(d, at):
@@ -83,6 +89,7 @@ def run(script, names):
     seen = {}
     shared = {}
     mapat = bg3map_addr()
+    readyat = nmi_ready_addr()
     lines_in = {}          # box -> [(x0, x1, y, msg)] drawn since its last clear
     prev = 0
 
@@ -97,7 +104,9 @@ def run(script, names):
         if not os.path.exists(f):
             continue
         d = open(f, 'rb').read()
-        for t, p1, p2 in shared_tiles(d, mapat)[:1]:
+        # the maps the NMI uploads: only while the game waits for it (nmi_ready); otherwise the
+        # dump may catch a map half written
+        for t, p1, p2 in (shared_tiles(d, mapat)[:1] if d[readyat] else []):
             shared.setdefault(labels[i], (t, p1, p2))
         idx = d[0x1dbfe] | d[0x1dbff] << 8
         if ((idx - prev) & 0xffff) > 4096:

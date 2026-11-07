@@ -130,7 +130,7 @@ T_RESULT_MIRACLE	MIRACLE!!
 T_MISS	攻撃が外れた！
 T_WEAK	WEAK!!
 T_CRIT	会心！
-T_STUN	スタン！
+T_STUN	STUN!
 T_COMBO	{n} COMBO
 T_BOSS_WARN	WARNING
 T_STAGE_CLEAR	WAVE CLEAR!
@@ -146,9 +146,11 @@ T_RESULT_ORB	{s}を取り戻した！
 T_RESULT_OVER	持ち物がいっぱいで {n} コインになった
 T_RESULT_LOSE	ここまでに手に入れたものは持ち帰れる
 T_BATTLE_HELP	{gray}B:ガード R:肉 ←→:ねらう START:ポーズ
-T_PAUSE_TITLE	ポーズ
-T_PAUSE_RESUME	つづける
-T_PAUSE_LEAVE	あきらめて帰る
+T_PAUSE_TITLE	メニュー
+T_PAUSE_RESUME	続ける
+T_PAUSE_LEAVE	離脱する
+T_PAUSE_LEAVE2	{red}本当に離脱する？
+T_PAUSE_WAVE	{gray}WAVE {n}/{m}
 T_PAUSE_HELP	ボタンのそうさ
 T_DRAIN	HP を吸い取られた！
 T_STDRAIN	ST を奪われた！
@@ -202,6 +204,18 @@ TXT_NEXT_LABEL	NEXT
 TXT_GUARD_LABEL	ガード
 TXT_NONE_GRAY	{gray}なし
 TXT_SP_TAG	{yellow}必殺
+T_SP_CUTIN	必殺技
+TXT_WAVE_N	WAVE {n}
+T_CLEAR	CLEAR
+T_TRAINING	ガードの練習
+TXT_COMBO	{yellow}{n} {gold}HIT!
+TXT_COMBO_RATE	{yellow}必殺 {n}倍
+TXT_COMBO_RATE_D	{yellow}必殺 {n}.{m}倍
+T_BUFF_1	次の技 ST0
+T_BUFF_2	次の技 威力2倍
+T_BUFF_3	次の技 会心1.5倍
+TXT_ST_PLUS	ST+{n}
+TXT_ST_MINUS	ST -{n}
 TXT_LOCK_TURNS	{red}あと{n}ターン
 TXT_ORB_0	{gray}●
 TXT_ORB_1	{red}●
@@ -426,10 +440,10 @@ T_DBG_GOODS_D	フエルスロット・スロットリセット 99 個\n素材は
 T_DBG_GOODS_NOW	いま：フエルスロット {n}・リセット {m}
 T_DBG_GOODS_NOW2	　　　チケット {n} 枚・{s} {m} 個
 T_DBG_ALL	武器・盾を全種類もらう
-T_DBG_ALL_D	武器と盾を全種類 1 つずつもらう（240 種類）\n（持ち物がいっぱいになるとそこで止まる）
+T_DBG_ALL_D	武器と盾を全種類 1 つずつもらう（240 種類）\n持ち物がいっぱいになると、そこで止まる
 T_DBG_BAG_NOW	いま：持ち物 {n}/{m}
 T_DBG_DEX	図鑑を全部うめる
-T_DBG_DEX_D	図鑑のモンスター・武器・盾・必殺技を\n全部「見た」にする（スキルの札はそのまま）
+T_DBG_DEX_D	図鑑のモンスター・武器・盾・必殺技を\n全部「見た」にする\n（スキルの札はそのまま）
 T_DBG_DEX_NOW	いま：モンスター {n}/93・必殺技 {m}/13
 T_DBG_DEX_NOW2	　　　武器と盾 {n}/240
 T_DBG_OPEN	全部のエリアと STAGE を開く
@@ -448,7 +462,8 @@ T_DBG_OPEN_ASK	全部のエリアと STAGE を開く？
 T_DBG_OPEN_DONE	全部のエリアと STAGE を開いた
 T_DBG_OPEN_ALREADY	もう全部開いている
 T_DBG_BAG_FULL	持ち物がいっぱい（売ってから）
-T_DBG_GIVE_ASK	{s}をもらう？
+T_DBG_GIVE_ASK	{s}を
+T_DBG_GIVE_ASK2	もらう？
 T_DBG_GIVEN	持ち物に入れた
 T_DBG_PICK_HEAD	持ち物 {n}/{m}
 T_DBG_PICK_FULL	{red}持ち物 {n}/{m}（いっぱい）

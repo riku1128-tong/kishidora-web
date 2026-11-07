@@ -148,6 +148,16 @@ static void grid_draw(void) {
   tb_flush(BX_GRID);
 }
 
+/* rows of the current page that have characters (the cursor skips empty ones at the end) */
+static u8 name_rows(void) {
+  u8 r = NAME_GRID_H, x;
+  while (r > 1) {
+    for (x = 0; x < NAME_GRID_W; ++x) if (name_grid[npage][(r - 1) * NAME_GRID_W + x]) return r;
+    --r;
+  }
+  return 1;
+}
+
 void name_entry(void) {
   u8 cx = 0, cy = 0, i;
   u16 g;
@@ -176,10 +186,11 @@ void name_entry(void) {
     frame_wait();
     if (pad_rep & BTN_LEFT) { cx = cx ? cx - 1 : NAME_GRID_W - 1; se_play(SE_CURSOR); }
     if (pad_rep & BTN_RIGHT) { cx = cx + 1 < NAME_GRID_W ? cx + 1 : 0; se_play(SE_CURSOR); }
-    if (pad_rep & BTN_UP) { cy = cy ? cy - 1 : NAME_GRID_H - 1; se_play(SE_CURSOR); }
-    if (pad_rep & BTN_DOWN) { cy = cy + 1 < NAME_GRID_H ? cy + 1 : 0; se_play(SE_CURSOR); }
+    if (pad_rep & BTN_UP) { cy = cy ? cy - 1 : name_rows() - 1; se_play(SE_CURSOR); }
+    if (pad_rep & BTN_DOWN) { cy = cy + 1 < name_rows() ? cy + 1 : 0; se_play(SE_CURSOR); }
     if (pad_new & (BTN_L | BTN_R)) {
       npage = (pad_new & BTN_R) ? (npage + 1) % 3 : (npage + 2) % 3;
+      if (cy >= name_rows()) cy = name_rows() - 1;
       se_play(SE_CURSOR);
       grid_draw();
     }
@@ -205,7 +216,7 @@ void orb_scene(u8 orb) {
   win_open(MK_BOX_DLG, 1, 8, 30, 7, MK_DLG_TILE(30, 7), PAL_W_FRAME);
   targ_str = ORBN_0 + orb;
   say_center(MK_BOX_DLG, TOP_Y, T_ORB_GET);
-  say_center(MK_BOX_DLG, TOP_Y + 2 * LINE_C, ORBD_0 + orb);
+  say_center(MK_BOX_DLG, TOP_Y + 24, ORBD_0 + orb);           /* ends by 45: inside the bottom frame (48) */
   tb_flush(MK_BOX_DLG);
   se_play(SE_MIRACLE);
   do { oam_next = 0; oam_finish(); frame_wait(); } while (!(pad_new & (BTN_A | BTN_B)));

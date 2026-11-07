@@ -73,9 +73,9 @@ static void sk_row(u16 i, u8 y) {
   u8 s = sk_list[i];
   if (s == 255) { say(BX_SUB, 14, y, T_DBG_SK_NONE); return; }
   say(BX_SUB, 14, y, SKILLN_0 + s);
-  sayn(BX_SUB, 104, y, T_DEX_ST, skills[s].cost);
+  sayn(BX_SUB, 96, y, T_DEX_ST, skills[s].cost);
   targ_str = skills[s].wtype > 2 ? T_DEX_SPECIAL : WTN_0 + skills[s].wtype;
-  say(BX_SUB, 144, y, TXT_GRAY_S);
+  say(BX_SUB, 128, y, TXT_GRAY_S);              /* ends by 152: the scroll marks are at 156 */
 }
 
 /* pick a skill for the slot; 254 = cancelled */
@@ -182,7 +182,7 @@ static void give_scene(void) {
     if (sv.ninv >= D_INV_MAX) { mk_notice(T_DBG_BAG_FULL, 0); continue; }
     if (items[it].type == WT_SHIELD || it == ITEM_FUUIN) {
       targ_str = ITEMN_0 + it;
-      if (!mk_confirm(T_DBG_GIVE_ASK, 0)) continue;
+      if (!mk_confirm(T_DBG_GIVE_ASK, T_DBG_GIVE_ASK2)) continue;
       mk_notice(debug_give(it, 0, 0) ? T_DBG_GIVEN : T_DBG_BAG_FULL, 0);
     } else {
       win_close(BX_LIST);

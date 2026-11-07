@@ -24,7 +24,7 @@ FULL = 'shnmk12.pcf.gz'
 HALF = 'shnm6x12a.pcf.gz'
 GLYPH0 = 16
 NO_LINE_START = set('、。，．・！？）」』】〕…‥ー～〜!?),.:;ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ')
-CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12, '{purple}': 13}
+CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12, '{purple}': 13, '{gold}': 14}
 
 # characters the source text uses that the 12-dot fonts lack
 SUBST = {'～': '〜', '〜': '〜', '－': 'ー', '−': '－', '♡': '♥', '–': '-', '—': 'ー', '‥': '…', '･': '・', '　': ' ', '❤': '♥', '♪': '♪',

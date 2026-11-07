@@ -988,10 +988,14 @@ draw_run:
 @not_str:
   cmp #16
   bcs @glyph
-  ; colour code 5..10, 13 -> palette (the same palettes in every box); {c0} = the box's own colour
+  ; colour code 5..10, 13, 14 -> palette (the same palettes in every box); {c0} = the box's own colour
   cmp #13
   bne :+
   lda #11              ; {purple}: colour_pal[6]
+:
+  cmp #14
+  bne :+
+  lda #12              ; {gold}: colour_pal[7]
 :
   sec
   sbc #5
@@ -1067,7 +1071,7 @@ draw_run:
 .endif
   rts
 
-colour_pal: .byte 0, 1, 2, 3, 5, 4, 7, 0   ; c0 (box), yellow, red, gray, blue, green, purple (BG3 palettes, see bg3pal in sys.c)
+colour_pal: .byte 0, 1, 2, 3, 5, 4, 7, 6   ; c0 (box), yellow, red, gray, blue, green, purple, gold (BG3 palettes, see bg3pal in sys.c)
 
 push_src:
   .a16
@@ -1667,7 +1671,7 @@ glyph_pal:
 :
   lda t_py
   clc
-  adc #12
+  adc t_gh             ; the shadow row: 12 (12-dot) or 7 (8-dot)
   lsr
   lsr
   lsr

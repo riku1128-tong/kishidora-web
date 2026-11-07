@@ -649,6 +649,8 @@ class Gen:
             self.text('CREDIT_%d' % i, l)
         self.define('N_CREDIT', len(T['CREDITS']))
         for k, (n, price, desc) in T['GOODS'].items():
+            if '（' in desc and '\n' not in desc:
+                desc = desc.replace('（', '\n（', 1)      # the shop wraps it: break before the note
             self.text('GOODSD_' + k, desc)
             self.define('PRICE_' + k, price)
         for i, k in enumerate(['失敗', '成功', '大成功', '奇跡']):

@@ -87,9 +87,9 @@ static void item_row(u16 n, u8 y) {
   u16 i = order[n];
   Inv *it = &sv.inv[i];
   u8 s = equipped_slot(i);
-  mk_item_name(BX_LIST, 14, y, it);
-  if (s != 255) say(BX_LIST, 208, y, T_TAG_MAIN + s);
-  if (inv_fav(it)) say(BX_LIST, 224, y, T_TAG_FAV);      /* clear of the scroll marks at 236 */
+  mk_item_name(BX_LIST, 14, y, it, 1);
+  if (s != 255) say(BX_LIST, 200, y, T_TAG_MAIN + s);
+  if (inv_fav(it)) say(BX_LIST, 216, y, T_TAG_FAV);      /* ends by 227: clear of the scroll marks at 236 */
   targ_str = RARN_0 + items[it->id].rarity;
   say(BX_LIST, 176, y, TXT_GRAY_S);
 }
@@ -137,7 +137,7 @@ static void equip_set(u8 slot, u16 i) {
 static void slot_row(u16 s, u8 y) {
   say(BX_LIST, 14, y, T_SLOT_MAIN + s);
   if (sv.equip[s] == NO_ITEM) say(BX_LIST, 70, y, T_SLOT_EMPTY);
-  else mk_item_name(BX_LIST, 70, y, &sv.inv[sv.equip[s]]);
+  else mk_item_name(BX_LIST, 70, y, &sv.inv[sv.equip[s]], 0);
 }
 
 static void slot_header(void) { say(BX_LIST, 14, LIST_KEYS_Y, T_EQ_KEYS); }

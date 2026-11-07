@@ -57,6 +57,7 @@ extern u16 bg1map[1024], bg2map[1024], bg3map[1024];
 void wait_frame(void);
 void vram_now(void);          /* ea0=vaddr ea1=src ea2=bank ea3=size ; display blanked */
 u8   vram_queue(void);        /* ea0..ea4 ; returns 1 if queued */
+u8   vram_queue_front(void);  /* the same, ahead of the queued entries */
 void force_blank(u8 on);
 void set_vram_layout(void);
 void vram_clear(void);       /* display blanked */

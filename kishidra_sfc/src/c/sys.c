@@ -38,6 +38,12 @@ void queue_vram(u16 vaddr, u16 src, u8 bank, u16 size) {
   while (!vram_queue()) wait_frame();
 }
 
+/* one entry ahead of everything queued (it must arrive in one NMI: at most 4KB) */
+void queue_vram_front(u16 vaddr, u16 src, u8 bank, u16 size) {
+  ea[0] = vaddr; ea[1] = src; ea[2] = bank; ea[3] = size; ea[4] = 0;
+  while (!vram_queue_front()) wait_frame();
+}
+
 /* large uploads while the display is on: 2KB per queue entry */
 void queue_vram_big(u16 vaddr, u16 src, u8 bank, u16 size) {
   u16 c;

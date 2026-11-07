@@ -224,7 +224,7 @@ static void sortie_draw(u8 cur) {
   for (s = 0; s < 4; ++s) {
     say(BX_SORTIE, 12, TOP_Y + s * LINE_C, T_SLOT_MAIN + s);
     if (sv.equip[s] == NO_ITEM) say(BX_SORTIE, 56, TOP_Y + s * LINE_C, T_SLOT_EMPTY);
-    else mk_item_name(BX_SORTIE, 56, TOP_Y + s * LINE_C, &sv.inv[sv.equip[s]]);
+    else mk_item_name(BX_SORTIE, 56, TOP_Y + s * LINE_C, &sv.inv[sv.equip[s]], 0);
   }
   say(BX_SORTIE, 32, SORTIE_BTN_Y, T_SORTIE_GO);
   say(BX_SORTIE, 112, SORTIE_BTN_Y, T_SORTIE_EQUIP);
@@ -292,7 +292,9 @@ static u8 area_window(void) {
     if (sv.ninv >= D_INV_MAX) { mk_notice(T_INV_FULL, T_INV_FULL2); continue; }
     win_close(BX_WIN);
     if (rows[r].kind == RK_TUT) { map_men = MEN_TUTORIAL; return MA_BATTLE; }   /* fixed tutorial gear */
+    label_hide();                  /* a piece of it would stick out beside the sortie window */
     k = sortie();
+    draw_label();
     if (k == 1) { map_men = rows[r].men; return MA_BATTLE; }
   }
 }
@@ -330,7 +332,7 @@ static u8 mirage_window(void) {
 static u8 after_battle(void) {
   u8 cleared = map_area;
   if (!res.win || res.mirage) return MA_NONE;
-  if (res.orb != 255) orb_scene(res.orb);
+  if (res.orb != 255) { label_hide(); orb_scene(res.orb); draw_label(); }   /* the label under the orb window */
   if (res.king) { label_hide(); ending(); return MA_TITLE; }
   if (res.opened != 255) {
     label_hide();
@@ -340,8 +342,8 @@ static u8 after_battle(void) {
     make_nodes();
     set_scroll();
     draw_top();
+    opened_notice(res.opened);     /* before the label: the notice covers its row */
     draw_label();
-    opened_notice(res.opened);
   }
   return MA_NONE;
 }

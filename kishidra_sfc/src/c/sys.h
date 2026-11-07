@@ -22,6 +22,7 @@ void load_map(u16 id, u8 bg, u16 add, u8 row);
 u16  unpack(u16 id, u16 dst7f);
 void queue_vram(u16 vaddr, u16 src, u8 bank, u16 size);
 void queue_vram_big(u16 vaddr, u16 src, u8 bank, u16 size);
+void queue_vram_front(u16 vaddr, u16 src, u8 bank, u16 size);   /* first in the queue, one entry */
 
 void sys_init(void);
 void screen_off(void);

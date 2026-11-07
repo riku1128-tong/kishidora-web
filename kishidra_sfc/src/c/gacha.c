@@ -101,7 +101,7 @@ static void gacha_run(void) {
 }
 
 static void goods_run(void) {
-  u8 e;
+  u8 e, sel = 0;
   for (;;) {
     win_open(BX_BODY, 2, 4, 28, 11, T_BODY, PAL_W);
     targ_str = MATN_0 + MAT_IT_RESET;
@@ -110,14 +110,15 @@ static void goods_run(void) {
     say_wrap(BX_BODY, 30, TOP_Y + 2 * LINE_H, GOODSD_IT_RESET, 28 * 8 - 8);
     say(BX_BODY, 30, TOP_Y + 4 * LINE_H + 4, T_GACHA_BACK);
     tb_flush(BX_BODY);
-    for (;;) {
+    for (;;) {                       /* rows: buy, もどる */
       oam_next = 0;
-      mk_cursor(16 + 30 - 11, 32 + TOP_Y + 2);
+      mk_cursor(16 + 30 - 11, 32 + (sel ? TOP_Y + 4 * LINE_H + 4 : TOP_Y) + 2);
       oam_finish();
       frame_wait();
+      if (pad_new & (BTN_UP | BTN_DOWN)) { sel ^= 1; se_play(SE_CURSOR); }
       if (pad_new & (BTN_B | BTN_A)) break;
     }
-    if (pad_new & BTN_B) { se_play(SE_CANCEL); return; }
+    if ((pad_new & BTN_B) || sel) { se_play(SE_CANCEL); return; }
     se_play(SE_OK);
     if (!mk_confirm(T_BUY_ASK, 0)) continue;
     e = goods_buy(MAT_IT_RESET);

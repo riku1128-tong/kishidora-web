@@ -92,6 +92,8 @@ _hdma_tab1:   .res 32
 _hdma_tab2:   .res 32
 nmi_tmp:      .res 2
 nmi_budget:   .res 2
+vq_lock:      .res 1
+nmi_front:    .res 1
 
 .segment "BSS"
 _bg1map: .res 2048
@@ -582,6 +584,10 @@ nmi_vline:
 vq_run:
   .a8
   .i16
+  lda vq_lock          ; vram_queue_front is moving the head
+  beq :+
+  rts
+:
   lda _vq_count
   bne :+
   rts
@@ -803,6 +809,64 @@ CFUNC vram_now
   rtl
 
 ; unsigned char vram_queue(void): queue ea[0..4]; returns 1 if queued
+; unsigned char vram_queue_front(void): like vram_queue, but the entry goes first (a sprite's
+; tiles that must arrive in one NMI, ahead of text uploads)
+CFUNC vram_queue_front
+  php
+  AXY16
+  phb
+  A8
+  lda #$80
+  pha
+  plb
+  I16
+  lda _vq_count
+  cmp #VQ_MAX
+  bcc :+
+  plb
+  plp
+  .i8
+  ldx #0
+  lda #0
+  rtl
+  .i16
+:
+  lda _vq_head         ; the slot before the oldest entry (not in the ring yet)
+  bne :+
+  lda #VQ_MAX
+:
+  dec a
+  sta nmi_front
+  A16
+  and #$00ff
+  asl
+  asl
+  asl
+  tax
+  lda _ea+0
+  sta _vq+0,x
+  lda _ea+2
+  sta _vq+2,x
+  lda _ea+6
+  sta _vq+5,x
+  A8
+  lda _ea+4
+  sta _vq+4,x
+  lda _ea+8
+  sta _vq+7,x
+  inc vq_lock          ; head and count change together: the NMI skips the queue meanwhile
+  lda nmi_front
+  sta _vq_head
+  inc _vq_count
+  stz vq_lock
+  plb
+  plp
+  .i8
+  ldx #0
+  lda #1
+  rtl
+  .i16
+
 CFUNC vram_queue
   php
   AXY16
@@ -941,14 +1005,14 @@ irq_dummy:
   rti
 .ifdef PROFILE
 ; profiling build (PROFILE=1 python build.py rom): a V-IRQ every 16 lines stores the
-; interrupted PC/PB in a ring at $7F:F000 (index at $7F:EFFE) for tools/harness/prof.py
+; interrupted PC/PB in a ring at $7F:F000 (index at $7F:DBFC; the text check log ends at $7F:EFFF) for tools/harness/prof.py
 irq_prof:
   rep #$30
   .a16
   .i16
   pha
   phx
-  lda f:$7fefff-1
+  lda f:$7fdbfc
   and #$0ffc
   tax
   lda 6,s
@@ -959,7 +1023,7 @@ irq_prof:
   txa
   clc
   adc #4
-  sta f:$7fefff-1
+  sta f:$7fdbfc
   sep #$20
   .a8
   lda f:TIMEUP

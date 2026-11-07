@@ -164,11 +164,17 @@ static u8 mk_confirm(u16 q, u16 q2) {
   return sel == 0;
 }
 
-/* item name with "+N" (enhanced slots) */
-static void mk_item_name(u8 bx, u16 x, u8 y, const Inv *it) {
+/* item name with "+N" (enhanced slots).  The yellow "+N" starts on its own tile; in lists with
+ * rows 14 px apart (two rows share a tile row) it goes to a column of its own (fixed = 1),
+ * past the longest name (108 px), so it never shares a tile with a name. */
+static void mk_item_name(u8 bx, u16 x, u8 y, const Inv *it, u8 fixed) {
   u8 n = enh_count(it);
+  u16 px;
   say(bx, x, y, ITEMN_0 + it->id);
-  if (n) sayn(bx, x + msg_width(ITEMN_0 + it->id) + 1, y, TXT_PLUS, n);
+  if (!n) return;
+  px = (x + msg_width(ITEMN_0 + it->id) + 7) & ~7;
+  if (fixed) px = MAX(px, (x + 112 + 7) & ~7);
+  sayn(bx, px, y, TXT_PLUS, n);
 }
 
 /* item card: 4 lines (5 with a two-line effect text) in a window of MK_CARD_H tiles:
@@ -186,9 +192,11 @@ static void mk_item_detail(u8 bx, const Inv *it) {
   say(bx, x, TOP_Y, WTN_0 + r->type);
   x += msg_width(WTN_0 + r->type) + 6;
   if (r->type != WT_SHIELD && r->element != EL_NONE) { say(bx, x, TOP_Y, ELN_0 + r->element); x += msg_width(ELN_0 + r->element); }
-  x = (x + 15) & ~7;                       /* stars on their own tiles */
+  x = (x + 15) & ~7;                       /* stars (8-dot font) one tile each: up to 9 end by 152 */
   n = inv_slots_of(it);
-  for (k = 0; k < n; ++k) say(bx, x + k * 12, TOP_Y, T_STAR_0 + enh_get(it, k));
+  text_small = 8;
+  for (k = 0; k < n; ++k) say(bx, x + k * 8, TOP_Y + 2, T_STAR_0 + enh_get(it, k));
+  text_small = 0;
   if (r->type == WT_SHIELD) { sayn(bx, 150, TOP_Y, T_ITEM_HP, r->atk); sayn(bx, 200, TOP_Y, T_ITEM_DEF, r->def); }
   else { sayn(bx, 160, TOP_Y, T_ITEM_ATK, r->atk); if (enh_sum(it)) sayn(bx, 208, TOP_Y, TXT_PLUS, enh_sum(it)); }
   y = TOP_Y + LINE_C;

@@ -16,7 +16,7 @@ static u16 head_item = NO_ITEM;
 static void head(void) {
   box(BX_HEAD, 0, 0, 32, 2, T_HEAD, PAL_W, BOX_OPAQUE);
   say(BX_HEAD, 8, 2, T_FORGE_TITLE);
-  if (head_item != NO_ITEM) mk_item_name(BX_HEAD, 56, 2, &sv.inv[head_item]);
+  if (head_item != NO_ITEM) mk_item_name(BX_HEAD, 56, 2, &sv.inv[head_item], 0);
   sayn(BX_HEAD, 200, 2, TXT_COINS, sv.coins);
   tb_flush(BX_HEAD);
 }
@@ -73,6 +73,8 @@ static u16 do_enhance(u16 i) {
     pick_exclude = i;
     src = pick_item(3, T_FG_PICK_SRC, NO_ITEM);
     pick_exclude = NO_ITEM;
+    win_close(2); win_close(1);     /* pick_item's card and list (ids 2 and 1 there) */
+    card(i);
     head();
     if (src == NO_ITEM) return i;
     if (!mk_confirm(T_CONFIRM, 0)) return i;
