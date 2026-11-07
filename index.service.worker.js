@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1794011702|19785201';
+const CACHE_VERSION = '1794031695|17149402';
 /** @type {string} */
 const CACHE_PREFIX = 'キシドラ！-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
