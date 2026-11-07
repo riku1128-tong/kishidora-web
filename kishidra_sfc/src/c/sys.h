@@ -12,6 +12,7 @@ void asset_pal(void);       /* ea0 id, ea1 first colour */
 void asset_map(void);       /* ea0 id, ea1 bg 0-2, ea2 add, ea3 row */
 void far_copy(void);        /* ea0 src, ea1 bank, ea2 dst, ea3 len */
 void asset_copy(void);      /* ea0 id, ea1 dst, ea2 max -> ea2 len */
+void asset_where(void);     /* ea0 id -> ea1 address, ea2 bank (raw assets: DMA from ROM) */
 u16  copy_asset(u16 id, void *dst, u16 max);
 void estat_block(void);     /* ea0 area, ea1 men, ea3 dst -> ea2 count */
 

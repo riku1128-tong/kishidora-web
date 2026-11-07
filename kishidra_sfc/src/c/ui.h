@@ -8,6 +8,7 @@
 #define BOX_FRAME  2
 #define BOX_WINDOW 3
 #define BOX_LOW 4
+#define BOX_SMALL 8            /* text in the 8-dot font (7 rows + shadow, lines 9 px apart) */
 /* BG3 text palettes (bg3pal in sys.c): the same for transparent boxes and windows */
 #define PAL_WHITE 0
 #define PAL_YELLOW 1
@@ -29,11 +30,14 @@ extern u8 tb[12 * 8];
 extern u32 targ_num, targ_num2;
 extern u16 targ_str;
 extern u16 text_wrap;          /* > 0: lines break before this x (say_wrap) */
+extern u16 text_small;         /* msg_width measures in the 8-dot font */
 extern u16 hero_name[8];
 
 void tb_open(u8 box);
 void tb_clear(u8 box);         /* waits until no queued upload reads the box's canvas */
 void tb_clear_now(u8 box);
+void tb_rect_now(u8 box);
+void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour);   /* filled pixels in the canvas */
 void tb_flush(u8 box);
 void tb_flush_rows(u8 box, u8 r0, u8 nr);
 void tb_text(u8 box);

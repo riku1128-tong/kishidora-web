@@ -23,7 +23,7 @@ FONT_DIRS = ['/usr/share/fonts/X11/misc', os.path.join(HERE, '..', 'font')]
 FULL = 'shnmk12.pcf.gz'
 HALF = 'shnm6x12a.pcf.gz'
 GLYPH0 = 16
-CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12}
+CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12, '{purple}': 13}
 
 # characters the source text uses that the 12-dot fonts lack
 SUBST = {'～': '〜', '〜': '〜', '－': 'ー', '−': '－', '♡': '♥', '–': '-', '—': 'ー', '‥': '…', '･': '・', '　': ' ', '❤': '♥', '♪': '♪',
@@ -35,6 +35,13 @@ CUSTOM = {
     '▶': (8, ['', '', '#', '##', '###', '####', '###', '##', '#', '', '', '']),
     '▷': (8, ['', '', '#', '##', '#.#', '#..#', '#.#', '##', '#', '', '', '']),
     '♥': (11, ['', '', '.##...##', '####.####', '#########', '#########', '.#######', '..#####', '...###', '....#', '', '']),
+}
+
+
+# 8-dot glyphs the 美咲 font lacks
+SMALL_CUSTOM = {
+    '▶': (6, ['', '#', '##', '###', '##', '#', '']),
+    '▷': (6, ['', '#', '##', '#.#', '##', '#', '']),
 }
 
 
@@ -142,6 +149,32 @@ class TextDB:
                 w += self.glyphs.glyph(self.chars[c - GLYPH0])[0]
         return w
 
+    def write_small(self):
+        """font_s.bin: the same glyphs from the 8-dot 美咲ゴシック, per glyph 16 bytes (8 rows, big-endian
+        16-bit; ink in rows 0-6, row 7 free for the shadow) ; font_s.bin.wid: widths."""
+        from PIL import Image, ImageDraw, ImageFont
+        path = next(p for p in (os.path.join(HERE, '..', 'font', 'misaki_gothic_2nd.ttf'),
+                                '/usr/share/fonts/truetype/misaki/misaki_gothic_2nd.ttf') if os.path.exists(p))
+        font = ImageFont.truetype(path, 8)
+        rows_out = bytearray()
+        wid = bytearray()
+        for ch in self.chars:
+            if ch in SMALL_CUSTOM:
+                w, art = SMALL_CUSTOM[ch]
+                rows = [sum(0x8000 >> i for i, c in enumerate(r) if c == '#') for r in art] + [0] * (8 - len(art))
+            else:
+                im = Image.new('1', (16, 8), 0)
+                d = ImageDraw.Draw(im)
+                d.fontmode = '1'
+                d.text((0, 0), ch, font=font, fill=1)
+                rows = [sum(0x8000 >> x for x in range(16) if im.getpixel((x, y))) for y in range(8)]
+                w = int(round(font.getlength(ch)))
+            for v in rows[:8]:
+                rows_out += struct.pack('>H', v)
+            wid.append(w)
+        open(self.font_path.replace('font.bin', 'font_s.bin'), 'wb').write(rows_out)
+        open(self.font_path.replace('font.bin', 'font_s.bin') + '.wid', 'wb').write(wid)
+
     def write_font(self):
         """font.bin: per glyph 24 bytes (12 rows, big-endian 16-bit) ; font.wid: widths."""
         rows = bytearray()
@@ -155,6 +188,7 @@ class TextDB:
         os.makedirs(os.path.dirname(self.font_path), exist_ok=True)
         open(self.font_path, 'wb').write(rows)
         open(self.font_path + '.wid', 'wb').write(wid)
+        self.write_small()
         with open(self.font_path + '.chars', 'w', encoding='utf-8') as f:
             for ch in self.chars:
                 f.write((ch.encode('unicode_escape').decode('ascii') if ch in '\\\n' or not ch.isprintable() else ch) + '\n')

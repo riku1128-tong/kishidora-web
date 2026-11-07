@@ -29,7 +29,7 @@ def text_names():
 
 
 def bg3map_addr():
-    m = re.search(r'^_bg3map\s+([0-9A-F]{6})', open(os.path.join(ROOT, 'build', 'kishidra.map')).read(), re.M)
+    m = re.search(r'(?:^|\s)_bg3map\s+([0-9A-F]{6})', open(os.path.join(ROOT, 'build', 'kishidra.map')).read(), re.M)
     return int(m.group(1), 16) & 0xffff
 
 
@@ -109,21 +109,22 @@ def run(script, names):
             x = e[4] | e[5] << 8
             y = e[6]
             j = (j + 8) & 0xffff
-            if kind not in KIND and kind not in (6, 7):
+            if kind not in KIND and kind not in (6, 7, 9):
                 continue                          # not written yet
             if kind == 7:
                 lines_in[box] = []
                 continue
-            if kind == 6:
+            if kind in (6, 9):
+                hgt = 12 if kind == 6 else 7
                 x1 = x + e[7]
-                for (a0, a1, ay, am) in lines_in.get(box, []):
+                for (a0, a1, ay, am, ahg) in lines_in.get(box, []):
                     if (a0, a1, ay, am) == (x, x1, y, msg):
                         continue                  # the same line drawn again
-                    if x < a1 - 1 and a0 < x1 - 1 and abs(y - ay) < 12:
+                    if x < a1 - 1 and a0 < x1 - 1 and (ay <= y < ay + ahg or y <= ay < y + hgt):
                         add((8, box, msg, am, y), (labels[i], 'overlap', box, name(msg), x, y, 'over %s (x %d..%d y %d)' % (name(am), a0, a1, ay)))
                         if os.environ.get('TC_DEBUG'):
                             print('overlap', i, labels[i], box, name(msg), x, x1, y, 'old', name(am), a0, a1, ay, file=sys.stderr)
-                lines_in.setdefault(box, []).append((x, x1, y, msg))
+                lines_in.setdefault(box, []).append((x, x1, y, msg, hgt))
                 continue
             key = (kind, box, msg, x // 8 if kind == 3 else -1, y)
             extra = ''

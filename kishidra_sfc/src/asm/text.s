@@ -1,10 +1,10 @@
 ; text boxes on BG3: 12-dot glyphs rendered into a 2bpp tile canvas ($7F:0000 = BG3 tile 0)
 .include "snes.inc"
 
-.import text_table, font_glyphs, font_width, vq_push
+.import text_table, font_glyphs, font_width, font_glyphs_s, font_width_s, vq_push
 .importzp FONT_DIGIT0
 .import _ea, _bg3map, _bgmap_dirty
-.export _targ_num, _targ_num2, _targ_str, _hero_name, _tb, _text_wrap
+.export _targ_num, _targ_num2, _targ_str, _hero_name, _tb, _text_wrap, _text_small
 .import _bg3_vram
 
 CANVAS_BANK = $7f
@@ -17,6 +17,9 @@ t_dry:    .res 2          ; 1 = measure only (draw nothing)
 t_drawn:  .res 2          ; a glyph was drawn on this line since the last colour change
 t_maxx:   .res 2          ; widest x reached (measure)
 _text_wrap: .res 2        ; > 0: a glyph that would reach this x starts a new line (C sets it)
+_text_small: .res 2       ; text_width measures in the 8-dot font (C sets it)
+t_gh:     .res 2          ; glyph rows (12, or 7 in the 8-dot font) ; the shadow adds one
+t_lh:     .res 2          ; line step (14 / 9)
 t_msg:    .res 2          ; text id being drawn (text check log)
 t_minw:   .res 2          ; minimum digits ({n3}: 3, zero padded)
 _tb:        .res NBOX*8      ; x, y, w, h, tile lo, tile hi, pal, flags (bit0 opaque, bit1 frame)
@@ -90,6 +93,20 @@ box_load:
   lda _tb+7,x
   and #$00ff
   sta t_flags
+set_font:              ; t_gh / t_lh from t_flags bit 3 (BOX_SMALL: the 8-dot font)
+  lda t_flags
+  and #8
+  bne :+
+  lda #12
+  sta t_gh
+  lda #14
+  sta t_lh
+  rts
+:
+  lda #7
+  sta t_gh
+  lda #9
+  sta t_lh
   rts
 
 ; void tb_open(u8 box): ea0 = x | y<<8, ea1 = w | h<<8, ea2 = tile, ea3 = pal | flags<<8 (1 opaque, 2 frame)
@@ -663,6 +680,111 @@ CFUNC tb_clear_now
   plp
   rtl
 
+; void tb_rect_now(u8 box): ea0 = x, ea1 = y, ea2 = width, ea3 = height | colour << 8 (0-3):
+; a filled rectangle in the box canvas (gauges such as the boss HP bar)
+CFUNC tb_rect_now
+  php
+  phb
+  AXY16
+  pha
+  A8
+  lda #$80
+  pha
+  plb
+  A16
+  pla
+  jsr box_load
+  lda _ea+6
+  and #$00ff
+  sta t_ty1            ; rows left
+  bne :+
+  jmp @done
+:
+  lda _ea+2
+  sta t_py
+@row:
+  lda _ea+4
+  sta t_tx1            ; columns left
+  bne :+
+  jmp @done
+:
+  lda _ea+0
+  sta t_px
+@px:
+  lda t_px             ; the pixel's bit
+  and #7
+  tax
+  sep #$20
+  .a8
+  lda f:rect_bit,x
+  sta t_tmp2
+  eor #$ff
+  sta t_tmp2+1
+  rep #$20
+  .a16
+  ; canvas byte of (t_px, t_py): ((base + (py >> 3) * w + (px >> 3)) * 16) + (py & 7) * 2
+  lda t_py
+  lsr
+  lsr
+  lsr
+  ldx t_w
+  jsr mul16x8
+  sta t_tmp
+  lda t_px
+  lsr
+  lsr
+  lsr
+  clc
+  adc t_tmp
+  clc
+  adc t_base
+  asl
+  asl
+  asl
+  asl
+  sta t_tmp
+  lda t_py
+  and #7
+  asl
+  clc
+  adc t_tmp
+  tax
+  sep #$20
+  .a8
+  lda _ea+7            ; colour
+  lsr
+  lda f:$7f0000,x      ; plane 0 <- colour bit 0
+  and t_tmp2+1
+  bcc :+
+  ora t_tmp2
+:
+  sta f:$7f0000,x
+  lda _ea+7
+  lsr
+  lsr
+  lda f:$7f0001,x      ; plane 1 <- colour bit 1
+  and t_tmp2+1
+  bcc :+
+  ora t_tmp2
+:
+  sta f:$7f0001,x
+  rep #$20
+  .a16
+  inc t_px
+  dec t_tx1
+  beq :+
+  jmp @px
+:
+  inc t_py
+  dec t_ty1
+  beq @done
+  jmp @row
+@done:
+  plb
+  plp
+  rtl
+rect_bit: .byte $80, $40, $20, $10, $08, $04, $02, $01
+
 ; tb_flush is in ui.c (chunked uploads through queue_vram)
 
 ; void tb_text(u8 box): ea0 = px, ea1 = py, ea2 = text id
@@ -678,6 +800,7 @@ CFUNC tb_text
   A16
   pla
   jsr box_load
+  jsr font_override
   lda _ea+4
   sta t_msg
   jsr text_ptr
@@ -685,6 +808,18 @@ CFUNC tb_text
   plb
   plp
   rtl
+
+; text_small set by C: this text in the 8-dot font whatever the box's font
+font_override:
+  .a16
+  lda _text_small
+  beq :+
+  lda t_flags
+  ora #8
+  sta t_flags
+  jsr set_font
+:
+  rts
 
 ; void tb_codes(u8 box): ea0 = px, ea1 = py, ea2 = pointer to codes in $7E
 CFUNC tb_codes
@@ -722,6 +857,12 @@ CFUNC text_width
   pha
   plb
   A16
+  lda _text_small
+  beq :+
+  lda #8
+:
+  sta t_flags
+  jsr set_font
   lda _ea+4
   jsr text_ptr
   jsr measure
@@ -802,7 +943,7 @@ draw_run:
   stz t_maxx
   lda t_py
   clc
-  adc #14
+  adc t_lh
   sta t_py
   jmp @loop
 @not_nl:
@@ -853,7 +994,11 @@ draw_run:
 @not_str:
   cmp #16
   bcs @glyph
-  ; colour code 5..10 -> palette (the same palettes in every box); {c0} = the box's own colour
+  ; colour code 5..10, 13 -> palette (the same palettes in every box); {c0} = the box's own colour
+  cmp #13
+  bne :+
+  lda #11              ; {purple}: colour_pal[6]
+:
   sec
   sbc #5
   and #$0007
@@ -905,7 +1050,7 @@ draw_run:
 .endif
   rts
 
-colour_pal: .byte 0, 1, 2, 3, 5, 4, 0, 0   ; c0 (box), yellow, red, gray, blue, green (BG3 palettes, see bg3pal in sys.c)
+colour_pal: .byte 0, 1, 2, 3, 5, 4, 7, 0   ; c0 (box), yellow, red, gray, blue, green, purple (BG3 palettes, see bg3pal in sys.c)
 
 push_src:
   .a16
@@ -995,6 +1140,9 @@ draw_glyph:
   sbc #16
   sta t_tmp
   tax
+  lda t_flags
+  and #8
+  bne @small
   lda f:font_width,x
   and #$00ff
   sta t_gw
@@ -1013,6 +1161,24 @@ draw_glyph:
   lda #^font_glyphs
   sta t_glyph+2
   A16
+  bra @font
+@small:                ; 8-dot font: 16 bytes per glyph
+  lda f:font_width_s,x
+  and #$00ff
+  sta t_gw
+  lda t_tmp
+  asl
+  asl
+  asl
+  asl
+  clc
+  adc #.loword(font_glyphs_s)
+  sta t_glyph
+  A8
+  lda #^font_glyphs_s
+  sta t_glyph+2
+  A16
+@font:
   lda t_dry
   bne @adv
   lda _text_wrap       ; wrapping: the glyph's last column past the limit -> next line
@@ -1035,7 +1201,7 @@ draw_glyph:
   stz t_maxx
   lda t_py
   clc
-  adc #14
+  adc t_lh
   sta t_py
 @nowrap:
 .ifdef PROFILE
@@ -1125,7 +1291,7 @@ gblit:
   rep #$20
   .a16
   lda t_row
-  cmp #12
+  cmp t_gh
   bcs @blank
   asl
   tay
@@ -1201,8 +1367,10 @@ gblit:
 @adv:
   inc t_row
   lda t_row
-  cmp #13
-  bcs @ret
+  cmp t_gh
+  beq :+
+  bcs @ret             ; the glyph rows and one more for the shadow
+:
   lda t_off
   clc
   adc #2
@@ -1688,7 +1856,8 @@ text_check:
   sta t_tmp2
   lda t_py
   clc
-  adc #11
+  adc t_gh
+  dec a                ; last row of the glyph
   cmp t_tmp2
   bcc :+
   stz t_tmp2
@@ -1703,7 +1872,8 @@ text_check:
 :
   lda t_py
   clc
-  adc #11
+  adc t_gh
+  dec a                ; last row of the glyph
   lsr
   lsr
   lsr
@@ -1813,7 +1983,13 @@ tc_extent:
   pha
   lda t_x0
   sta t_px
-  lda #6
+  lda t_flags
+  and #8
+  beq :+
+  lda #3               ; 9: a line in the 8-dot font
+:
+  clc
+  adc #6
   jsr tc_log
   pla
   sta t_px

@@ -56,24 +56,6 @@ def preview_bg(path, data, words, pal, size, pal_base=2):
     im.save(os.path.join(PREVIEW, path))
 
 
-HUD_FONT = {
-    '0': ['.###.', '#...#', '#..##', '#.#.#', '##..#', '#...#', '.###.'],
-    '1': ['..#..', '.##..', '..#..', '..#..', '..#..', '..#..', '.###.'],
-    '2': ['.###.', '#...#', '....#', '..##.', '.#...', '#....', '#####'],
-    '3': ['####.', '....#', '....#', '.###.', '....#', '....#', '####.'],
-    '4': ['...#.', '..##.', '.#.#.', '#..#.', '#####', '...#.', '...#.'],
-    '5': ['#####', '#....', '####.', '....#', '....#', '#...#', '.###.'],
-    '6': ['.###.', '#....', '#....', '####.', '#...#', '#...#', '.###.'],
-    '7': ['#####', '....#', '...#.', '..#..', '..#..', '..#..', '..#..'],
-    '8': ['.###.', '#...#', '#...#', '.###.', '#...#', '#...#', '.###.'],
-    '9': ['.###.', '#...#', '#...#', '.####', '....#', '....#', '.###.'],
-    '/': ['....#', '...#.', '...#.', '..#..', '.#...', '.#...', '#....'],
-    'H': ['#...#', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
-    'P': ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
-    'S': ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
-    'T': ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
-}
-HUD_GLYPH0 = 39
 
 
 class Gfx:
@@ -120,7 +102,9 @@ class Gfx:
             h = round(im.height * 256 / im.width)
             im = im.resize((256, h), Image.NEAREST)
             top = max(0, min(h - 128, int(h * 0.22)))
-            self.bg('BG_' + n.upper(), im.crop((0, top, 256, top + 128)), npal=3, pal_base=2, tile_base=0, max_tiles=512)
+            # rows 2-15 (112 px; the battle panel is rows 16-27): at most 448 tiles, BG2 tiles 448-511
+            # hold the panel art
+            self.bg('BG_' + n.upper(), im.crop((0, top, 256, top + 112)), npal=3, pal_base=2, tile_base=0, max_tiles=448)
         self.a.const('BG_LIST', '"%s"' % ','.join(names))
 
     # ------------------------------------------------------------ sprites
@@ -436,6 +420,7 @@ class Gfx:
                     idx = [0 if px[tx * 8 + x, ty * 8 + y][3] == 0 else 1 + caches[g_](px[tx * 8 + x, ty * 8 + y][:3]) for y in range(8) for x in range(8)]
                     data += G.tile4(idx)
             palsel.append(g_)
+        self.icon_imgs = icons[:len(ids)]
         self.a.add('ICONS16', bytes(data))
         self.a.add('ICONS16_PAL', b''.join(G.palette_bytes(p) for p in pals), compress=False)
         self.a.add('ICONS16_SEL', bytes(palsel), compress=False)
@@ -514,7 +499,23 @@ class Gfx:
             gd.text((2, -2), str(i), font=small, fill=pal[1] + (255,))
             x, y = (10 + i % 6) * 8, (i // 6) * 8
             sheet.alpha_composite(g, (x, y))
-        # mini HP bar tiles 0..8 px (row 1 col 14,15 + row 3 cols 10..15 ...) -> place at row 3 (y=24) cols 0..8
+        # The mini HP bars and the small icons go to the misc strip (FX_MISC, its row 3): the
+        # yellow digits use rows 2-3 here.  Misc rows 0-1 cols 8-13: cost badges 16x16 (red, short,
+        # gray), cols 14-15 row 0: the small gray NEXT badge.
+        fxsheet = sheet
+        sheet = Image.new('RGBA', (128, 32), (0, 0, 0, 0))
+        d = ImageDraw.Draw(sheet)
+        for k, fill in enumerate((pal[4], pal[8], pal[7])):
+            g = Image.new('RGBA', (16, 16), (0, 0, 0, 0)); gd = ImageDraw.Draw(g)
+            gd.rounded_rectangle((0, 2, 15, 13), 5, fill=pal[0] + (255,))
+            gd.rounded_rectangle((1, 3, 14, 12), 4, fill=pal[1] + (255,))
+            gd.rounded_rectangle((2, 4, 13, 11), 3, fill=fill + (255,))
+            sheet.alpha_composite(g, (64 + k * 16, 0))
+        g = Image.new('RGBA', (16, 8), (0, 0, 0, 0)); gd = ImageDraw.Draw(g)
+        gd.rounded_rectangle((0, 0, 15, 7), 3, fill=pal[0] + (255,))
+        gd.rounded_rectangle((1, 1, 14, 6), 2, fill=pal[7] + (255,))
+        sheet.alpha_composite(g, (112, 0))
+        # mini HP bar tiles 0..8 px -> row 3 (y=24) cols 0..8 of the misc strip
         for i in range(9):
             g = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
             gd = ImageDraw.Draw(g)
@@ -535,14 +536,23 @@ class Gfx:
         gd.ellipse((0, 2, 7, 6), fill=pal[10] + (255,), outline=pal[7] + (255,)); gd.point((3, 4), fill=pal[1] + (255,)); sheet.alpha_composite(g, (104, 24))
         g = Image.new('RGBA', (8, 8), (0, 0, 0, 0)); gd = ImageDraw.Draw(g)
         gd.ellipse((0, 0, 7, 7), fill=pal[9] + (255,), outline=pal[8] + (255,)); gd.line((3, 2, 3, 5), fill=pal[12] + (255,)); sheet.alpha_composite(g, (112, 24))
-        sheet = G.snap(sheet)
+        misc = G.snap(sheet)
+        sheet = G.snap(fxsheet)
         cache = G.Cache(pal)
-        px = sheet.load()
-        data = bytearray()
-        for tr in range(4):
-            for tc in range(16):
-                data += G.tile4([0 if px[tc * 8 + x, tr * 8 + y][3] == 0 else 1 + cache(px[tc * 8 + x, tr * 8 + y][:3]) for y in range(8) for x in range(8)])
+
+        def strip_tiles(im, rows, cols):
+            px = im.load()
+            out = bytearray()
+            for tr in rows:
+                for tc in cols:
+                    out += G.tile4([0 if px[tc * 8 + x, tr * 8 + y][3] == 0 else 1 + cache(px[tc * 8 + x, tr * 8 + y][:3]) for y in range(8) for x in range(8)])
+            return out
+        data = strip_tiles(sheet, range(4), range(16))
         self.a.add('FX_STRIP', bytes(data))
+        # misc strip parts: row 0 cols 8-15, row 1 cols 8-15, rows 2-3 (the shield and skill icons
+        # of cols 0-7 are uploaded by the battle)
+        self.a.add('FX_MISC', bytes(strip_tiles(misc, [0], range(8, 16)) + strip_tiles(misc, [1], range(8, 16)) + strip_tiles(misc, [2, 3], range(16))))
+        misc.resize((512, 128), Image.NEAREST).save(os.path.join(PREVIEW, 'fx_misc.png'))
         self.a.add('FX_PAL', G.palette_bytes(pal), compress=False)
         os.makedirs(PREVIEW, exist_ok=True)
         sheet.resize((512, 128), Image.NEAREST).save(os.path.join(PREVIEW, 'fx.png'))
@@ -575,55 +585,174 @@ class Gfx:
         self.a.add('FX_CELLS', bytes(data))
         cells.resize((512, 128), Image.NEAREST).save(os.path.join(PREVIEW, 'fx_cells.png'))
 
+    # ------------------------------------------------------------ battle panel (rows 16-27)
+    # The phone battle panel (battle_frame.gd, skill_card.gd, big_button.gd, gauge.gd), drawn here
+    # in one 15-colour palette (BG palette 5): BG2 tiles 448-511 hold the frame, arches, cards,
+    # NEXT cards and the guard / meat buttons (with state variants as map snippets); BG1 tiles
+    # 0-63 the HP / ST bars and the icons on top of them.
+    PANEL_PAL = [(20, 8, 6), (59, 29, 11), (110, 58, 23), (216, 160, 96), (74, 20, 24), (232, 176, 64),
+                 (246, 237, 216), (200, 184, 150), (224, 40, 40), (255, 255, 255), (88, 208, 104),
+                 (58, 134, 224), (144, 200, 248), (236, 106, 134), (128, 128, 144)]
+    PANEL_TILE0 = 448
+
     def hud(self):
-        """BG1 tiles for the HP/ST bars (palette 5)"""
-        pal = [(8, 8, 12), (40, 32, 24), (72, 200, 72), (232, 208, 64), (232, 72, 56), (72, 144, 240), (216, 168, 64),
-               (24, 24, 32), (248, 248, 248)]
-        tiles = []
+        P = self.PANEL_PAL
+        INK, WDARK, WMID, WLIGHT, ARCH, GOLD, CREAM, PLOW, RED, WHITE, GREEN, BLUE, LBLUE, PINK, GRAY = P
+
+        def rbox(d, x0, y0, x1, y1, r, fill):
+            d.rectangle((x0 + r, y0, x1 - r, y1), fill=fill)
+            d.rectangle((x0, y0 + r, x1, y1 - r), fill=fill)
+            for cx, cy in ((x0 + r, y0 + r), (x1 - r, y0 + r), (x0 + r, y1 - r), (x1 - r, y1 - r)):
+                d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=fill)
+
+        def card(d, x0, y0, x1, y1, kind):
+            if kind == 'card':
+                rbox(d, x0, y0, x1, y1, 3, INK)
+                rbox(d, x0 + 1, y0 + 1, x1 - 1, y1 - 1, 2, GOLD)
+                d.rectangle((x0 + 2, y0 + 2, x1 - 2, y1 - 2), fill=CREAM)
+                d.rectangle((x0 + 2, y0 + 15, x1 - 2, y1 - 2), fill=PLOW)
+                d.rectangle((x0 + 2, y1 - 13, x1 - 2, y1 - 2), fill=WDARK)        # name strip
+            elif kind == 'next':
+                rbox(d, x0, y0, x1, y1, 3, INK)
+                rbox(d, x0 + 1, y0 + 1, x1 - 1, y1 - 1, 2, PLOW)
+                d.rectangle((x0 + 2, y0 + 2, x1 - 2, y1 - 2), fill=WDARK)
+            elif kind == 'empty':
+                rbox(d, x0, y0, x1, y1, 3, WDARK)
+                d.rectangle((x0 + 1, y0 + 2, x1 - 1, y1 - 2), fill=INK)
+                d.rectangle((x0 + 2, y0 + 1, x1 - 2, y1 - 1), fill=INK)
+            else:                                                                   # glossy button
+                base, top = {'guard': (BLUE, LBLUE), 'meat': (PINK, CREAM), 'off': (GRAY, PLOW)}[kind]
+                rbox(d, x0, y0, x1, y1, 4, INK)
+                rbox(d, x0 + 1, y0 + 1, x1 - 1, y1 - 1, 3, WHITE if kind != 'off' else PLOW)
+                rbox(d, x0 + 2, y0 + 2, x1 - 2, y1 - 2, 2, base)
+                d.rectangle((x0 + 4, y0 + 3, x1 - 4, y0 + 4), fill=top)              # shine
+
+        def panel(variant):
+            im = Image.new('RGB', (256, 96), WMID)
+            d = ImageDraw.Draw(im)
+            # gauges: dark box for the bars (x 2-189) and the HP number tab (x 192-253)
+            d.rectangle((0, 0, 255, 0), fill=WDARK)
+            rbox(d, 2, 1, 189, 14, 2, INK)
+            rbox(d, 192, 1, 253, 14, 2, WDARK)
+            d.rectangle((193, 2, 252, 13), fill=INK)
+            for c in range(4):
+                x0 = c * 64
+                # arch (weapon tab) with the shelf under it
+                d.rectangle((x0, 16, x0 + 63, 31), fill=WMID)
+                rbox(d, x0 + 3, 17, x0 + 60, 36, 5, GOLD)
+                rbox(d, x0 + 4, 18, x0 + 59, 36, 4, ARCH)
+                d.rectangle((x0, 29, x0 + 63, 29), fill=WLIGHT)
+                d.rectangle((x0, 30, x0 + 63, 31), fill=WDARK)
+                # separators between the columns
+                for xx in (x0, x0 + 63):
+                    d.rectangle((xx, 32, xx, 95), fill=WDARK)
+                kc, kn = variant.get(c, ('card', 'next'))
+                card(d, x0 + 4, 33, x0 + 59, 70, kc)
+                card(d, x0 + 4, 73, x0 + 59, 94, kn)
+            d.rectangle((0, 95, 255, 95), fill=WDARK)
+            return im
+
+        cache = G.Cache(P)
+
+        def idx_of(im, tx, ty):
+            px = im.load()
+            return tuple(1 + cache(px[tx * 8 + x, ty * 8 + y]) for y in range(8) for x in range(8))
+
+        tiles, index = [], {}
+
+        def tile_word(t):
+            for h in (0, 1):
+                for v in (0, 1):
+                    k = G.flipped(t, h, v)
+                    if k in index:
+                        return (self.PANEL_TILE0 + index[k]) | (5 << 10) | (h << 14) | (v << 15)
+            index[t] = len(tiles)
+            tiles.append(t)
+            return (self.PANEL_TILE0 + index[t]) | (5 << 10)
+
+        def map_of(im, tx0, ty0, w, h):
+            return [tile_word(idx_of(im, tx, ty)) for ty in range(ty0, ty0 + h) for tx in range(tx0, tx0 + w)]
+        base = panel({3: ('guard', 'meat')})
+        words = map_of(base, 0, 0, 32, 12)
+        snippets = []          # (name, column tile x, row, w, h, image)
+        for name, var, c, row, h in (('CARD_EMPTY', {0: ('empty', 'next')}, 0, 4, 5),
+                                     ('NEXT_NONE', {0: ('card', 'empty')}, 0, 9, 3),
+                                     ('GUARD_OFF', {3: ('off', 'meat')}, 3, 4, 5),
+                                     ('MEAT_OFF', {3: ('guard', 'off')}, 3, 9, 3)):
+            im = panel(var)
+            snippets.append((name, map_of(im, c * 8, row, 8, h)))
+        if len(tiles) > 64:
+            raise SystemExit('battle panel: %d BG2 tiles (max 64)' % len(tiles))
+        self.a.add('PANEL_TILES', b''.join(G.tile4(t) for t in tiles), compress=False)
+        self.a.add('PANEL_MAP', b''.join(struct.pack('<H', w) for w in words), compress=False)
+        for name, ws in snippets:
+            self.a.add('PANEL_' + name, b''.join(struct.pack('<H', w) for w in ws), compress=False)
+        self.a.add('PANEL_PAL', G.palette_bytes(P), compress=False)
+        self.a.const('PANEL_NTILES', len(tiles))
+        base.resize((768, 288), Image.NEAREST).save(os.path.join(PREVIEW, 'panel.png'))
+
+        # ---------------- BG1 overlay tiles (palette 5): bars, ST cells, icons
+        ov = []
 
         def tile(fn):
             im = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
             fn(ImageDraw.Draw(im))
-            tiles.append(im)
-        # 0 empty, 1-9 HP bar fill 0..8 (green), 10-18 yellow, 19-27 red, 28-36 ST blue, 37 bar left cap, 38 right cap
-        tile(lambda d: None)
-        for colour in (pal[2], pal[3], pal[4], pal[5]):
+            ov.append(im)
+        tile(lambda d: None)                                           # 0 empty
+        # 1-9 HP bar fill 0..8 px green, 10-18 red (y 2-5 inside a gold frame at y 1 / 6)
+        for colour in (GREEN, RED):
             for i in range(9):
                 def f(d, i=i, colour=colour):
-                    d.rectangle((0, 1, 7, 6), fill=pal[7] + (255,))
-                    d.line((0, 0, 7, 0), fill=pal[6] + (255,))
-                    d.line((0, 7, 7, 7), fill=pal[6] + (255,))
+                    d.line((0, 1, 7, 1), fill=GOLD + (255,))
+                    d.line((0, 6, 7, 6), fill=GOLD + (255,))
+                    d.rectangle((0, 2, 7, 5), fill=INK + (255,))
                     if i:
                         d.rectangle((0, 2, i - 1, 5), fill=colour + (255,))
-                        d.line((0, 2, i - 1, 2), fill=pal[8] + (255,))
+                        d.line((0, 2, i - 1, 2), fill=WHITE + (255,))
                 tile(f)
-        tile(lambda d: (d.rectangle((6, 0, 7, 7), fill=pal[6] + (255,))))
-        tile(lambda d: (d.rectangle((0, 0, 1, 7), fill=pal[6] + (255,))))
-        # 39.. small HUD glyphs (5x7, white with dark shadow): 0-9 / H P S T
-        for ch in '0123456789/HPST':
-            rows = HUD_FONT[ch]
-            def f(d, rows=rows):
-                for y, r in enumerate(rows):
-                    for x, c in enumerate(r):
-                        if c == '#':
-                            d.point((x + 2, y + 1), fill=pal[7] + (255,))
-                            d.point((x + 1, y + 1), fill=pal[7] + (255,))
-                            d.point((x + 1, y + 2), fill=pal[7] + (255,))
-                for y, r in enumerate(rows):
-                    for x, c in enumerate(r):
-                        if c == '#':
-                            d.point((x + 1, y), fill=pal[8] + (255,))
-            tile(f)
-        cache = G.Cache(pal)
+        tile(lambda d: (d.line((7, 1, 7, 6), fill=GOLD + (255,)), d.rectangle((6, 2, 6, 5), fill=GOLD + (255,))))   # 19 left cap
+        tile(lambda d: (d.line((0, 1, 0, 6), fill=GOLD + (255,)), d.rectangle((1, 2, 1, 5), fill=GOLD + (255,))))   # 20 right cap
+        # 21-28 ST cell halves (L, R) x full / empty / short-full / short-empty: 15 x 6 px pills
+        for fill, hi in ((BLUE, LBLUE), (WDARK, None), (RED, PINK), (ARCH, None)):
+            for half in (0, 1):
+                def f(d, half=half, fill=fill, hi=hi):
+                    x0, x1 = (1, 7) if half == 0 else (0, 6)
+                    d.rectangle((x0, 2, x1, 6), fill=fill + (255,))
+                    if half == 0:
+                        d.point((1, 2), fill=(0, 0, 0, 0)); d.point((1, 6), fill=(0, 0, 0, 0))
+                    else:
+                        d.point((6, 2), fill=(0, 0, 0, 0)); d.point((6, 6), fill=(0, 0, 0, 0))
+                    if hi:
+                        d.line((x0 + (1 if half == 0 else 0), 3, x1 - (1 if half else 0), 3), fill=hi + (255,))
+                tile(f)
+        assert len(ov) == 29
+        # 29-36 guard icon (16x16, then dimmed), 37-44 meat icon (then dimmed)
+        for src in ('guard', 'meat'):
+            im = self.img('assets/battle/%s.png' % src).resize((16, 16), Image.LANCZOS)
+            im.putalpha(im.split()[3].point(lambda v: 255 if v > 110 else 0))
+            for dim in (0, 1):
+                c = im.copy()
+                if dim:
+                    c = Image.merge('RGBA', [b.point(lambda v: v * 55 // 100) for b in c.split()[:3]] + [c.split()[3]])
+                for ty in (0, 1):
+                    for tx in (0, 1):
+                        ov.append(c.crop((tx * 8, ty * 8, tx * 8 + 8, ty * 8 + 8)))
         data = bytearray()
-        for im in tiles:
+        for im in ov:
             im = G.snap(im)
             px = im.load()
             data += G.tile4([0 if px[x, y][3] == 0 else 1 + cache(px[x, y][:3]) for y in range(8) for x in range(8)])
         self.a.add('HUD_TILES', bytes(data))
-        self.a.const('HUD_GLYPH0', HUD_GLYPH0)
-        self.a.const('HUD_NTILES', len(tiles))
-        self.a.add('HUD_PAL', G.palette_bytes(pal), compress=False)
+        self.a.const('HUD_NTILES', len(ov))
+        self.a.const('HUD_ICON_T', len(ov))        # BG1 tiles 45-60: the 3 weapon icons and the shield
+        # item icons (weapons, shields) in the panel palette: 4 tiles each, uploaded per battle
+        idata = bytearray()
+        for im in self.icon_imgs:
+            px = im.load()
+            for ty in (0, 1):
+                for tx in (0, 1):
+                    idata += G.tile4([0 if px[tx * 8 + x, ty * 8 + y][3] == 0 else 1 + cache(px[tx * 8 + x, ty * 8 + y][:3]) for y in range(8) for x in range(8)])
+        self.a.add('PANEL_ICONS', bytes(idata), compress=False)       # 128 bytes per item, DMA'd from ROM
 
     def menu_obj(self):
         """menu / map sprites (OBJ $6000): tiles 0-63 icons (palette MENU_OBJ_PAL), 64.. king chibi (32x32 cells, KING_PAL)"""

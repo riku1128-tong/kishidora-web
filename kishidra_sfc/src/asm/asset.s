@@ -450,3 +450,18 @@ CFUNC asset_copy
   plb
   plp
   rtl
+
+; void asset_where(void): ea0 = raw asset id -> ea1 = its address, ea2 = its bank (for DMA from ROM)
+CFUNC asset_where
+  php
+  phb
+  AXY16
+  lda _ea+0
+  jsr asset_find
+  lda lz_src
+  sta _ea+2
+  lda lz_src+2
+  sta _ea+4
+  plb
+  plp
+  rtl

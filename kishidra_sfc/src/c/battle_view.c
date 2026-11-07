@@ -6,7 +6,8 @@
 #include <string.h>
 
 /* ---------------------------------------------------------------- layout */
-#define FIELD_Y   16           /* rows 2-17 */
+#define FIELD_Y   16           /* rows 2-15; the panel is rows 16-27 */
+#define FIELD_ROWS 14
 #define FOOT_Y    123          /* D_HERO_Y: feet line */
 #define HERO_X    D_HERO_X
 #define STRIP_TILE(n) ((n) * 64)
@@ -26,17 +27,27 @@
 #define BOSS_TILE_B 288
 #define ATTR(tile, pal, prio) ((u16)(tile) | ((u16)(pal) << 9) | ((u16)(prio) << 12))
 
-/* BG3 boxes */
+/* BG3 boxes (2bpp tiles $6000-$6FFF: up to tile 511).  The panel's own art is BG2 (tiles 448-511,
+ * palette 5) and BG1 (tiles 0-60: bars and icons); its text is in these transparent boxes. */
 #define BX_TOP 0
-#define BX_HPST 1
-#define BX_PANEL 2
+#define BX_HPNUM 1             /* "200/200" in the tab, rows 16-17 */
+#define BX_PANEL 2             /* windows over the field: talk, tutorial, pause, mirage chests */
 #define BX_BANNER 3
 #define BX_HERO 4
-#define T_TOP 1
-#define T_HPST (T_TOP + 64)
-#define T_PANEL (T_HPST + 64)
-#define T_BANNER (T_PANEL + 256)
-#define T_HERO (T_BANNER + 64)
+#define BX_LBL 5               /* "HP" / "ST" */
+#define BX_TABS 6              /* rows 18-19: button letters, element orbs, 必殺 tags */
+#define BX_CARDS 7             /* rows 20-24: costs, names */
+#define BX_NEXT 8              /* rows 25-27 */
+#define TL_TOP 1
+#define TL_HPNUM (TL_TOP + 64)
+#define TL_LBL (TL_HPNUM + 16)
+#define TL_TABS (TL_LBL + 6)
+#define TL_CARDS (TL_TABS + 64)
+#define TL_NEXT (TL_CARDS + 160)
+#define TL_BANNER (TL_NEXT + 96)
+#define TL_HERO (TL_BANNER + 64)
+#define TL_WIN TL_TABS           /* a window over the field takes the panel text's tiles (hidden meanwhile) */
+#define TOP_Y_B 8              /* text 8 px inside a framed window (its frame tiles are gold) */
 
 /* ---------------------------------------------------------------- actors */
 typedef struct {
@@ -173,15 +184,15 @@ static void boss_place(u8 k) {
   u8 x, y, tx0, ty0;
   u16 add = a->boss_buf ? BOSS_TILE_B : BOSS_TILE_A, w, i;
   s16 px = a->slide + b_e[k].sx + boss_ax, py = FOOT_Y + 4 + boss_ay;
-  /* clear rows 2-17 */
-  for (i = 2 * 32; i < 18 * 32; ++i) bg1map[i] = 0;
+  /* clear rows 2-15 (the panel's BG1 rows stay) */
+  for (i = 2 * 32; i < 16 * 32; ++i) bg1map[i] = 0;
   if (px < 0) px = 0;
   tx0 = (u8)(px >> 3);
   ty0 = (u8)(py >> 3);
   boss_x0 = (s16)tx0 * 8 - px;
   boss_y0 = (s16)ty0 * 8 - py;
   for (y = 0; y < boss_h; ++y) {
-    if (ty0 + y < 2 || ty0 + y > 17) continue;
+    if (ty0 + y < 2 || ty0 + y > 15) continue;
     for (x = 0; x < boss_w; ++x) {
       if (tx0 + x > 31) continue;
       w = rd16(boss_map + ((u16)y * boss_w + x) * 2);
@@ -192,12 +203,14 @@ static void boss_place(u8 k) {
   a->boss_drawn = 1;
 }
 
+static void panel_icons(void);
+
 /* ---------------------------------------------------------------- set up */
 static void load_stage_gfx(void) {
   u8 i, z = 0;
   u16 i16;
   Actor *a;
-  for (i16 = 2 * 32; i16 < 18 * 32; ++i16) bg1map[i16] = 0;
+  for (i16 = 2 * 32; i16 < 16 * 32; ++i16) bg1map[i16] = 0;
   bgmap_dirty |= 1;
   for (i = 0; i < b_ne; ++i) {
     a = &act[i];
@@ -251,9 +264,16 @@ static void misc_setup(void) {
   load_vram(ASSET_FX_CELLS, OBJ_VRAM(STRIP_CELLS));
   load_pal(ASSET_FX_PAL, PAL_OBJ(OBJ_FX));
   load_pal(ASSET_SKILL_ICONS_PAL, PAL_OBJ(OBJ_SKILL));
+  /* misc strip: cost badges (row 0-1 cols 8-15), mini HP bars and marks (row 3) */
+  unpack(ASSET_FX_MISC, 0x6800);
+  ea[0] = OBJ_VRAM(STRIP_MISC) + 8 * 16; ea[1] = 0x6800; ea[2] = 0x7f; ea[3] = 256; vram_now();
+  ea[0] = OBJ_VRAM(STRIP_MISC) + 24 * 16; ea[1] = 0x6900; ea[2] = 0x7f; ea[3] = 256; vram_now();
+  ea[0] = OBJ_VRAM(STRIP_MISC) + 32 * 16; ea[1] = 0x6a00; ea[2] = 0x7f; ea[3] = 1024; vram_now();
+  /* panel overlay on BG1 (bars, icons) and the panel art on BG2 tiles 448-511, palette 5 */
   load_vram(ASSET_HUD_TILES, VRAM_BG1_TILES);
-  load_pal(ASSET_HUD_PAL, 80);
-  for (i = 18 * 32; i < 20 * 32; ++i) bg1map[i] = 0;
+  load_pal(ASSET_PANEL_PAL, 80);
+  for (i = 16 * 32; i < 28 * 32; ++i) bg1map[i] = 0;
+  panel_icons();
 }
 
 /* skill icon of slot s (current) into misc strip tiles 2+s*2 */
@@ -278,127 +298,291 @@ static void bg_setup(void) {
   u16 id = area_bg[b_area];
   if (b_area == AR_CASTLE && b_men == D_CASTLE_MEN) id = BG_CASTLE_FINAL;
   load_vram(id, VRAM_BG2_TILES);
-  load_map(id + 1, 1, 0, 2);
+  load_map(id + 1, 1, 0, 2);                       /* rows 2-15 */
   load_pal(id + 2, 32);
+  load_vram(ASSET_PANEL_TILES, VRAM_BG2_TILES + 448 * 16);
+  load_map(ASSET_PANEL_MAP, 1, 0, 16);             /* rows 16-27 */
 }
 
-/* ---------------------------------------------------------------- HUD text */
+/* ---------------------------------------------------------------- HUD: the phone's battle panel
+ * Rows 16-27 (battle_frame.gd / skill_card.gd): row 16 the HP bar and the HP tab, row 17 the
+ * 10 ST cells, then four 64 px columns: the weapon tab (icon, button, element orb or 必殺),
+ * the skill card (icon, cost badge, name) and the NEXT card; column 3 has the shield, the
+ * guard button (B) and the meat button (R).  Art: BG2 (frame, state variants), BG1 (bars,
+ * icons), OBJ (skill icons, cost badges); text: the BG3 boxes above. */
+#define HUD_ATTR (5 << 10)
+#define BG1_ICON(c, k) (HUD_ICON_T + (c) * 4 + (k))
+#define HT_HP 1                /* BG1 HUD tiles (make_gfx.py hud) */
+#define HT_HP_RED 10
+#define HT_CAP_L 19
+#define HT_CAP_R 20
+#define HT_ST 21               /* + 2 empty, + 4 short, + 6 short empty */
+#define HT_GUARD 29            /* + 4 dimmed */
+#define HT_MEAT 37
+#define MISC_BADGE 8           /* misc strip: badges 16x16 (red, short, gray) at 8 / 10 / 12, small 14 */
+#define MISC_BAR 48            /* mini HP bars 0-8, then arrow, star, poison, paralyze, blind */
+static u16 pbase[32 * 12];     /* the panel's BG2 map as loaded (rows 16-27) */
+static u8 col_var[4][2];       /* shown variant: [card, next] 0 normal, 1 empty / off */
+static u8 st_blink;            /* frames of the ST-short blink */
+static u8 modal_on;            /* a window over the field: the HUD text boxes are hidden */
+static u8 panel_can;           /* the cards were drawn for "can command" */
+
+static void bg1_put(u8 row, u8 col, u16 t) { bg1map[(u16)row * 32 + col] = t | HUD_ATTR; }
+
+/* item icons (weapons, shield) into BG1 tiles BG1_ICON from the ROM; the guard / meat icons */
+static void panel_icons(void) {
+  u8 c, k;
+  u16 at, item;
+  ea[0] = ASSET_PANEL_ICONS; asset_where();
+  at = ea[1]; k = (u8)ea[2];
+  for (c = 0; c < 4; ++c) {
+    item = c < 3 ? (b_w[c].nsk ? b_w[c].item : 255) : b_shield;
+    if (item == 255 || item >= N_ITEM) continue;
+    ea[0] = VRAM_BG1_TILES + BG1_ICON(c, 0) * 16; ea[1] = at + item * 128; ea[2] = k; ea[3] = 128; vram_now();
+    at = ea[1] - item * 128;
+    bg1_put(18, c * 8 + 3, BG1_ICON(c, 0)); bg1_put(18, c * 8 + 4, BG1_ICON(c, 1));
+    bg1_put(19, c * 8 + 3, BG1_ICON(c, 2)); bg1_put(19, c * 8 + 4, BG1_ICON(c, 3));
+  }
+  bgmap_dirty |= 1;
+}
+
+/* the guard / meat icons, dimmed when the button is off */
+static void button_icons(void) {
+  u8 g = col_var[3][0] ? 4 : 0, m = col_var[3][1] ? 4 : 0;
+  bg1_put(21, 27, HT_GUARD + g); bg1_put(21, 28, HT_GUARD + g + 1);
+  bg1_put(22, 27, HT_GUARD + g + 2); bg1_put(22, 28, HT_GUARD + g + 3);
+  bg1_put(25, 27, HT_MEAT + m); bg1_put(25, 28, HT_MEAT + m + 1);
+  bg1_put(26, 27, HT_MEAT + m + 2); bg1_put(26, 28, HT_MEAT + m + 3);
+  bgmap_dirty |= 1;
+}
+
+/* BG2 map of column c, part k (0 card rows 20-24, 1 NEXT rows 25-27): normal or a variant */
+static void panel_part(u8 c, u8 k, u8 v) {
+  static u16 buf[8 * 5];
+  u8 r0 = k ? 9 : 4, h = k ? 3 : 5, x, y;
+  u16 id;
+  if (col_var[c][k] == v) return;
+  col_var[c][k] = v;
+  if (v) {
+    id = c == 3 ? (k ? ASSET_PANEL_MEAT_OFF : ASSET_PANEL_GUARD_OFF) : (k ? ASSET_PANEL_NEXT_NONE : ASSET_PANEL_CARD_EMPTY);
+    ea[0] = id; ea[1] = (u16)buf; ea[2] = sizeof(buf); asset_copy();
+  }
+  for (y = 0; y < h; ++y)
+    for (x = 0; x < 8; ++x)
+      bg2map[(u16)(16 + r0 + y) * 32 + c * 8 + x] = v ? buf[y * 8 + x] : pbase[(r0 + y) * 32 + c * 8 + x];
+  bgmap_dirty |= 2;
+  if (c == 3) button_icons();
+}
+
+static void hud_text_boxes(void) {
+  box(BX_TOP, 0, 0, 32, 2, TL_TOP, PAL_W, BOX_OPAQUE);
+  box(BX_HPNUM, 24, 16, 8, 2, TL_HPNUM, PAL_W, 0);
+  box(BX_LBL, 0, 16, 3, 2, TL_LBL, PAL_W, BOX_SMALL);
+  say(BX_LBL, 3, 0, TXT_HP_LABEL);
+  say(BX_LBL, 3, 8, TXT_ST_LABEL);
+  tb_flush(BX_LBL);
+  box(BX_TABS, 0, 18, 32, 2, TL_TABS, PAL_W, BOX_SMALL);
+  box(BX_CARDS, 0, 20, 32, 5, TL_CARDS, PAL_W, 0);
+  box(BX_NEXT, 0, 25, 32, 3, TL_NEXT, PAL_W, BOX_SMALL);
+  box(BX_BANNER, 0, 8, 32, 2, TL_BANNER, PAL_T_YELLOW, 0);
+  box(BX_HERO, 1, 9, 11, 2, TL_HERO, PAL_T_WHITE, 0);
+}
+
 static void hud_boxes(void) {
-  box(BX_TOP, 0, 0, 32, 2, T_TOP, PAL_W, BOX_OPAQUE);
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW | BOX_LOW);
-  box(BX_BANNER, 0, 8, 32, 2, T_BANNER, PAL_T_YELLOW, 0);
-  box(BX_HERO, 1, 9, 11, 2, T_HERO, PAL_T_WHITE, 0);
+  u8 c;
+  hud_text_boxes();
+  /* the panel map as loaded by bg_setup, for restoring columns */
+  for (c = 0; c < 12; ++c) memcpy(&pbase[c * 32], &bg2map[(16 + c) * 32], 64);
+  memset(col_var, 0, sizeof(col_var));
+  button_icons();
   copy_asset(ASSET_SKILL_ICONS_SEL, skill_sel, N_SKILL);
 }
 
+/* windows over the field (talk, tutorial, pause, mirage chests) take tiles from 1: the HUD
+ * text is hidden while one is open */
+static void modal_open(u8 x, u8 y, u8 w, u8 h) {
+  if (!modal_on) {
+    box_hide(BX_TOP); box_hide(BX_HPNUM); box_hide(BX_LBL); box_hide(BX_TABS);
+    box_hide(BX_CARDS); box_hide(BX_NEXT); box_hide(BX_BANNER); box_hide(BX_HERO);
+    modal_on = 1;
+  }
+  box(BX_PANEL, x, y, w, h, 1, PAL_W, BOX_WINDOW);
+}
+
+static void modal_close(void) {
+  if (!modal_on) return;
+  box_hide(BX_PANEL);
+  modal_on = 0;
+  hud_text_boxes();
+  banner_t = hero_msg_t = 0;
+  top_dirty = hp_dirty = panel_dirty = 1;
+}
+
+/* top bar: WAVE n/m, the boss's name and HP bar, the coins */
 static void draw_top(void) {
-  Foe *t;
+  u8 i, b = 255;
+  u16 w;
+  Foe *f;
+  if (modal_on) return;
   tb_clear(BX_TOP);
   targ_num = b_stage; targ_num2 = b_stage_count;
-  say(BX_TOP, 4, 2, TXT_TOP_WAVE);
-  if (b_target < b_ne) {
-    t = &b_e[b_target];
-    if (foe_targetable(t)) say(BX_TOP, 74, 2, t->awake ? NAME_SECRET_AWAKE : MONN_0 + t->mon);
+  say(BX_TOP, 6, 2, TXT_WAVE_Y);
+  for (i = 0; i < b_ne; ++i) if (act[i].boss && foe_targetable(&b_e[i])) b = i;
+  if (b != 255) {
+    f = &b_e[b];
+    text_small = 8;
+    say(BX_TOP, 88, 0, f->awake ? NAME_SECRET_AWAKE : MONN_0 + f->mon);
+    text_small = 0;
+    box_pal(BX_TOP, 11, 1, 15, 1, PAL_RED);
+    w = f->hp_max ? (u16)((u32)f->hp * 116 / f->hp_max) : 0;
+    if (f->hp && !w) w = 1;
+    tb_rect(BX_TOP, 88, 10, 116, 4, 1);          /* back: shadow colour */
+    if (w) tb_rect(BX_TOP, 88, 10, w, 3, 3);       /* fill: the tiles' red */
   }
-  sayn(BX_TOP, 204, 2, TXT_COINS, b_coins);
+  targ_num = b_coins;
+  w = msg_width(TXT_COINS);
+  say(BX_TOP, 252 - w, 2, TXT_COINS);
   tb_flush(BX_TOP);
   top_dirty = 0;
 }
 
-/* HUD glyph tiles on BG1 (palette 5): digits, '/', H P S T */
-#define HUD_T(c) (HUD_GLYPH0 + (c))
-#define HUD_SLASH HUD_T(10)
-#define HUD_H HUD_T(11)
-#define HUD_P HUD_T(12)
-#define HUD_S HUD_T(13)
-#define HUD_TT HUD_T(14)
-#define HUD_ATTR ((5 << 10) | 0x2000)
-static void hud_put(u8 row, u8 col, u16 t) { bg1map[row * 32 + col] = t | HUD_ATTR; }
-
-/* "a/b" right-aligned so that the last digit is at col 30; clears cols 22-30 */
-static void hud_frac(u8 row, u16 a, u16 b) {
-  u8 col = 30, i;
-  for (i = 22; i <= 30; ++i) bg1map[row * 32 + i] = 0;
-  do { hud_put(row, col--, HUD_T(b % 10)); b /= 10; } while (b);
-  hud_put(row, col--, HUD_SLASH);
-  do { hud_put(row, col--, HUD_T(a % 10)); a /= 10; } while (a && col >= 22);
+/* HP bar (20 tiles, green; red at 25 % or less) and the 10 ST cells on BG1 */
+static void draw_bars(void) {
+  u16 fill, t, f;
+  u8 i, sh = st_blink && (st_blink & 4), cell;
+  bg1_put(16, 2, HT_CAP_L); bg1_put(16, 23, HT_CAP_R);
+  fill = b_hp_max ? (u16)((u32)b_hp * 160 / b_hp_max) : 0;
+  if (b_hp && !fill) fill = 1;
+  t = (b_hp * 4 > b_hp_max) ? HT_HP : HT_HP_RED;
+  for (i = 0; i < 20; ++i) {
+    f = fill > (u16)i * 8 ? MIN(fill - (u16)i * 8, 8) : 0;
+    bg1_put(16, 3 + i, t + f);
+  }
+  for (i = 0; i < 10; ++i) {
+    cell = HT_ST + (sh ? 4 : 0) + (i < b_st && i < b_st_max ? 0 : 2);
+    bg1_put(17, 3 + i * 2, cell);
+    bg1_put(17, 4 + i * 2, cell + 1);
+  }
+  bgmap_dirty |= 1;
 }
 
 static void draw_hpst(void) {
-  u16 i, fill, t;
-  u8 st;
-  hud_put(18, 0, HUD_H); hud_put(18, 1, HUD_P);
-  hud_put(19, 0, HUD_S); hud_put(19, 1, HUD_TT);
-  hud_frac(18, b_hp, b_hp_max);
-  hud_frac(19, b_st, b_st_max);
-  /* HP bar: 18 tiles at cols 3-20 (144 px) */
-  fill = b_hp_max ? (u16)((u32)b_hp * 144 / b_hp_max) : 0;
-  if (b_hp && !fill) fill = 1;
-  t = (b_hp * 4 > b_hp_max) ? (b_hp * 2 > b_hp_max ? 1 : 10) : 19;
-  for (i = 0; i < 18; ++i) {
-    u16 f = fill > i * 8 ? MIN(fill - i * 8, 8) : 0;
-    bg1map[18 * 32 + 3 + i] = (t + f) | HUD_ATTR;
-  }
-  st = b_st;
-  for (i = 0; i < 10 && i < b_st_max; ++i) bg1map[19 * 32 + 3 + i] = (28 + (i < st ? 8 : 0)) | HUD_ATTR;
-  bgmap_dirty |= 1;
+  u16 w;
+  draw_bars();
+  if (modal_on) return;
+  tb_clear(BX_HPNUM);
+  targ_num = b_hp; targ_num2 = b_hp_max;
+  w = msg_width(TXT_FRAC);
+  say(BX_HPNUM, w < 60 ? 60 - w : 0, 2, TXT_FRAC);
+  tb_flush(BX_HPNUM);
   hp_dirty = 0;
 }
 
+/* centred in a column: x of a text of width w in the 56 px card at column c */
+static u16 col_mid(u8 c, u16 w) { return (u16)c * 64 + 4 + (w < 56 ? (56 - w) / 2 : 0); }
+
+static u16 small_width(u16 msg) {
+  u16 w;
+  text_small = 8;
+  w = msg_width(msg);
+  text_small = 0;
+  return w;
+}
+
+/* in the 8-dot font, centred in the card of column c */
+static void say_small_mid(u8 bx, u8 c, u8 y, u16 msg, u16 w) {
+  u16 x = col_mid(c, w);
+  text_small = 8;
+  say(bx, x, y, msg);
+  text_small = 0;
+}
+
 static void draw_panel(void) {
-  u8 s, sk, nx, cost, sp;
-  u16 y;
-  tb_clear(BX_PANEL);
-  for (s = 0; s < 3; ++s) {
-    y = 4 + s * 14;
-    sk = skill_of(s);
-    say(BX_PANEL, 6, y, TXT_BTN_Y + s);
-    if (sk == SK_NONE) { say(BX_PANEL, 34, y, T_SLOT_EMPTY); continue; }
-    if (is_locked(s)) { say(BX_PANEL, 34, y, T_LOCKED); continue; }
-    say(BX_PANEL, 34, y, SKILLN_0 + sk);
+  u8 c, sk, nx, cost, sp, can, el, x;
+  u16 nm, w;
+  if (modal_on) return;
+  can = battle_can_command();
+  panel_can = can;
+  tb_clear(BX_TABS); tb_clear(BX_CARDS); tb_clear(BX_NEXT);
+  for (c = 0; c < 3; ++c) {
+    x = c * 64;
+    sk = skill_of(c);
+    say(BX_TABS, x + 8, 4, TXT_BTN_Y + c);
+    if (sk == SK_NONE) {
+      panel_part(c, 0, 1); panel_part(c, 1, 1);
+      say_small_mid(BX_CARDS, c, 16, TXT_NONE_GRAY, small_width(TXT_NONE_GRAY));
+      continue;
+    }
+    panel_part(c, 0, 0); panel_part(c, 1, 0);
     cost = skill_cost(sk);
-    sayn(BX_PANEL, 112, y, cost > b_st ? TXT_COST_RED : TXT_COST, cost);
-    sp = special_if(s);
-    if (sp != 255) say(BX_PANEL, 148, y, TXT_SP_ARROW), say(BX_PANEL, 160, y, SPN_0 + sp);
-    else {
-      nx = next_skill_of(s);
-      say(BX_PANEL, 148, y, TXT_NEXT_ARROW);
-      if (nx != SK_NONE) say(BX_PANEL, 160, y, SKILLN_0 + nx);
+    sp = special_if(c);
+    el = items[b_w[c].item].element;
+    if (sp != 255 && cost <= b_st && !is_locked(c)) say(BX_TABS, x + 42, 4, TXT_SP_TAG);
+    else say(BX_TABS, x + 48, 4, TXT_ORB_0 + (el < 6 ? el : 0));
+    /* card: the cost in the badge (a sprite), the name in the strip */
+    if (is_locked(c)) {
+      targ_num = b_lock_turns;
+      say_small_mid(BX_CARDS, c, 28, TXT_LOCK_TURNS, small_width(TXT_LOCK_TURNS));
+    } else {
+      nm = SKILLN_0 + sk;
+      targ_str = nm;
+      say_small_mid(BX_CARDS, c, 28, can ? TXT_S : TXT_S_GRAY, small_width(nm));
+    }
+    if (!is_locked(c)) {
+      targ_num = cost;
+      w = msg_width(TXT_N_WHITE);
+      say(BX_CARDS, x + 48 - w / 2, 1, cost > b_st ? TXT_N_RED : TXT_N_WHITE);
+    }
+    /* NEXT: the label, the next skill's cost (gray badge) and name */
+    say(BX_NEXT, x + 8, 3, TXT_NEXT_LABEL);
+    if (b_w[c].nsk > 1) {
+      nx = next_skill_of(c);
+      targ_num = skill_cost(nx);
+      say(BX_NEXT, x + 47, 3, TXT_N_WHITE);
+      targ_str = SKILLN_0 + nx;
+      say(BX_NEXT, col_mid(c, small_width(SKILLN_0 + nx)), 12, TXT_S);   /* white like the label above (a tile row is shared) */
     }
   }
-  say(BX_PANEL, 6, 46, meat_asker() != 255 ? TXT_HELP_MEAT : T_BATTLE_HELP);
-  tb_flush(BX_PANEL);
+  /* column 3: guard (B), meat (R) */
+  panel_part(3, 0, (b_guard_cool || b_phase != PH_FIGHT) ? 1 : 0);
+  panel_part(3, 1, (can || meat_asker() != 255) ? 0 : 1);
+  say(BX_CARDS, 192 + 8, 1, TXT_BTN_B);
+  say_small_mid(BX_CARDS, 3, 28, TXT_GUARD_LABEL, small_width(TXT_GUARD_LABEL));
+  say(BX_NEXT, 192 + 8, 3, TXT_BTN_R);
+  tb_flush(BX_TABS); tb_flush(BX_CARDS); tb_flush(BX_NEXT);
   panel_dirty = 0;
 }
 
 static void banner(u16 msg, u8 pal, u8 t) {
+  if (modal_on) return;
   tb[BX_BANNER * 8 + 6] = pal;
-  box(BX_BANNER, 0, 8, 32, 2, T_BANNER, pal, 0);
+  box(BX_BANNER, 0, 8, 32, 2, TL_BANNER, pal, 0);
   say_center(BX_BANNER, 2, msg);
   tb_flush(BX_BANNER);
   banner_t = t;
 }
 
 static void hero_msg(u16 msg, u8 pal) {
-  box(BX_HERO, 1, 9, 11, 2, T_HERO, pal, 0);
+  if (modal_on) return;
+  box(BX_HERO, 1, 9, 11, 2, TL_HERO, pal, 0);
   say_center(BX_HERO, 2, msg);
   tb_flush(BX_HERO);
   hero_msg_t = 40;
 }
 
-/* ---------------------------------------------------------------- talk window */
+/* ---------------------------------------------------------------- talk window (over the field) */
 static void talk_show(u16 text, u8 who) {
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW);
-  say(BX_PANEL, 8, 3, who == MON_117 ? MONN_0 + MON_117 : (who == 255 ? NAME_KING : MONN_0 + maou_forms[0]));
-  say(BX_PANEL, 8, 18, text);
+  modal_open(0, 2, 32, 14);
+  say(BX_PANEL, 10, TOP_Y_B, who == MON_117 ? MONN_0 + MON_117 : (who == 255 ? NAME_KING : MONN_0 + maou_forms[0]));
+  say_wrap(BX_PANEL, 12, TOP_Y_B + 16, text, 248);
+  say(BX_PANEL, 196, 92, T_TALK_NEXT);
   tb_flush(BX_PANEL);
   talk_open = 1;
 }
 
 static void talk_close(void) {
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW | BOX_LOW);
+  modal_close();
   talk_open = 0;
-  panel_dirty = 1;
 }
 
 /* ---------------------------------------------------------------- tutorial guide (TUTORIAL_STEPS) */
@@ -418,11 +602,11 @@ static void tut_show(u8 msg) {
   else if (msg == TUT_MSG_GIVEUP) { title = TUTX_GIVEUP; body = TUTX_GIVEUP_LINES; }
   else if (msg == TUT_MSG_HINT) { title = TUTX_HINT_TITLE; body = tut_goal[tut_step] == TG_TARGET ? TUTX_TARGET_HINT : TUTX_HINT_LINES; }
   tut_msg = msg;
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW);
+  modal_open(0, 2, 32, 14);
   targ_str = title;
-  say(BX_PANEL, 8, 3, TXT_YELLOW_S);
-  say(BX_PANEL, 12, 17, body);
-  say(BX_PANEL, 196, 3, T_TALK_NEXT);
+  say(BX_PANEL, 10, TOP_Y_B, TXT_YELLOW_S);
+  say_wrap(BX_PANEL, 12, TOP_Y_B + 16, body, 248);
+  say(BX_PANEL, 196, 92, T_TALK_NEXT);
   tb_flush(BX_PANEL);
   tut_open = 1;
 }
@@ -462,8 +646,7 @@ static void tut_next(void) {
 /* A pressed on the tutorial window */
 static void tut_ok(void) {
   tut_open = 0;
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW | BOX_LOW);
-  panel_dirty = 1;
+  modal_close();
   if (tut_msg == TUT_MSG_GIVEUP) { tut_next(); return; }
   if (tut_msg != TUT_MSG_STEP) {
     u8 g = tut_goal[tut_step];
@@ -605,6 +788,7 @@ static void on_event(Ev *e) {
     break;
   case EV_ST_SHORT:
     hero_msg(T_ST_SHORT, PAL_T_RED);
+    st_blink = D_ST_SHORT_BLINK_FRAMES;
     se_play(SE_CANCEL);
     break;
   case EV_LOCKED:
@@ -779,8 +963,8 @@ static void draw_number(s16 x, s16 y, u32 v, u8 col) {
 /* sprite lists rebuilt only when what they show changes, put out by src/asm/sprite.s spr_list */
 typedef struct { s16 x, y; u16 ta, big; } SprEnt;
 #define OV_MAX 9
-static SprEnt ov_spr[ENEMY_MAX][OV_MAX], sk_spr[12];
-static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n, sk_sig[3];
+static SprEnt ov_spr[ENEMY_MAX][OV_MAX], sk_spr[30];
+static u8 ov_n[ENEMY_MAX], ov_sig[ENEMY_MAX][7], sk_n, sk_sig[9];
 
 static void spr_emit(const SprEnt *p, u8 n) {
   if (!n) return;
@@ -793,29 +977,43 @@ static void ent_add(s16 x, s16 y, u16 ta) { ent->x = x; ent->y = y; ent->ta = ta
 
 static void lists_reset(void) {
   memset(ov_sig, 0xff, sizeof(ov_sig));
-  memset(sk_sig, 0xff, sizeof(sk_sig));
+  memset(sk_sig, 0xfe, sizeof(sk_sig));
   memset(ov_n, 0, sizeof(ov_n));
   sk_n = 0;
 }
 
-/* skill icons on the panel (16x16 each, palette = selected / not) */
+/* panel sprites: the skill icon (16x16, palette = selected / not) and the cost badge of each
+ * card, the small gray badge of each NEXT card */
 static void skill_sprites(void) {
-  u8 i, sk, sig[3];
-  s16 y;
+  u8 i, sk, sig[9], x;
   for (i = 0; i < 3; ++i) {
     sk = skill_of(i);
     sig[i] = sk == SK_NONE ? 255 : skill_sel[sk];
+    sig[3 + i] = sk == SK_NONE || is_locked(i) ? 0 : (skill_cost(sk) > b_st ? 2 : 1);
+    sig[6 + i] = b_w[i].nsk > 1 ? 1 : 0;
   }
-  if (memcmp(sig, sk_sig, 3)) {
-    memcpy(sk_sig, sig, 3);
+  if (memcmp(sig, sk_sig, 9)) {
+    memcpy(sk_sig, sig, 9);
     ent = sk_spr;
     for (i = 0; i < 3; ++i) {
-      if (sig[i] == 255) continue;
-      y = 164 + i * 14;
-      ent_add(16, y, ATTR(STRIP_TILE(STRIP_MISC) + 2 + i * 2, OBJ_SKILL + sig[i], 3));
-      ent_add(24, y, ATTR(STRIP_TILE(STRIP_MISC) + 3 + i * 2, OBJ_SKILL + sig[i], 3));
-      ent_add(16, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 18 + i * 2, OBJ_SKILL + sig[i], 3));
-      ent_add(24, y + 8, ATTR(STRIP_TILE(STRIP_MISC) + 19 + i * 2, OBJ_SKILL + sig[i], 3));
+      x = i * 64;
+      if (sig[i] != 255) {
+        ent_add(x + 10, 164, ATTR(STRIP_TILE(STRIP_MISC) + 2 + i * 2, OBJ_SKILL + sig[i], 3));
+        ent_add(x + 18, 164, ATTR(STRIP_TILE(STRIP_MISC) + 3 + i * 2, OBJ_SKILL + sig[i], 3));
+        ent_add(x + 10, 172, ATTR(STRIP_TILE(STRIP_MISC) + 18 + i * 2, OBJ_SKILL + sig[i], 3));
+        ent_add(x + 18, 172, ATTR(STRIP_TILE(STRIP_MISC) + 19 + i * 2, OBJ_SKILL + sig[i], 3));
+      }
+      if (sig[3 + i]) {
+        u16 t = STRIP_TILE(STRIP_MISC) + MISC_BADGE + (sig[3 + i] == 2 ? 2 : 0);
+        ent_add(x + 40, 160, ATTR(t, OBJ_FX, 3));
+        ent_add(x + 48, 160, ATTR(t + 1, OBJ_FX, 3));
+        ent_add(x + 40, 168, ATTR(t + 16, OBJ_FX, 3));
+        ent_add(x + 48, 168, ATTR(t + 17, OBJ_FX, 3));
+      }
+      if (sig[6 + i]) {
+        ent_add(x + 42, 202, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BADGE + 6, OBJ_FX, 3));
+        ent_add(x + 50, 202, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BADGE + 7, OBJ_FX, 3));
+      }
     }
     sk_n = (u8)(ent - sk_spr);
   }
@@ -844,15 +1042,15 @@ static void overlay_sprites(u8 i, Foe *e, Actor *a) {
     memcpy(ov_sig[i], sig, 7);
     y = a->boss ? FIELD_Y + 4 : FOOT_Y - 56;
     ent = ov_spr[i];
-    if (sig[2]) ent_add(x - 4, y - 10 + (sig[2] - 1), ATTR(STRIP_TILE(STRIP_FX) + 48 + 9, OBJ_FX, 3));
+    if (sig[2]) ent_add(x - 4, y - 10 + (sig[2] - 1), ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 9, OBJ_FX, 3));
     if (c != 255) ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + (c < 6 ? 10 + c : 16 + 10 + (c - 6)), OBJ_FX, 3));
-    else ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 10, OBJ_FX, 3));
-    ent_add(x - 12, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + MIN(hp, 8), OBJ_FX, 3));
-    ent_add(x - 4, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + (hp > 8 ? MIN(hp - 8, 8) : 0), OBJ_FX, 3));
-    ent_add(x + 4, y - 2, ATTR(STRIP_TILE(STRIP_FX) + 48 + (hp > 16 ? MIN(hp - 16, 8) : 0), OBJ_FX, 3));
-    if (sig[5] & 1) ent_add(x - 12, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 11, OBJ_FX, 3));
-    if (sig[5] & 2) ent_add(x - 20, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 12, OBJ_FX, 3));
-    if (sig[5] & 4) ent_add(x - 28, y - 10, ATTR(STRIP_TILE(STRIP_FX) + 48 + 13, OBJ_FX, 3));
+    else ent_add(x + 6, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 10, OBJ_FX, 3));
+    ent_add(x - 12, y - 2, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + MIN(hp, 8), OBJ_FX, 3));
+    ent_add(x - 4, y - 2, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + (hp > 8 ? MIN(hp - 8, 8) : 0), OBJ_FX, 3));
+    ent_add(x + 4, y - 2, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + (hp > 16 ? MIN(hp - 16, 8) : 0), OBJ_FX, 3));
+    if (sig[5] & 1) ent_add(x - 12, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 11, OBJ_FX, 3));
+    if (sig[5] & 2) ent_add(x - 20, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 12, OBJ_FX, 3));
+    if (sig[5] & 4) ent_add(x - 28, y - 10, ATTR(STRIP_TILE(STRIP_MISC) + MISC_BAR + 13, OBJ_FX, 3));
     ov_n[i] = (u8)(ent - ov_spr[i]);
   }
   spr_emit(ov_spr[i], ov_n[i]);
@@ -882,7 +1080,7 @@ static void draw_sprites(void) {
     spr_add(f->x, f->y, ATTR(STRIP_TILE(STRIP_CELLS) + f->cell * 4, OBJ_FX, 3), 1);
     --f->t;
   }
-  skill_sprites();
+  if (!modal_on) skill_sprites();
   for (i = 0, e = b_e, a = act; i < b_ne; ++i, ++e, ++a) overlay_sprites(i, e, a);
   /* shield (in front of the hero or behind, as the pose says) and the hero */
   p = hero_pose_now == 255 ? 0 : hero_pose_now;
@@ -938,14 +1136,14 @@ static void animate(void) {
     }
     if (b_e[i].gone && a->boss_drawn) {
       u16 k;
-      for (k = 2 * 32; k < 18 * 32; ++k) bg1map[k] = 0;
+      for (k = 2 * 32; k < 16 * 32; ++k) bg1map[k] = 0;
       bgmap_dirty |= 1;
       a->boss_drawn = 0;
     }
   }
   if (shake_t) { --shake_t; shake_x = (shake_t & 2) ? 2 : -2; shake_y = (shake_t & 1) ? 1 : 0; }
   else shake_x = shake_y = 0;
-  /* HDMA: BG1 (boss) and BG2 (scenery) scroll for lines 0-143, 0 below */
+  /* HDMA: BG1 (boss) and BG2 (scenery) scroll for lines 0-127, 0 below (the panel) */
   {
     s16 bx = 0, by = 0;
     for (i = 0; i < b_ne; ++i) if (act[i].boss) {
@@ -955,29 +1153,30 @@ static void animate(void) {
       if (b_e[i].dying && (frame_ct & 4)) bx = 256;
     }
     hdma_tab1[0] = 127; hdma_tab1[1] = (u8)bx; hdma_tab1[2] = (u8)(bx >> 8); hdma_tab1[3] = (u8)by; hdma_tab1[4] = (u8)(by >> 8);
-    hdma_tab1[5] = 17; hdma_tab1[6] = (u8)bx; hdma_tab1[7] = (u8)(bx >> 8); hdma_tab1[8] = (u8)by; hdma_tab1[9] = (u8)(by >> 8);
+    hdma_tab1[5] = 1; hdma_tab1[6] = (u8)bx; hdma_tab1[7] = (u8)(bx >> 8); hdma_tab1[8] = (u8)by; hdma_tab1[9] = (u8)(by >> 8);
     hdma_tab1[10] = 1; hdma_tab1[11] = 0; hdma_tab1[12] = 0; hdma_tab1[13] = 0; hdma_tab1[14] = 0; hdma_tab1[15] = 0;
     bx = -shake_x; by = -shake_y;
     hdma_tab2[0] = 127; hdma_tab2[1] = (u8)bx; hdma_tab2[2] = (u8)(bx >> 8); hdma_tab2[3] = (u8)by; hdma_tab2[4] = (u8)(by >> 8);
-    hdma_tab2[5] = 17; hdma_tab2[6] = (u8)bx; hdma_tab2[7] = (u8)(bx >> 8); hdma_tab2[8] = (u8)by; hdma_tab2[9] = (u8)(by >> 8);
+    hdma_tab2[5] = 1; hdma_tab2[6] = (u8)bx; hdma_tab2[7] = (u8)(bx >> 8); hdma_tab2[8] = (u8)by; hdma_tab2[9] = (u8)(by >> 8);
     hdma_tab2[10] = 1; hdma_tab2[11] = 0; hdma_tab2[12] = 0; hdma_tab2[13] = 0; hdma_tab2[14] = 0; hdma_tab2[15] = 0;
     hdma_on = 0xc0;
   }
   if (banner_t && banner_t != 255) { if (--banner_t == 0) { tb_clear(BX_BANNER); tb_flush(BX_BANNER); } }
   if (hero_msg_t) { if (--hero_msg_t == 0) { tb_clear(BX_HERO); tb_flush(BX_HERO); } }
+  if (st_blink) { --st_blink; if ((st_blink & 3) == 0) draw_bars(); }
 }
 
 /* ---------------------------------------------------------------- mirage chest choice */
 static u8 mirage_cursor;
 static void mirage_draw(void) {
   u8 i;
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW);
-  say(BX_PANEL, 8, 3, T_MIRAGE_PICK);
+  modal_open(2, 4, 28, 9);
+  say(BX_PANEL, 10, TOP_Y_B, T_MIRAGE_PICK);
   for (i = 0; i < b_mirage_offer_n; ++i) {
     u8 k = b_mirage_offer[i][0], t = b_mirage_offer[i][1];
     targ_num = mirage_rewards[k].v[t];
-    say(BX_PANEL, 16, 17 + i * 14, i == mirage_cursor ? TXT_CURSOR : TXT_SPACE);
-    says(BX_PANEL, 30, 17 + i * 14, TXT_MIRAGE_ITEM, MIRN_0 + k);
+    if (i == mirage_cursor) say(BX_PANEL, 16, TOP_Y_B + 16 + i * 14, TXT_CURSOR);
+    says(BX_PANEL, 30, TOP_Y_B + 16 + i * 14, TXT_MIRAGE_ITEM, MIRN_0 + k);
   }
   tb_flush(BX_PANEL);
 }
@@ -985,22 +1184,19 @@ static void mirage_draw(void) {
 /* ---------------------------------------------------------------- main loop */
 static u8 pause_menu(void) {
   u8 sel = 0;
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW);
   for (;;) {
-    tb_clear(BX_PANEL);
-    say(BX_PANEL, 8, 3, T_PAUSE_TITLE);
-    say(BX_PANEL, 24, 18, sel == 0 ? TXT_CURSOR : TXT_SPACE);
-    say(BX_PANEL, 38, 18, T_PAUSE_RESUME);
-    say(BX_PANEL, 24, 32, sel == 1 ? TXT_CURSOR : TXT_SPACE);
-    say(BX_PANEL, 38, 32, T_PAUSE_LEAVE);
+    modal_open(7, 5, 18, 8);
+    say_center(BX_PANEL, TOP_Y_B, T_PAUSE_TITLE);
+    say(BX_PANEL, 24, TOP_Y_B + 16 + sel * 14, TXT_CURSOR);
+    say(BX_PANEL, 38, TOP_Y_B + 16, T_PAUSE_RESUME);
+    say(BX_PANEL, 38, TOP_Y_B + 30, T_PAUSE_LEAVE);
     tb_flush(BX_PANEL);
     do { frame_wait(); } while (!(pad_new & (BTN_UP | BTN_DOWN | BTN_A | BTN_B | BTN_START)));
     if (pad_new & (BTN_UP | BTN_DOWN)) { sel ^= 1; se_play(SE_CURSOR); }
     if (pad_new & (BTN_B | BTN_START)) { sel = 0; break; }
     if (pad_new & BTN_A) break;
   }
-  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW | BOX_LOW);
-  panel_dirty = 1;
+  modal_close();
   return sel;
 }
 
@@ -1058,8 +1254,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
       if (pad_new & BTN_A) {
         se_play(SE_OK);
         battle_mirage_pick(mirage_cursor);
-        box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW | BOX_LOW);
-        panel_dirty = 1; hp_dirty = 1;
+        modal_close();
       }
     } else if (b_phase == PH_FIGHT) {
       if (pad_new & BTN_Y) battle_press_skill(0);
@@ -1089,7 +1284,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
     skill_icons_update();
     if (top_dirty) draw_top();
     if (hp_dirty) draw_hpst();
-    if (panel_dirty && !talk_open && !tut_open && b_phase != PH_REWARD) draw_panel();
+    if (panel_dirty || panel_can != battle_can_command()) draw_panel();
     draw_sprites();
     if (win_t) { if (++win_t > 150) { result = 1; break; } }
     if (lose_t) { if (++lose_t > 180) { result = 0; break; } }

@@ -187,6 +187,26 @@ TXT_HELP_MEAT	{yellow}R:肉でガードしてあげよう！
 TXT_CURSOR	{yellow}▶
 TXT_SPACE	 
 TXT_MIRAGE_ITEM	{s} {yellow}+{n}
+TXT_BTN_B	{yellow}B
+TXT_BTN_R	{yellow}R
+TXT_WAVE_Y	{yellow}WAVE {n}/{m}
+TXT_N_WHITE	{n}
+TXT_N_RED	{red}{n}
+TXT_N_GRAY	{gray}{n}
+TXT_HP_LABEL	{green}HP
+TXT_ST_LABEL	{blue}ST
+TXT_NEXT_LABEL	NEXT
+TXT_GUARD_LABEL	ガード
+TXT_NONE_GRAY	{gray}なし
+TXT_SP_TAG	{yellow}必殺
+TXT_LOCK_TURNS	{red}あと{n}ターン
+TXT_ORB_0	{gray}●
+TXT_ORB_1	{red}●
+TXT_ORB_2	{blue}●
+TXT_ORB_3	{green}●
+TXT_ORB_4	{yellow}●
+TXT_ORB_5	{purple}●
+TXT_S_GRAY	{gray}{s}
 # menu kit
 TXT_MORE_UP	{gray}▲
 TXT_MORE_DOWN	{gray}▼

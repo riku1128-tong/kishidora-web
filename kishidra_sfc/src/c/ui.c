@@ -31,6 +31,11 @@ static void canvas_wait(u16 t0, u16 n) {
   } while (busy);
 }
 
+void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour) {
+  ea[0] = x; ea[1] = y; ea[2] = w; ea[3] = h | ((u16)colour << 8);
+  tb_rect_now(id);
+}
+
 void tb_clear(u8 id) {
   u8 *b = &tb[id * 8];
   canvas_wait(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3]);
@@ -75,7 +80,10 @@ u16 msg_width(u16 msg) {
 
 void say_center(u8 id, u16 py, u16 msg) {
   u16 w = (u16)tb[id * 8 + 2] * 8;
-  u16 tw = msg_width(msg);
+  u16 tw;
+  text_small = tb[id * 8 + 7] & BOX_SMALL;
+  tw = msg_width(msg);
+  text_small = 0;
   say(id, tw < w ? (w - tw) / 2 : 0, py, msg);
 }
 

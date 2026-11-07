@@ -1,0 +1,11 @@
+美咲フォント (美咲ゴシック第2, misaki_gothic_2nd.ttf) — the 8-dot font for the battle panel
+Copyright 2002-2021 Num Kadoma  https://littlelimit.net/misaki.htm
+
+These fonts are free software.
+Unlimited permission is granted to use, copy, and distribute it, with or
+without modification, either commercially and noncommercially.
+THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
+
+これらのフォントはフリー（自由な）ソフトウエアです。
+あらゆる改変の有無に関わらず、また商業的な利用であっても、自由にご利用、
+複製、再配布することができますが、全て無保証とさせていただきます。

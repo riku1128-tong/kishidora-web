@@ -27,7 +27,9 @@ Safari 版（Godot 4 Web 版）キシドラ！の地上世界を、スーパー�
 ## 操作
 
 - マップ: 十字キーでエリアを選ぶ、A で決定、Y / X / START でメニュー
-- バトル: Y / X / A で MAIN / SUB / THIRD の武器のスキル、B でガード、R で肉、←→ で狙う敵、START でポーズ
+- バトル: Y / X / A で MAIN / SUB / THIRD の武器のスキル、B でガード、R で肉、←→ で狙う敵、START でポーズ。
+  画面下はスマホ版と同じ 4 列のパネル（武器のタブ・スキルのカードと ST の札・NEXT・ガード / 肉のボタン、
+  HP バーと 10 マスの ST）で、各列の左上にボタン（Y / X / A / B / R）が出ます
 - メニュー: A 決定、B もどる、SELECT で持ち物の並び替え、←→ でページ送り
 - 図鑑: L / R でタブ、SELECT で種類（武器・必殺技・スキル）、A でくわしく、カードは ←→ でとなり
 
@@ -68,4 +70,5 @@ python build.py rom
   処理時間の内訳 `prof.py`、文字のはみ出し・枠かぶり・色の混ざり・重なりの検査 `textcheck.py`
   〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要〉、文字列の幅 `textwidth.py` など）
 
-フォントは東雲フォント（パブリックドメイン、`tools/font/SHINONOME_COPYRIGHT.txt`）を使っています。
+フォントは東雲フォント（パブリックドメイン、`tools/font/SHINONOME_COPYRIGHT.txt`）と、戦闘パネルの小さい文字に
+美咲ゴシック第2（フリーソフトウエア、`tools/font/MISAKI_COPYRIGHT.txt`）を使っています。
