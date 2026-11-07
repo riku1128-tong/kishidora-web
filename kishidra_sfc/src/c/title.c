@@ -2,7 +2,7 @@
 
 /* has_save: "つづきから" is offered; returns SC_NEWGAME or SC_MAP */
 u8 title_scene(u8 has_save) {
-  u8 sel = has_save ? 0 : 1, i;
+  u8 sel = has_save ? 0 : 1, i, shown = 255;
   screen_off();
   sys_init();
   load_vram(ASSET_TITLE_TILES, VRAM_BG1_TILES);
@@ -20,7 +20,10 @@ u8 title_scene(u8 has_save) {
   screen_on();
   bgm_play(BGM_OPENING);
   for (;;) {
-    for (i = 0; i < 2; ++i) box_pal(0, 1, (u8)(i * 2 + 1 + (i ? 1 : 0)), 12, 2, i == sel ? PAL_W_YELLOW : PAL_W);
+    if (sel != shown) {
+      for (i = 0; i < 2; ++i) box_pal(0, 1, (u8)(i * 2 + 1 + (i ? 1 : 0)), 12, 2, i == sel ? PAL_W_YELLOW : PAL_W);
+      shown = sel;
+    }
     frame_wait();
     if ((pad_new & (BTN_UP | BTN_DOWN)) && has_save) { sel ^= 1; se_play(SE_CURSOR); }
     if (pad_new & (BTN_A | BTN_START)) {

@@ -3,7 +3,7 @@
 .include "snes.inc"
 
 .import bgm_table, bgm_banks, spc_image, se_dir, se_vol, _ea
-.import SPC_IMAGE_LEN_LO, SPC_IMAGE_LEN_HI
+.import SPC_IMAGE_LEN_LO, SPC_IMAGE_LEN_HI, SPC_BOOT_LEN, SPC_SPLIT_END, se_thr
 .export spc_boot_far
 
 APU0 = $2140
@@ -14,10 +14,13 @@ BLOCKS_PER_BANK = 3640
 RING_BLOCKS = 1813
 PREFILL = 640
 PER_FRAME = 24
+LOAD_BLOCKS = 64       ; sound effect upload after boot: at most this many 9-byte blocks per frame
+LOAD_STOP = 212        ; ...and none once the beam reaches this scanline (the NMI comes at 225)
 SPC_IMAGE_LEN = SPC_IMAGE_LEN_LO + SPC_IMAGE_LEN_HI * 65536
 
 .segment "ENGZP": zeropage
 s_ptr:   .res 3
+s_lptr:  .res 3        ; sound effect samples still to upload
 
 .segment "LOWBSS"
 s_on:    .res 1        ; 0 = off, 1 = streaming, 2 = silence tail
@@ -31,6 +34,7 @@ s_p2:    .res 1
 s_p3:    .res 1
 s_cnt:   .res 2
 s_ready: .res 1
+s_lleft: .res 2        ; bytes of samples still to upload (0 = sound effects ready)
 
 .segment "ENGINE"
 
@@ -70,7 +74,7 @@ spc_boot_far:
   sta s_ptr+2
   ldx #.loword(spc_image)
   stx s_ptr
-  ldx #.loword(SPC_IMAGE_LEN)
+  ldx #SPC_BOOT_LEN     ; driver + directory only; the samples follow after boot
   stx s_cnt
   ldy #0
   A16
@@ -107,8 +111,7 @@ spc_boot_far:
   inc a
 :
   sta APU0
-  and #$7f
-  sta s_seq
+  sta s_seq            ; the driver starts from this port 0 value
   ; wait until the driver says it is ready
   ldx #0
 @rdy:
@@ -119,10 +122,98 @@ spc_boot_far:
   bne @rdy
   lda #1
   sta s_ready
+  ; the samples: LOAD to $0200 + SPC_BOOT_LEN, streamed by sound_tick
+  ldx #.loword(SPC_IMAGE_LEN) - SPC_BOOT_LEN
+  stx s_lleft
+  ; s_ptr now points just past the driver in the image
+  lda s_ptr
+  sta s_lptr
+  lda s_ptr+1
+  sta s_lptr+1
+  lda s_ptr+2
+  sta s_lptr+2
+  ldx #$0200 + SPC_BOOT_LEN
+  stx s_p2
+  lda #5
+  jsr cmd
 @none:
   plb
   plp
   rtl
+
+; one transaction: three bytes at [ptr],y (y advances), port 0 = s_seq + 4
+.macro XFER ptr
+  lda [ptr],y
+  sta APU1
+  iny
+  lda [ptr],y
+  sta APU2
+  iny
+  lda [ptr],y
+  sta APU3
+  iny
+  lda s_seq
+  clc
+  adc #4
+  sta s_seq
+  sta APU0
+:
+  cmp APU0
+  bne :-
+.endmacro
+
+; upload sound effect samples (raw load, type 2): two blocks, then more while the frame has time
+load_some:
+  .a8
+  .i16
+  ldx #LOAD_BLOCKS
+@l:
+  lda s_seq
+  and #$fc
+  ora #2
+  sta s_seq
+  ldy #0
+  XFER s_lptr
+  XFER s_lptr
+  XFER s_lptr
+  A16
+  lda s_lptr
+  clc
+  adc #9
+  cmp #SPC_SPLIT_END   ; the image continues at $8000 of the next bank
+  bne :+
+  A8
+  inc s_lptr+2
+  A16
+  lda #$8000
+:
+  sta s_lptr
+  lda s_lleft
+  sec
+  sbc #9
+  sta s_lleft
+  A8
+  beq @done            ; all loaded
+  dex
+  beq @done
+  cpx #LOAD_BLOCKS - 1
+  bcs @next            ; the first two blocks always
+  lda $2137            ; latch the beam position
+  lda $213F            ; (resets the counter read order)
+  lda $213D
+  xba
+  lda $213D
+  and #1
+  bne @next            ; line 256+: vblank, the next NMI is a frame away
+  xba
+  cmp #LOAD_STOP
+  bcc @next
+  cmp #225
+  bcc @done            ; close to the NMI: leave the rest for the next frame
+@next:
+  jmp @l
+@done:
+  rts
 
 ; ---------------------------------------------------------------- transactions (A8 I16, DBR $80)
 ; command A, parameters s_p2 / s_p3
@@ -135,8 +226,9 @@ cmd:
   lda s_p3
   sta APU3
   lda s_seq
-  inc a
-  and #$7f
+  and #$fc             ; type 0
+  clc
+  adc #4
   sta s_seq
   sta APU0
 :
@@ -144,45 +236,35 @@ cmd:
   bne :-
   rts
 
-; one stream block (9 bytes at [s_ptr]) = three transactions
+; one stream block (9 bytes at [s_ptr]) = three transactions (type 1)
 send_block:
   .a8
   .i16
-  ldy #0
-  .repeat 3
-  lda [s_ptr],y
-  sta APU1
-  iny
-  lda [s_ptr],y
-  sta APU2
-  iny
-  lda [s_ptr],y
-  sta APU3
-  iny
   lda s_seq
-  inc a
-  and #$7f
+  and #$fc
+  ora #1
   sta s_seq
-  ora #$80
-  sta APU0
-:
-  cmp APU0
-  bne :-
-  .endrep
+  ldy #0
+  XFER s_ptr
+  XFER s_ptr
+  XFER s_ptr
   rts
 
 send_silence:
   .a8
   .i16
+  lda s_seq
+  and #$fc
+  ora #1
+  sta s_seq
   .repeat 3
   stz APU1
   stz APU2
   stz APU3
   lda s_seq
-  inc a
-  and #$7f
+  clc
+  adc #4
   sta s_seq
-  ora #$80
   sta APU0
 :
   cmp APU0
@@ -375,6 +457,8 @@ CFUNC sound_tick
   lda #$80
   pha
   plb
+  lda s_ready
+  beq @out
   lda s_on
   beq @out
   lda APU2             ; free blocks reported by the driver
@@ -391,6 +475,10 @@ CFUNC sound_tick
   lda s_on
   bne @l
 @out:
+  ldx s_lleft
+  beq :+
+  jsr load_some
+:
   plb
   plp
   rtl
@@ -409,6 +497,15 @@ CFUNC se_start
   A16
   lda _ea+0
   and #$00ff
+  asl
+  tax
+  lda s_lleft          ; still uploading: only once this sample is in ARAM
+  cmp f:se_thr,x
+  beq :+
+  bcs @out             ; (plp restores the register widths)
+:
+  txa
+  lsr
   tax
   A8
   lda f:se_dir,x

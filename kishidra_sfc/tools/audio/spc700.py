@@ -125,6 +125,8 @@ class Asm:
     def bmi(self, t): self.b(0x30); self._rel(t)
     def bpl(self, t): self.b(0x10); self._rel(t)
     def cbne(self, d, t): self.b(0x2E, d); self._rel(t)
+    def bbs(self, d, bit, t): self.b(0x03 | (bit << 5), d); self._rel(t)   # branch if dp bit set
+    def bbc(self, d, bit, t): self.b(0x13 | (bit << 5), d); self._rel(t)   # branch if dp bit clear
     def dbnz_y(self, t): self.b(0xFE); self._rel(t)
     def jmp(self, t): self.b(0x5F); self._abs(t)
     def call(self, t): self.b(0x3F); self._abs(t)
