@@ -60,5 +60,7 @@ extern const u8 gacha_wt[4];
 extern const u8 area_story[N_AREA][2];
 extern const u16 name_grid[3][90];
 extern const u16 default_name[7];
+extern const u8 tut_goal[N_TUT_STEP];
+extern const u8 tut_stage_first[4];
 
 #endif

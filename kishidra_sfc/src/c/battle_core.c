@@ -29,6 +29,7 @@ u16 b_talk_text, b_talk_req;
 u8 b_talk_who;
 u8 b_form_who;
 u8 b_difficulty = 1;
+u8 b_mode, b_freeze, b_tut_protect;   /* tutorial / training */
 u8 b_guard_late = T_GUARD_LATE_FRAMES;
 u8 b_mirage, b_mirage_offer_n;
 u8 b_mirage_offer[3][2];
@@ -384,9 +385,24 @@ static u8 has_boss(void) {
 
 static void start_stage(void) {
   u8 ids[ENEMY_MAX + 1], n, i;
-  n = pick_formation(ids);
-  add_lucky(ids, &n);
-  place_enemies(ids, n);
+  if (b_mode == BM_TUTORIAL) {
+    ids[0] = ids[1] = MON_TUTORIAL;
+    n = b_stage >= T_TUTORIAL_MULTI_STAGE ? 2 : 1;
+    place_enemies(ids, n);
+    for (i = 0; i < n; ++i) b_e[i].hp = b_e[i].hp_max = D_TUT_ENEMY_HP;
+    b_tut_protect = 1;
+    for (i = 0; i < SLOTS; ++i) b_w[i].pos = 0;
+  } else if (b_mode == BM_TRAINING) {
+    ids[0] = MON_KAKASHI;
+    n = 1;
+    place_enemies(ids, n);
+    b_e[0].hp = b_e[0].hp_max = TRAINING_HP;
+    b_e[0].base = b_e[0].count = TRAINING_COUNT;
+  } else {
+    n = pick_formation(ids);
+    add_lucky(ids, &n);
+    place_enemies(ids, n);
+  }
   b_hero_state = HS_NORMAL;
   b_hero_timer = 0;
   b_guard_cool = 0;
@@ -447,7 +463,9 @@ void battle_start(u8 area, u8 men, const Loadout *lo) {
   b_area = area;
   b_men = men;
   b_mirage = area == AR_MIRAGE;
-  if (b_mirage) b_stage_count = MIRAGE_WAVES;
+  if (b_mode == BM_TUTORIAL) b_stage_count = D_TUTORIAL_STAGES;
+  else if (b_mode == BM_TRAINING) b_stage_count = 1;
+  else if (b_mirage) b_stage_count = MIRAGE_WAVES;
   else if (is_castle()) b_stage_count = D_CASTLE_STAGES;
   else if (is_secret()) b_stage_count = D_SECRET_STAGES;
   else if (is_treasure()) b_stage_count = D_TREASURE_STAGES;
@@ -481,6 +499,8 @@ static void force_attack(u8 i) {
   b_step_timer = D_ENEMY_ZERO_FRAMES;
   ev_post(EV_ENEMY_PHASE, i, 1, 0, 0, 0);
 }
+
+void battle_force_attack(u8 i) { if (i < b_ne && foe_targetable(&b_e[i])) force_attack(i); }
 
 static void open_lock(void) {
   Foe *e;
@@ -598,7 +618,7 @@ static void enemies_turn(void) {
       continue;
     }
     if (para) continue;
-    if (e->count) --e->count;
+    if (e->count && !b_freeze) --e->count;
     if (e->count == 0) {
       if (foe_lucky(e)) {
         e->fleeing = D_DEFEAT_BLINK_FRAMES;
@@ -840,6 +860,7 @@ static void attack_hero(void) {
   if (opening) dmg = 0;
   b_hp = dmg >= b_hp ? 0 : b_hp - dmg;
   if (b_hp > b_hp_max) b_hp = b_hp_max;
+  if (b_mode && b_hp == 0) b_hp = 1;       /* tutorial / training: the hero cannot fall */
   if (ab == BA_DRAIN && dmg > 0) {
     gain = mul_pct(dmg, D_DRAIN_PCT);
     if (b_mirage) gain = MAX(1, mul_pct(gain, T_MIRAGE_DRAIN_PCT));

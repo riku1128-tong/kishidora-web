@@ -281,7 +281,7 @@ class Gfx:
         import safari
         sf = safari.get()
         mh = self.mob_meta()
-        rows = sf.tables['ENEMY_TABLE']
+        rows = sf.tables['ENEMY_TABLE'] + [{'id': 'MON_KAKASHI', 'kind': 'EK_ZAKO'}]   # training dummy
         zako_poses = ['normal', 'idle2', 'attack', 'hurt', 'defeat']
         boss_poses = ['normal', 'idle2', 'attack', 'hurt', 'defeat', 'special', 'guard']
         lst = []

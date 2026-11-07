@@ -274,7 +274,7 @@
 #define FX_NIRAMI                    83
 #define FX_AUTO_MG                   84
 #define FX_KILL_DRAGON_X             85
-#define N_MON                        93
+#define N_MON                        94
 #define MON_NONE                     255
 #define MON_001                      0
 #define MON_002                      1
@@ -369,6 +369,7 @@
 #define MON_117                      90
 #define MON_118                      91
 #define MON_119                      92
+#define MON_KAKASHI                  93
 #define N_AREA                       17
 #define AR_ARCADIA                   0
 #define AR_PLAIN                     1
@@ -1196,6 +1197,23 @@
 #define PRICE_IT_RESET               500
 #define NAME_GRID_W                  10
 #define NAME_GRID_H                  9
+#define N_TUT_STEP                   16
+#define TG_INFO                      0
+#define TG_SKILL                     1
+#define TG_SKILL2                    2
+#define TG_MEAT                      3
+#define TG_DEFEAT                    4
+#define TG_GUARD                     5
+#define TG_JUST                      6
+#define TG_MIRACLE                   7
+#define TG_SPECIAL                   8
+#define TG_TARGET                    9
+#define TUTORIAL_SUB_SKILL_0         0
+#define TUTORIAL_SUB_SKILL_1         37
+#define TUTORIAL_SUB_SKILL_2         255
+#define MON_TUTORIAL                 87
+#define TRAINING_HP                  30000
+#define TRAINING_COUNT               1
 #define TEXT_LAST_BANK               193
 #include "gtypes.h"
 #endif

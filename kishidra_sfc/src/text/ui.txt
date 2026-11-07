@@ -346,3 +346,4 @@ T_CONTINUE_GRAY	{gray}つづきから
 T_NEW_ASK	はじめからにする？
 T_NEW_ASK2	{red}今の記録は消える
 T_MIRAGE_RULES	{gray}地上のボス 18 体と続けて戦う\n（1 WAVE に 1 体・お供なし）\n難易度は蜃気楼の中だけルナティック\nガードやジャストでもダメージを受ける\nWAVE の合間に宝箱を 1 つ選べる\nクリアで 500000 コイン
+T_RES_TUT_GIFT	チュートリアルのごほうび！

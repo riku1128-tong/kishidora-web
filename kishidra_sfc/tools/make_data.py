@@ -84,7 +84,7 @@ class Gen:
         self.effect_index = {k: i for i, k in enumerate(self.effect_ids)}
         self.fk = ['FK_NONE'] + sorted({e['kind'] for e in s.effects.values()} - {'FK_NONE'})
         self.races = [r['id'] for r in s.tables['RACE_TABLE']]
-        self.mon_ids = [r['id'] for r in s.tables['ENEMY_TABLE']]
+        self.mon_ids = [r['id'] for r in s.tables['ENEMY_TABLE']] + ['MON_KAKASHI']   # + the training dummy
         self.mon_index = {k: i for i, k in enumerate(self.mon_ids)}
         self.area_ids = [r['id'] for r in s.tables['AREA_TABLE']] + [self.T['MIRAGE']['surface']['id']]
         self.area_index = {k: i for i, k in enumerate(self.area_ids)}
@@ -574,6 +574,36 @@ class Gen:
         'ABCDEFGHIJ' 'KLMNOPQRST' 'UVWXYZ.-!?' 'abcdefghij' 'klmnopqrst' 'uvwxyz&+*/' '0123456789' '          ' '          ',
     ]
 
+    TUT_GOALS = ['', 'skill', 'skill2', 'meat', 'defeat', 'guard', 'just', 'miracle', 'special', 'target']
+
+    def build_tutorial(self):
+        T = self.T
+        steps = T['TUTORIAL_STEPS']
+        goals = []
+        for i, st in enumerate(steps):
+            self.text('TUTT_%d' % i, st['title'])
+            self.text('TUTL_%d' % i, '\n'.join(st['lines']))
+            self.text('TUTH_%d' % i, st.get('hint', '') or ' ')
+            goals.append(self.TUT_GOALS.index(st.get('goal', '')))
+        self.define('N_TUT_STEP', len(steps))
+        for i, g in enumerate(self.TUT_GOALS):
+            self.define('TG_%s' % (g.upper() or 'INFO'), i)
+        self.c.append('const u8 tut_goal[%d] = { %s };' % (len(steps), ', '.join(map(str, goals))))
+        self.c.append('const u8 tut_stage_first[4] = { %s };' % ', '.join(map(str, T['TUTORIAL_STAGE_FIRST'])))
+        tt = T['TUTORIAL_TEXT']
+        for k in ('retry', 'giveup', 'clear', 'hint_title'):
+            self.text('TUTX_' + k.upper(), tt[k])
+        self.text('TUTX_GIVEUP_LINES', '\n'.join(tt['giveup_lines']))
+        self.text('TUTX_GUARD_NG', '\n'.join(tt['guard_ng']))
+        self.text('TUTX_HINT_LINES', '\n'.join(tt['hint_lines']))
+        self.text('TUTX_TARGET_HINT', '\n'.join(tt['target_hint_lines']))
+        s = self.s
+        for i, sk in enumerate(s.num('TUTORIAL_SUB_SKILLS')[:3]):
+            self.define('TUTORIAL_SUB_SKILL_%d' % i, 255 if sk == 'SK_NONE' else self.skill_index[sk])
+        self.define('MON_TUTORIAL', self.mon_index[s.num('TUTORIAL_MON')])
+        self.define('TRAINING_HP', T['TRAINING_HP'])
+        self.define('TRAINING_COUNT', T['TRAINING_COUNT'])
+
     def build_difficulty_text(self):
         def mult(v):
             x = v / 100
@@ -685,6 +715,7 @@ def main():
     g.build_story()
     g.build_name_grid()
     g.build_difficulty_text()
+    g.build_tutorial()
     g.build_ui_text()
     g.write_text()
     g.write()

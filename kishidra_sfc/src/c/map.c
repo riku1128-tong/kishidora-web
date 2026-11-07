@@ -132,7 +132,7 @@ static void map_setup(void) {
 }
 
 /* ---------------------------------------------------------------- stage list */
-enum { RK_MEN, RK_TREASURE, RK_GACHA, RK_GOODS };
+enum { RK_MEN, RK_TREASURE, RK_GACHA, RK_GOODS, RK_TUT, RK_TRAIN };
 typedef struct { u8 kind, men, open; } Row;
 static Row rows[16];
 static u8 nrows;
@@ -140,6 +140,10 @@ static u8 nrows;
 static void make_rows(u8 a) {
   u8 m, n = men_count(a);
   nrows = 0;
+  if (a == AR_ARCADIA) {
+    rows[nrows].kind = RK_TUT; rows[nrows].men = MEN_TUTORIAL; rows[nrows].open = 1; ++nrows;
+    rows[nrows].kind = RK_TRAIN; rows[nrows].men = MEN_TRAINING; rows[nrows].open = 1; ++nrows;
+  }
   for (m = 1; m <= n; ++m) {
     rows[nrows].kind = RK_MEN; rows[nrows].men = m; rows[nrows].open = men_open(a, m);
     ++nrows;
@@ -180,6 +184,13 @@ static void row_draw(u16 i, u8 y) {
     break;
   case RK_GACHA:
     say(BX_WIN, 14, y, T_ROW_GACHA);
+    break;
+  case RK_TUT:
+    say(BX_WIN, 14, y, T_ROW_TUTORIAL);
+    if (sv.tut_cleared) say(BX_WIN, 124, y, T_LBL_CLEAR);
+    break;
+  case RK_TRAIN:
+    say(BX_WIN, 14, y, T_ROW_TRAINING);
     break;
   case RK_GOODS:
     say(BX_WIN, 14, y, T_ROW_GOODS);
@@ -259,6 +270,7 @@ static u8 area_window(void) {
     if (rows[r].kind == RK_GOODS) { win_close(BX_WIN); shop_scene(sel, 1); return MA_REDRAW; }
     if (sv.ninv >= D_INV_MAX) { mk_notice(T_INV_FULL, T_INV_FULL2); continue; }
     win_close(BX_WIN);
+    if (rows[r].kind == RK_TUT) { map_men = MEN_TUTORIAL; return MA_BATTLE; }   /* fixed tutorial gear */
     k = sortie();
     if (k == 1) { map_men = rows[r].men; return MA_BATTLE; }
   }

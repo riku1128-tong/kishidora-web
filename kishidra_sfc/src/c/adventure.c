@@ -370,3 +370,47 @@ u8 mat_up_do(u8 m, u16 n) {
   save_write();
   return ERR_OK;
 }
+
+/* ---------------------------------------------------------------- tutorial */
+void adv_tutorial_loadout(Loadout *lo) {
+  memset(lo, 0, sizeof(Loadout));
+  lo->w[0].item = ITEM_START_WEAPON;
+  lo->w[0].sk[0] = START_SKILL_0; lo->w[0].sk[1] = START_SKILL_1; lo->w[0].sk[2] = 255;
+  lo->w[0].nsk = START_SKILL_1 != 255 ? 2 : 1;
+  lo->w[1].item = ITEM_TUTORIAL_SUB_WEAPON;
+  lo->w[1].sk[0] = TUTORIAL_SUB_SKILL_0; lo->w[1].sk[1] = TUTORIAL_SUB_SKILL_1; lo->w[1].sk[2] = 255;
+  lo->w[1].nsk = TUTORIAL_SUB_SKILL_1 != 255 ? 2 : 1;
+  lo->w[2].item = ITEM_NONE;
+  lo->shield = ITEM_EQUIP_SHIELD;
+}
+
+static void give(u8 id, const u8 *sk, u8 nsk) {
+  u8 i = res.nitems;
+  if (i >= ITEMS_RUN_MAX) return;
+  res.fresh[i] = !bit_get(sv.found_items, id);
+  res.idx[i] = inv_add(id, sk, nsk, -1, 1);
+  if (res.idx[i] == NO_ITEM) { res.fresh[i] = 0; res.overflow += sell_price(id); coins_add(sell_price(id)); }
+  b_items[i].item = id;
+  res.nitems = ++i;
+}
+
+/* commit_tutorial(): the reward shield the first time, a relief weapon on the 5th clear */
+void commit_tutorial(void) {
+  static const u8 relief[3] = { TUTORIAL_RELIEF_SKILL_0, TUTORIAL_RELIEF_SKILL_1, TUTORIAL_RELIEF_SKILL_2 };
+  u8 n = 0, k;
+  memset(&res, 0, sizeof(res));
+  res.win = 1;
+  res.orb = res.opened = 255;
+  commit_kills();
+  if (sv.tut_clears < 7) ++sv.tut_clears;
+  if (!sv.tut_cleared) {
+    give(ITEM_TUTORIAL_REWARD_SHIELD, 0, 0);
+    sv.tut_cleared = 1;
+  }
+  if (sv.tut_clears == D_TUTORIAL_RELIEF_CLEARS) {
+    for (k = 0; k < 3; ++k) if (relief[k] != 255) ++n;
+    give(ITEM_TUTORIAL_RELIEF_WEAPON, relief, n);
+  }
+  b_nitems = res.nitems;
+  save_write();
+}

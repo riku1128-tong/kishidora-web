@@ -7,15 +7,27 @@
 
 void result_scene(u8 outcome) {
   u8 i, y, shown, bags = 0;
-  if (b_mirage) commit_mirage(outcome == 1);
+  if (b_mode == BM_TUTORIAL) { if (outcome == 1) commit_tutorial(); else commit_lose(); }
+  else if (b_mode == BM_TRAINING) { memset(&res, 0, sizeof(res)); res.orb = res.opened = 255; }
+  else if (b_mirage) commit_mirage(outcome == 1);
   else if (outcome == 1) commit_win();
   else commit_lose();
   for (i = 0; i < N_MAT; ++i) bags += b_mats[i];
   mk_screen();
   win_open(BX_RES, 2, 2, 28, 24, T_RES, PAL_W_FRAME);
-  say_center(BX_RES, 6, outcome == 1 ? T_RES_WIN : (outcome == 2 ? T_RES_LEFT : T_RES_LOSE));
+  if (b_mode == BM_TUTORIAL && outcome == 1) say_center(BX_RES, 6, TUTX_CLEAR);
+  else say_center(BX_RES, 6, outcome == 1 ? T_RES_WIN : (outcome == 2 ? T_RES_LEFT : T_RES_LOSE));
   y = 32;
-  if (res.mirage) {
+  if (b_mode == BM_TRAINING) {
+    say(BX_RES, 24, y, T_MEN_TRAINING_D);
+  } else if (b_mode == BM_TUTORIAL) {
+    say(BX_RES, 24, y, outcome == 1 ? T_RES_TUT_GIFT : T_RES_NONE); y += 16;
+    for (i = 0; outcome == 1 && i < res.nitems; ++i) {
+      say(BX_RES, 40, y, ITEMN_0 + b_items[i].item);
+      if (res.fresh[i]) say(BX_RES, 180, y, T_GACHA_NEWTAG);
+      y += 13;
+    }
+  } else if (res.mirage) {
     targ_num2 = MIRAGE_WAVES;
     sayn(BX_RES, 24, y, T_RES_WAVE, res.mirage_wave); y += 18;
     if (res.mirage_clear) { say(BX_RES, 24, y, T_RES_CLEARED); y += 16; }

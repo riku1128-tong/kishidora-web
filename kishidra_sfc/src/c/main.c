@@ -29,10 +29,12 @@ void main(void) {
       sc = r == MA_BATTLE ? SC_BATTLE : SC_TITLE;
       break;
     case SC_BATTLE:
-      adv_loadout(&lo);
-      adv_prepare(map_area, map_men);
-      r = battle_scene(map_area, map_men, &lo);
+      if (map_men == MEN_TUTORIAL) { b_mode = BM_TUTORIAL; adv_tutorial_loadout(&lo); }
+      else { b_mode = map_men == MEN_TRAINING ? BM_TRAINING : BM_NORMAL; adv_loadout(&lo); }
+      adv_prepare(map_area, b_mode ? 1 : map_men);
+      r = battle_scene(map_area, b_mode ? 1 : map_men, &lo);
       result_scene(r);
+      b_mode = BM_NORMAL; b_freeze = 0;
       mode = MS_AFTER;
       sc = SC_MAP;
       break;

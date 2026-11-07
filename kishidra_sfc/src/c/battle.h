@@ -98,6 +98,10 @@ extern u16 b_talk_text, b_talk_req;
 extern u8 b_talk_who;          /* mon of the speaker or 255 = king */
 extern u8 b_form_who;
 extern u8 b_difficulty;
+#define BM_NORMAL 0
+#define BM_TUTORIAL 1
+#define BM_TRAINING 2
+extern u8 b_mode, b_freeze, b_tut_protect;
 extern u8 b_guard_late;
 extern u8 b_mirage, b_mirage_offer_n;
 extern u8 b_mirage_offer[3][2];
@@ -118,6 +122,7 @@ void battle_press_guard(void);
 void battle_press_meat(void);
 void battle_press_next(void);
 void battle_mirage_pick(u8 i);
+void battle_force_attack(u8 i);
 u8   battle_can_command(void);
 u8   battle_set_target(u8 i);
 u8   ev_pop(Ev *out);

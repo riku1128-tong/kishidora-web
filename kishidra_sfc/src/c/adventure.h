@@ -61,4 +61,8 @@ u8   slot_reset(u16 i, u8 slot);
 u8   mat_up_do(u8 m, u16 n);
 u16  mat_up_max(u8 m);
 u32  item_value(u8 id);
+void adv_tutorial_loadout(Loadout *lo);
+void commit_tutorial(void);
+#define MEN_TUTORIAL 250
+#define MEN_TRAINING 251
 #endif

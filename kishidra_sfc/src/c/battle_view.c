@@ -387,6 +387,130 @@ static void talk_close(void) {
   panel_dirty = 1;
 }
 
+/* ---------------------------------------------------------------- tutorial guide (TUTORIAL_STEPS) */
+static u8 tut_step, tut_open, tut_wait, tut_fails, tut_first_slot, tut_target_moved, tut_msg, tut_due;
+#define TUT_MSG_STEP 0
+#define TUT_MSG_RETRY 1
+#define TUT_MSG_GIVEUP 2
+#define TUT_MSG_HINT 3
+
+static u8 tut_stage_end(void) {
+  return b_stage < 4 ? tut_stage_first[b_stage] : N_TUT_STEP;
+}
+
+static void tut_show(u8 msg) {
+  u16 title = TUTT_0 + tut_step, body = TUTL_0 + tut_step;
+  if (msg == TUT_MSG_RETRY) { title = TUTX_RETRY; body = tut_goal[tut_step] == TG_GUARD ? TUTX_GUARD_NG : TUTH_0 + tut_step; }
+  else if (msg == TUT_MSG_GIVEUP) { title = TUTX_GIVEUP; body = TUTX_GIVEUP_LINES; }
+  else if (msg == TUT_MSG_HINT) { title = TUTX_HINT_TITLE; body = tut_goal[tut_step] == TG_TARGET ? TUTX_TARGET_HINT : TUTX_HINT_LINES; }
+  tut_msg = msg;
+  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW);
+  targ_str = title;
+  say(BX_PANEL, 8, 3, TXT_YELLOW_S);
+  say(BX_PANEL, 12, 17, body);
+  say(BX_PANEL, 196, 3, T_TALK_NEXT);
+  tb_flush(BX_PANEL);
+  tut_open = 1;
+}
+
+/* the step's action starts: freeze the enemy count unless this is a guard lesson */
+static void tut_arm(void) {
+  u8 g = tut_goal[tut_step], i;
+  tut_wait = 1;
+  tut_fails = 0;
+  tut_target_moved = 0;
+  b_freeze = !(g == TG_GUARD || g == TG_JUST || g == TG_MIRACLE);
+  b_tut_protect = g != TG_DEFEAT;
+  switch (g) {                     /* _start_goal() */
+  case TG_MEAT: b_st = 0; break;
+  case TG_GUARD: case TG_JUST: case TG_MIRACLE: battle_force_attack(0); break;
+  case TG_SKILL2: b_nhist = 0; break;
+  case TG_SPECIAL: b_st = b_st_max; b_w[0].pos = b_w[1].pos = 0; b_nhist = 0; tut_fails = 0; break;
+  case TG_TARGET: b_st = b_st_max; break;
+  case TG_DEFEAT:
+    for (i = 0; i < b_ne; ++i) if (b_e[i].hp > D_TUT_LAST_HP) b_e[i].hp = D_TUT_LAST_HP;
+    b_st = b_st_max;
+    break;
+  }
+  hp_dirty = panel_dirty = top_dirty = 1;
+  banner(TUTH_0 + tut_step, PAL_T_YELLOW, 150);
+}
+
+/* windows open when the player has control again (the turn must not freeze mid-attack) */
+static void tut_later(u8 msg) { tut_due = msg + 1; tut_wait = 0; }
+
+static void tut_next(void) {
+  ++tut_step;
+  tut_wait = 0;
+  if (tut_step < tut_stage_end()) tut_later(TUT_MSG_STEP);
+}
+
+/* A pressed on the tutorial window */
+static void tut_ok(void) {
+  tut_open = 0;
+  box(BX_PANEL, 0, 20, 32, 8, T_PANEL, PAL_W, BOX_WINDOW | BOX_LOW);
+  panel_dirty = 1;
+  if (tut_msg == TUT_MSG_GIVEUP) { tut_next(); return; }
+  if (tut_msg != TUT_MSG_STEP) {
+    u8 g = tut_goal[tut_step];
+    tut_wait = 1;
+    if (g == TG_GUARD || g == TG_JUST || g == TG_MIRACLE) battle_force_attack(0);
+    return;
+  }
+  if (tut_goal[tut_step] == TG_INFO) tut_next();
+  else tut_arm();
+}
+
+static void tut_done(void) {
+  se_play(SE_OK);
+  tut_next();
+}
+
+static void tut_event(Ev *e) {
+  u8 g;
+  if (b_mode != BM_TUTORIAL) return;
+  if (e->type == EV_FIGHT) {
+    tut_step = tut_stage_first[b_stage - 1];
+    tut_wait = 0;
+    b_freeze = 1;
+    tut_later(TUT_MSG_STEP);
+    return;
+  }
+  if (!tut_wait || tut_step >= N_TUT_STEP) return;
+  g = tut_goal[tut_step];
+  switch (e->type) {
+  case EV_ATTACK:
+  case EV_CHARGE:
+    if (g == TG_SKILL) { tut_first_slot = e->a; tut_done(); }
+    else if (g == TG_SKILL2 && e->a != tut_first_slot) tut_done();
+    else if (g == TG_SPECIAL && e->type == EV_ATTACK) {
+      if (e->c != 255) tut_done();
+      else if (++tut_fails == 3) tut_later(TUT_MSG_HINT);
+    } else if (g == TG_TARGET && e->type == EV_ATTACK) {
+      if (tut_target_moved) tut_done();
+      else if (++tut_fails == 2) { tut_fails = 0; tut_later(TUT_MSG_HINT); }
+    }
+    break;
+  case EV_MEAT:
+    if (g == TG_MEAT) tut_done();
+    break;
+  case EV_TARGET:
+    if (g == TG_TARGET) tut_target_moved = 1;
+    break;
+  case EV_STAGE_CLEAR:
+    if (g == TG_DEFEAT) { tut_wait = 0; ++tut_step; }
+    break;
+  case EV_ENEMY_HIT:
+    if (g == TG_GUARD || g == TG_JUST || g == TG_MIRACLE) {
+      u8 need = g == TG_GUARD ? GD_GUARD : (g == TG_JUST ? GD_JUST : GD_MIRACLE);
+      if (e->a >= need) tut_done();
+      else if (++tut_fails >= (g == TG_GUARD ? 255 : 4)) tut_later(TUT_MSG_GIVEUP);
+      else tut_later(TUT_MSG_RETRY);
+    }
+    break;
+  }
+}
+
 /* ---------------------------------------------------------------- events */
 static s16 foe_x(u8 i) { return b_e[i].sx + act[i].slide + act[i].dx; }
 
@@ -397,6 +521,7 @@ static u8 hero_wt(void) {
 
 static void on_event(Ev *e) {
   u8 i;
+  tut_event(e);
   switch (e->type) {
   case EV_STAGE_START:
     load_stage_gfx();
@@ -446,13 +571,13 @@ static void on_event(Ev *e) {
     break;
   case EV_GUARD:
     break;
-  case EV_ATTACK:
-    last_attack_sp = e->b;
+  case EV_ATTACK:               /* a = slot, b = skill, c = special (255 = none) */
+    last_attack_sp = (u8)e->c;
     sp_frame_t = 0;
-    if (e->b != 255) { banner(SPN_0 + e->b, PAL_T_YELLOW, 60); se_play(SE_SPECIAL); }
+    if (e->c != 255) { banner(SPN_0 + e->c, PAL_T_YELLOW, 60); se_play(SE_SPECIAL); }
     else if (e->a < 3) {
       u8 wt = items[b_w[e->a].item].type;
-      se_play(e->c == SK_KICK ? SE_KICK : (e->c == SK_SAKEBU ? SE_SHOUT : (wt == WT_SPEAR ? SE_SPEAR : (wt == WT_HAMMER ? SE_HAMMER : SE_SLASH))));
+      se_play(e->b == SK_KICK ? SE_KICK : (e->b == SK_SAKEBU ? SE_SHOUT : (wt == WT_SPEAR ? SE_SPEAR : (wt == WT_HAMMER ? SE_HAMMER : SE_SLASH))));
     }
     hp_dirty = 1; panel_dirty = 1;
     break;
@@ -848,8 +973,16 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   animate();
   draw_top(); draw_hpst(); draw_panel();
   screen_on();
+  tut_open = tut_wait = tut_due = 0;
   for (;;) {
     frame_wait();
+    if (tut_due && battle_can_command() && !b_npending && !b_npopups) { tut_show(tut_due - 1); tut_due = 0; }
+    if (tut_open) {                  /* tutorial window: the battle waits */
+      if (pad_new & BTN_A) { se_play(SE_OK); tut_ok(); }
+      animate();
+      draw_sprites();
+      continue;
+    }
     /* input */
     if (b_phase == PH_TALK) { if (pad_new & (BTN_A | BTN_B)) battle_press_next(); }
     else if (b_phase == PH_REWARD) {
@@ -892,7 +1025,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
     skill_icons_update();
     if (top_dirty) draw_top();
     if (hp_dirty) draw_hpst();
-    if (panel_dirty && !talk_open && b_phase != PH_REWARD) draw_panel();
+    if (panel_dirty && !talk_open && !tut_open && b_phase != PH_REWARD) draw_panel();
    draw_sprites();
     if (win_t) { if (++win_t > 150) { result = 1; break; } }
     if (lose_t) { if (++lose_t > 180) { result = 0; break; } }

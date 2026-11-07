@@ -334,6 +334,7 @@ void add_popup(u8 e, u32 dmg, u8 delay, u8 kind) {
 }
 
 void enemy_stun_now(Foe *e) {
+  if (b_mode == BM_TRAINING) return;
   if (e->stun_turns || !foe_targetable(e) || foe_lucky(e)) return;
   e->stun = e->stun_need;
   e->stun_turns = stun_turns_new();
@@ -407,6 +408,7 @@ void popup_update(void) {
     killed = 0;
     if (foe_targetable(e) && e->hp > 0) {
       e->hp = p.dmg >= e->hp ? 0 : e->hp - p.dmg;
+      if (e->hp == 0 && ((b_mode == BM_TUTORIAL && b_tut_protect) || b_mode == BM_TRAINING)) e->hp = 1;
       if (e->hp > 0 && e->mon == MON_117 && !e->awake && e->hp * 100 < e->hp_max * D_AWAKEN_HP_PCT) awaken(e);
       if (e->hp == 0) { killed = 1; foe_killed(e); }
     }
@@ -594,7 +596,12 @@ static u8 roll_goods(Foe *e, u8 boss_like) {
   return MAT_IT_FUERU;
 }
 
+static void give_reward_main(Foe *e);
 void give_reward(Foe *e) {
+  if (!b_mode) give_reward_main(e);    /* tutorial / training give nothing */
+}
+
+static void give_reward_main(Foe *e) {
   u8 boss_like = foe_boss(e) || e->mid, kind = boss_like ? EK_BOSS : e->kind, item = ITEM_NONE, mat, goods, rid, sure, peko;
   static const u16 cmin[3] = { D_EK_ZAKO_COIN_MIN, D_EK_BOSS_COIN_MIN, D_EK_LUCKY_COIN_MIN };
   static const u16 cmax[3] = { D_EK_ZAKO_COIN_MAX, D_EK_BOSS_COIN_MAX, D_EK_LUCKY_COIN_MAX };
