@@ -21,7 +21,7 @@ over its windows is >= 0.99 (sound effects lower single windows only).
           蜃気楼の斜塔 from WAVE 1 / 2 / 15 (force_mwave): 08 / 17; 15 = 13, its second form (WAVE 16) keeps
           13, WAVE 17 50, WAVE 18 ペコラータ 16
   tutorial training
-          the two first rows of アーケディア城: 02
+          the two first rows of アーケディア城: 02 (b_mode is checked: a STAGE would play 02 too)
   dex     the monster dex (save --dex 1000: only MON_001 unknown): cards with boss songs, a mid-boss
           song, the two swapped zako songs, 49 (魔王のペット), 50, 16; the unknown card plays the map song
           01 again after a card with another song; back in the list 01
@@ -46,6 +46,7 @@ import wavref  # noqa: E402
 
 D = {m.group(1): int(m.group(2)) for m in re.finditer(r'#define\s+(\w+)\s+(-?\d+)\b', open(os.path.join(GEN, 'gdata.h')).read())}
 DC_AREA = bt._C['DC_AREA']
+BM = {m.group(1): int(m.group(2)) for m in re.finditer(r'#define\s+(BM_\w+)\s+(\d+)', open(os.path.join(ROOT, 'src', 'c', 'battle.h')).read())}
 AW_GO = 1
 SAVE = '--open %d --clear-all --ending --tickets 3 --coins 5000' % D['AR_SECRET']
 REC = 300                  # frames per recording (5 s); checked from 1 s on
@@ -160,8 +161,9 @@ def tower(first):
     return make
 
 
-def first_rows(up, sortie):
-    """アーケディア城's list opened by DC_AREA (no focus: the newest open STAGE, row 6), UP x up, A (A)"""
+def first_rows(up, sortie, mode):
+    """アーケディア城's list opened by DC_AREA (no focus: the newest open STAGE, row 6), UP x up, A (A);
+    the battle must then run in b_mode mode (BM_TUTORIAL / BM_TRAINING, not a STAGE, which plays 02 too)"""
     def make():
         r = Run()
         r.to_map()
@@ -173,6 +175,8 @@ def first_rows(up, sortie):
         if sortie:
             r.s.raw('wait 40', 'press A')
         r.s.battle()
+        r.s.peek('b_mode', 'b_mode')
+        r.mode = mode
         r.s.raw('wait 20')
         r.rec('battle', '02_zako_early')
         return r
@@ -257,8 +261,8 @@ RUNS = {
     'tower1': tower(1),
     'tower2': tower(2),
     'tower15': tower(15),
-    'tutorial': first_rows(6, False),
-    'training': first_rows(5, True),
+    'tutorial': first_rows(6, False, BM['BM_TUTORIAL']),
+    'training': first_rows(5, True, BM['BM_TRAINING']),
     'dex': dex,
     'ending': ending,
 }
@@ -300,6 +304,8 @@ def analyse(st, name, r, wd, out):
             sr = step * 32000
             check(log, abs(mb['pos'] - want) < 0.3 * sr, '%s %s -> %s: the song goes on, not restarted (%s at %.2f s of the track, '
                   '%.2f s if it had played on since %s)' % (name, a, b, b, mb['pos'] / sr, want / sr, a))
+    if getattr(r, 'mode', None) is not None:
+        check(log, out.get('b_mode') == [r.mode], '%s: the battle runs in b_mode %s (want %d)' % (name, out.get('b_mode'), r.mode))
     if getattr(r, 'ending', False):
         ending_check(st, log, name, wd, out)
     return log

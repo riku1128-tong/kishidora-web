@@ -17,7 +17,8 @@ usage: test_romplace.py            unit tests of romplace.place() on made-up ban
                                    data (romdata) with every fake blob's bytes at its ExLoROM file offset
        test_romplace.py --build --keep DIR   keep the three ROMs of the builds (fake4 / fake8 / fill8 with
                                    their .lbl, .map and .place.txt) in DIR, e.g. to run harness scripts on
-                                   fill8, whose art partly comes from the slow banks
+                                   fill8, whose art partly comes from the slow banks (their music: the
+                                   first 8 tracks; the song ids of the others play BGM_ZAKO)
 Exit status 0 when all pass."""
 import json
 import os
@@ -196,7 +197,10 @@ SHORT_BGM = 8      # tracks kept in the copy: the stream before the 8 MB tracks 
 
 def cut_bgm(dst, n=SHORT_BGM):
     """the copy's BGM: the first n tracks only (place/bgm.json and the TRACK_ list of audio.h; bgm.brr
-    keeps its bytes, the manifest only names the first part)"""
+    keeps its bytes, the manifest only names the first part).  The song ids BGM_* of the cut tracks become
+    BGM_ZAKO (a kept looping track: the stream, and so the frame timing, goes on as in the normal build), so
+    that the copy's bgm_play never reads past its n-entry bgm_table (sound.s bgm_start has no bound check;
+    the battles, dex cards and ending of plan step H2 use those ids)"""
     gen = os.path.join(dst, 'data', 'gen')
     ents = json.load(open(os.path.join(gen, 'place', 'bgm.json'), encoding='utf-8'))['entries']
     e = ents[0]
@@ -205,8 +209,15 @@ def cut_bgm(dst, n=SHORT_BGM):
     romplace.write_manifest(gen, 'bgm', ents)
     h = os.path.join(gen, 'audio.h')
     txt = open(h).read()
+    cut = [m.group(1) for m in re.finditer(r'#define TRACK_(\w+) (\d+)\n', txt) if int(m.group(2)) >= n]
     txt = re.sub(r'#define N_BGM_TRACKS \d+', '#define N_BGM_TRACKS %d' % n, txt)
     txt = re.sub(r'#define TRACK_\w+ (\d+)\n', lambda m: m.group(0) if int(m.group(1)) < n else '', txt)
+    keep = int(re.search(r'#define BGM_ZAKO (\d+)\n', txt).group(1))
+    assert keep <= n, 'BGM_ZAKO is not among the first %d tracks' % n
+    for name in cut:
+        txt, k = re.subn(r'#define BGM_%s \d+\n' % re.escape(name), '#define BGM_%s %d\n' % (name, keep), txt)
+        assert k == 1, 'audio.h: no song id BGM_%s for TRACK_%s' % (name, name)
+    txt = re.sub(r'#define N_BGM \d+', '#define N_BGM %d' % (n + 1), txt)
     open(h, 'w').write(txt)
     return gen
 
