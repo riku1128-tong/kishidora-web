@@ -515,6 +515,98 @@ class Gen:
         for i, z in enumerate(SIZES):
             self.text('SZN_%d' % i, z[3:])
 
+    # ------------------------------------------------------------ loadout rules (src/c/loadout.c)
+    def build_solo(self):
+        """One weapon alone can fire a special (adventure.gd solo_ok = reachable_specials of one skill
+        list; INV_SOLO, the 必殺10連 roll): a bit table by the classes of the list's hit skills
+        (tools/data/loadout_model.py SoloTable), checked here against the web BFS on every ordered list
+        of 1-3 skills (repeats too).  One ROM blob solo_data (data/gen/solo.bin, read with lda f: by
+        src/asm/loadout.s solo_eval: 'long'):
+          SOLO_KICK 0     the class of SK_KICK (kick-only lists)
+          SOLO_CLS 64     class of each skill: 255 buff (hits 0), 1..K the hit skills of the specials,
+                          K + 1 any other hit skill
+          SOLO_MUL1 128   u16 C * c (c = 0..31), SOLO_MUL2 192: u16 C * C * c
+          SOLO_WPN 256    per item id: 1 = a weapon (web solo_ok counts weapons only)
+          SOLO_TAB 512    bit c0 + C c1 + C^2 c2 (classes in order, 0 = none)
+          SOLO_POOL       the 必殺10連 pool: item ids of each SOLO_RAR_r in the web's weapon_order
+                          (dex_data.gd weapon_order filtered by rarity: adventure.gd solo_gacha_cands)"""
+        import itertools
+        import romplace
+        import loadout_model
+        s, T = self.s, self.T
+        m = loadout_model.Model(s)
+        assert m.skill_ids == self.skill_ids
+        st = loadout_model.SoloTable(m)
+        n = bad = pos = 0
+        for k in (1, 2, 3):
+            for l in itertools.product(range(len(self.skill_ids)), repeat=k):
+                ref = bool(m.web_reach([list(l)]))
+                n += 1
+                pos += ref
+                if st.lookup(l)[0] != ref:
+                    bad += 1
+        assert not bad, 'solo table: %d of %d skill lists differ from the web BFS' % (bad, n)
+        blob = bytearray(512)
+        blob[0] = st.cls[m.kick]
+        for i, c in enumerate(st.cls):
+            blob[64 + i] = c
+        for c in range(32):
+            struct.pack_into('<H', blob, 128 + 2 * c, st.C * c)
+            struct.pack_into('<H', blob, 192 + 2 * c, st.C * st.C * c)
+        assert len(self.item_ids) <= 256
+        for i, k in enumerate(self.item_ids):
+            blob[256 + i] = 1 if k in s.weapons else 0
+        blob += st.bits
+        # the 必殺10連 pool (web DexData.weapon_order: WEAPON_TABLE without material items, sword /
+        # spear / hammer, below SSR, by type, rarity, atk, id)
+        mats = {r['item'] for r in s.tables['MAT_TABLE'] if r.get('item')}
+        tord = {'WT_SWORD': 0, 'WT_SPEAR': 1, 'WT_HAMMER': 2}
+        rows = [w for w in s.tables['WEAPON_TABLE'] if w['id'] not in mats and w['wtype'] in tord and w['rarity'] in RARITIES]
+        order = [w['id'] for w in sorted(rows, key=lambda w: (tord[w['wtype']], RARITIES.index(w['rarity']), int(w['atk']), w['id']))]
+        pool0 = len(blob)
+        cum = 0
+        rates = T['SOLO_GACHA_RATES']['surface']
+        tot = sum(w for _, w in rates)
+        for r, (rar, w) in enumerate(rates):
+            ids = [self.item_index[k] for k in order if s.weapons[k]['rarity'] == rar]
+            assert ids, rar
+            cum += w
+            self.define('SOLO_RAR_%d' % r, RARITIES.index(rar), rar)
+            self.define('SOLO_OFF_%d' % r, len(blob) - pool0)
+            self.define('SOLO_CNT_%d' % r, len(ids))
+            self.define('SOLO_CUM_%d' % r, cum * 100 // tot, 'roll < this: this rarity (cumulative %)')
+            blob += bytes(ids)
+        assert tot == 100 and cum == 100
+        self.define('SOLO_NRAR', len(rates))
+        self.define('SOLO_POOL', pool0, 'offset of the 必殺10連 pool in solo_data')
+        self.define('SOLO_POOL_N', len(blob) - pool0)
+        self.define('SOLO_C', st.C, 'classes per skill place (K + 2)')
+        self.define('SOLO_TAB_BYTES', len(st.bits))
+        open(os.path.join(GEN, 'solo.bin'), 'wb').write(bytes(blob))
+        romplace.write_manifest(GEN, 'solo', [
+            {'label': 'solo_data', 'file': 'solo.bin', 'size': len(blob), 'kind': 'whole', 'speed': 'fast',
+             'long': True}])        # loadout.s: lda f:solo_data+...,x
+        print('solo: %d skill lists checked (%d fire a special), K %d, table %d B, pool %d' % (
+            n, pos, st.K, len(st.bits), len(blob) - pool0))
+
+    def build_fx_state(self):
+        """desc.gd fx_state: per effect a rule byte fx_rule[] = class << 4 | parameter (FR_*: the element
+        of RESO / BOOST, the weapon type of TYPE) and two texts FXS_n (the 条件つき note of COND / BOOST /
+        BERSERK) and FXO_n (why RESO / TYPE / ALLSR / BOOST / BERSERK do not work), ' ' when there is none
+        (tools/data/loadout_model.py fx_rule).  Called after the UI texts: the new families go last."""
+        import loadout_model
+        s = self.s
+        for i, f in enumerate(loadout_model.FR):
+            self.define(f, i)
+        rule = []
+        for k in self.effect_ids:
+            cls, par, note, off = loadout_model.fx_rule(s, k, ELEMENTS, WTYPES)
+            assert par < 16
+            rule.append((loadout_model.FR.index(cls) << 4) | par)
+            self.text('FXS_%d' % self.effect_index[k], note or ' ')
+            self.text('FXO_%d' % self.effect_index[k], off or ' ')
+        self.c.append('const u8 fx_rule[N_EFFECT] = { %s };   /* FR_* << 4 | parameter */' % ', '.join(str(v) for v in rule))
+
     # ------------------------------------------------------------ enemy stats
     def build_estats(self):
         s = self.s
@@ -848,6 +940,8 @@ def main():
     g.build_difficulty_text()
     g.build_tutorial()
     g.build_ui_text()
+    g.build_fx_state()
+    g.build_solo()
     g.write_text()
     g.write()
     try:

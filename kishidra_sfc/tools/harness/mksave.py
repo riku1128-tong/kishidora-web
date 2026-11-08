@@ -10,6 +10,10 @@ Layout = struct Save in src/c/save.h (cc65 packs structs, little endian): SAVE_V
 ($0000), seq 1.  docs/plan/PLAN.md §2.
 
 v1 fields:
+  --equip M,S,T,SH         sv.equip: bag indexes of MAIN, SUB, THIRD, 盾 ('-' = empty; default --main, -, -, 1)
+  --story N                sv.story (default 1 = ST_OPENING).  Without ST_SOLO (8) the game computes the
+                           INV_SOLO bits of the bag on load and writes the save back (save.c save_load);
+                           with it (e.g. 9) the bits are taken as written (mksave writes them 0)
   --mat IDX:N ...          one material (after --mats N, which sets all of them)
   --kills MON:N ...        sv.kills[MON] = N (N > 0 also marks the monster found, as a kill does)
   --got ID:N ...           sv.got[ID] = N (N > 0 also marks the item found, as add_got does)
@@ -158,6 +162,9 @@ def main():
     ap.add_argument('--tickets', type=int, default=0)
     ap.add_argument('--ending', action='store_true', help='the ending has been seen')
     ap.add_argument('--main', type=int, default=0, help='inventory index equipped as MAIN')
+    ap.add_argument('--equip', default=None, help='MAIN,SUB,THIRD,SHIELD bag indexes (- = empty); overrides --main')
+    ap.add_argument('--story', type=lambda x: int(x, 0), default=1,
+                    help='sv.story (default 1 = ST_OPENING; 9 adds ST_SOLO: the INV_SOLO bits are taken as they are, all 0)')
     ap.add_argument('--dex', type=int, default=0, help='dex: every Nth monster / item / special unknown (0 = all unknown)')
     ap.add_argument('--mats', type=int, default=0)
     ap.add_argument('--items', nargs='*', default=[])
@@ -233,8 +240,13 @@ def main():
     body += struct.pack('<I', a.coins)
     body += b''.join(struct.pack('<I', c) for c in cleared)
     body += b'\0' * 14                                # name (default name is used)
-    body += struct.pack('<8B', 1 if a.ending else 0, 1, 1, 0, 6, 1, 8, 8)  # ending, tut, tut_clears, sort, guard_late, story, vols
-    body += struct.pack('<4H', a.main, 0xffff, 0xffff, 1)
+    body += struct.pack('<8B', 1 if a.ending else 0, 1, 1, 0, 6, a.story, 8, 8)  # ending, tut, tut_clears, sort, guard_late, story, vols
+    eq = [a.main, 0xffff, 0xffff, 1]
+    if a.equip is not None:
+        eq = [bag_ref(x, inv, 0xffff) for x in a.equip.split(',')]
+        if len(eq) != 4:
+            sys.exit('mksave: --equip MAIN,SUB,THIRD,SHIELD')
+    body += struct.pack('<4H', *eq)
     body += b''.join(struct.pack('<H', v) for v in mats)
     body += bytes(found_items) + bytes(32 - (n_item + 7) // 8) + bits(n_sp) + bytes(found_mons)
     body += b''.join(struct.pack('<H', v) for v in kills)

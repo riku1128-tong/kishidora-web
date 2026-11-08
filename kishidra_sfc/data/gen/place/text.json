@@ -9953,9 +9953,449 @@
 "speed": "fast"
 },
 {
+"label": "tx_1244",
+"file": "text/strings.bin",
+"off": 27112,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1245",
+"file": "text/strings.bin",
+"off": 27136,
+"size": 6,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1246",
+"file": "text/strings.bin",
+"off": 27142,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1247",
+"file": "text/strings.bin",
+"off": 27160,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1248",
+"file": "text/strings.bin",
+"off": 27178,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1249",
+"file": "text/strings.bin",
+"off": 27196,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1250",
+"file": "text/strings.bin",
+"off": 27214,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1251",
+"file": "text/strings.bin",
+"off": 27232,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1252",
+"file": "text/strings.bin",
+"off": 27252,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1253",
+"file": "text/strings.bin",
+"off": 27272,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1254",
+"file": "text/strings.bin",
+"off": 27290,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1255",
+"file": "text/strings.bin",
+"off": 27310,
+"size": 22,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1256",
+"file": "text/strings.bin",
+"off": 27332,
+"size": 22,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1257",
+"file": "text/strings.bin",
+"off": 27354,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1258",
+"file": "text/strings.bin",
+"off": 27372,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1259",
+"file": "text/strings.bin",
+"off": 27392,
+"size": 22,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1260",
+"file": "text/strings.bin",
+"off": 27414,
+"size": 32,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1261",
+"file": "text/strings.bin",
+"off": 27446,
+"size": 16,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1262",
+"file": "text/strings.bin",
+"off": 27462,
+"size": 16,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1263",
+"file": "text/strings.bin",
+"off": 27478,
+"size": 22,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1264",
+"file": "text/strings.bin",
+"off": 27500,
+"size": 36,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1265",
+"file": "text/strings.bin",
+"off": 27536,
+"size": 28,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1266",
+"file": "text/strings.bin",
+"off": 27564,
+"size": 28,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1267",
+"file": "text/strings.bin",
+"off": 27592,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1268",
+"file": "text/strings.bin",
+"off": 27610,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1269",
+"file": "text/strings.bin",
+"off": 27634,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1270",
+"file": "text/strings.bin",
+"off": 27658,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1271",
+"file": "text/strings.bin",
+"off": 27682,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1272",
+"file": "text/strings.bin",
+"off": 27706,
+"size": 14,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1273",
+"file": "text/strings.bin",
+"off": 27720,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1274",
+"file": "text/strings.bin",
+"off": 27744,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1275",
+"file": "text/strings.bin",
+"off": 27764,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1276",
+"file": "text/strings.bin",
+"off": 27784,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1277",
+"file": "text/strings.bin",
+"off": 27804,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1278",
+"file": "text/strings.bin",
+"off": 27824,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1279",
+"file": "text/strings.bin",
+"off": 27844,
+"size": 22,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1280",
+"file": "text/strings.bin",
+"off": 27866,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1281",
+"file": "text/strings.bin",
+"off": 27890,
+"size": 22,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1282",
+"file": "text/strings.bin",
+"off": 27912,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1283",
+"file": "text/strings.bin",
+"off": 27932,
+"size": 24,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1284",
+"file": "text/strings.bin",
+"off": 27956,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1285",
+"file": "text/strings.bin",
+"off": 27974,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1286",
+"file": "text/strings.bin",
+"off": 27992,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1287",
+"file": "text/strings.bin",
+"off": 28010,
+"size": 18,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1288",
+"file": "text/strings.bin",
+"off": 28028,
+"size": 30,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1289",
+"file": "text/strings.bin",
+"off": 28058,
+"size": 26,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1290",
+"file": "text/strings.bin",
+"off": 28084,
+"size": 26,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1291",
+"file": "text/strings.bin",
+"off": 28110,
+"size": 26,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1292",
+"file": "text/strings.bin",
+"off": 28136,
+"size": 26,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1293",
+"file": "text/strings.bin",
+"off": 28162,
+"size": 26,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1294",
+"file": "text/strings.bin",
+"off": 28188,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1295",
+"file": "text/strings.bin",
+"off": 28208,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1296",
+"file": "text/strings.bin",
+"off": 28228,
+"size": 20,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1297",
+"file": "text/strings.bin",
+"off": 28248,
+"size": 26,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "tx_1298",
+"file": "text/strings.bin",
+"off": 28274,
+"size": 30,
+"kind": "whole",
+"speed": "fast"
+},
+{
 "label": "font_glyphs",
 "file": "font.bin",
-"size": 16920,
+"size": 16992,
 "kind": "whole",
 "speed": "fast",
 "long": false
@@ -9963,7 +10403,7 @@
 {
 "label": "font_width",
 "file": "font.bin.wid",
-"size": 705,
+"size": 708,
 "kind": "whole",
 "speed": "fast",
 "long": true
@@ -9971,7 +10411,7 @@
 {
 "label": "font_glyphs_s",
 "file": "font_s.bin",
-"size": 11280,
+"size": 11328,
 "kind": "whole",
 "speed": "fast",
 "long": false
@@ -9979,7 +10419,7 @@
 {
 "label": "font_width_s",
 "file": "font_s.bin.wid",
-"size": 705,
+"size": 708,
 "kind": "whole",
 "speed": "fast",
 "long": true

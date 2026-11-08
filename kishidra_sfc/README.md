@@ -73,7 +73,10 @@ python build.py rom
 
 - `src/asm/` 65816 のエンジン（起動、NMI、DMA、文字表示、圧縮展開、SRAM、サウンドの転送）
 - `src/c/` ゲーム本体（cc65）。`battle_core.c` / `battle_hit.c` が Safari 版 battle_core.gd の移植、`battle_view.c` が戦闘画面、
-  `map.c` `menu.c` `gacha.c` `forge.c` `story.c` `rewards.c` が冒険部分、`save.c` `adventure.c` がセーブとルール
+  `map.c` `menu.c` `gacha.c` `forge.c` `story.c` `rewards.c` が冒険部分、`save.c` `adventure.c` がセーブとルール、
+  `loadout.c` が装備の共通ルール（その装備で出せる必殺技 `sp_reach`、武器 1 本で必殺技が出せるか `solo_ok_sk`
+  〈表は `src/asm/loadout.s` が ROM から読む〉と持ち物のその印 `INV_SOLO`、特殊効果のようす `fx_state`）。
+  `ovl.h` は戦闘と画面が交代で使う作業領域 `ovl[1536]`
 - `tools/make_data.py` `tools/make_gfx.py` `tools/make_audio.py` 変換スクリプト、`tools/audio/` SPC700 ドライバとアセンブラ・BRR 変換
 - `src/text/ui.txt` 画面の文章（id と文）。make_data.py は `ui.txt` を読んでから `ui_*.txt` を名前の順に読む
   （画面の組ごとに 1 つずつ足せる。同じ id はどのファイルでも 1 回だけ）。数は `{n}` `{m}` `{k}`
@@ -101,6 +104,8 @@ python build.py rom
   それを libretro コアで動かす `probe/runprobe.py`、
   走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`、
   セーブ v2 のテスト `savetest.py`（v1 からの移行・スロットの交代・こわれたスロットからの戻り）、
+  装備の共通ルールと乱数のテスト `loadtest.py`（`tools/data/loadout_model.py` の Python のモデル〈Safari 版の
+  必殺技の探索・特殊効果のようす〉と、TEST_HOOKS の ROM のテスト用の命令の答えを比べる）、
   文字と窓の道具のテスト `kitcheck.py`（TEST_HOOKS の ROM で `t/s6_*.txt` を動かす: `{k}`、行の間隔 `text_lh`、
   あとから開いた窓の下で閉じる窓、名前の入力 `name_input`、3 行の確認 `mk_confirm3`、数字のスプライト `mk_num_spr`）。
   `runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl` で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
@@ -115,7 +120,8 @@ python build.py rom
   （リングが 0.76 秒を切ったときだけ、そのフレームの分を待つ前に送る）。戦闘のループが 1 フレームに収まりやすい。
   ドライバの空き数（ポート 2）はブロックの連続受信中は更新されないので、最後のブロックから 32 ライン空けて読む。
   起動後の効果音サンプルの転送も待ち時間に行う（タイトルで約 3 秒）
-- ダメージ計算の百分率（`mul_pct`）と数字の桁分解はハードウェアの乗除算器で行う（`src/asm/math.s`、結果は C と同一）
+- ダメージ計算の百分率（`mul_pct`）と数字の桁分解はハードウェアの乗除算器で行う（`src/asm/math.s`、結果は C と同一）。
+  乱数（`rnd`、範囲の乱数 `rnd_range` / `rnd_below`）も math.s（前の C と同じ列）
 - 戦闘パネルのスプライト（アイコン・コストの札）は OAM の 96〜127 番に置き、変わったときだけ書き直す
 
 フォントは東雲フォント（パブリックドメイン、`tools/font/SHINONOME_COPYRIGHT.txt`）と、戦闘パネルの小さい文字に

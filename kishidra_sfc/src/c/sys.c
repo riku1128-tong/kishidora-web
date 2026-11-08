@@ -1,11 +1,12 @@
 #include "sys.h"
 #include "sound.h"
+#include "ovl.h"
 #include <string.h>
 
 u16 pad, pad_new, pad_rep;
 u16 dbg[8];
 u8 oam_next;
-static u16 seed = 0x2b7e;
+u8 ovl[OVL_SIZE];          /* the overlay arena (ovl.h) */
 
 void load_vram(u16 id, u16 vaddr) {
   ea[0] = id; ea[1] = vaddr;
@@ -148,23 +149,18 @@ void fade_in(void) {
 
 /* spr_add and oam_finish: src/asm/sprite.s */
 
-void rnd_seed(u16 s) { seed = s ? s : 0x2b7e; }
-
-u16 rnd(void) {
-  seed ^= seed << 7;
-  seed ^= seed >> 9;
-  seed ^= seed << 8;
-  return seed;
-}
+/* rnd(), rnd_mul8(), rnd_below() and the state rnd_state: src/asm/math.s */
+void rnd_seed(u16 s) { rnd_state = s ? s : 0x2b7e; }
 
 u16 rnd_range(u16 lo, u16 hi) {
   u16 n = hi - lo + 1;
   if (hi <= lo) return lo;
+  if (n < 256) return lo + rnd_mul8(rnd(), (u8)n);   /* the same value, by the multiplier */
   return lo + (u16)(((u32)rnd() * n) >> 16);
 }
 
 u8 rnd_pct(u16 p) {
-  return p > 0 && rnd_range(0, 99) < p;
+  return p > 0 && rnd_below(100) < p;                /* (= rnd_range(0, 99) < p) */
 }
 
 /* (v * p) / 100 as before, by the hardware multiplier and divider (math.s) */
@@ -188,6 +184,7 @@ u16 prof_marks[16];
 #ifdef TEST_HOOKS
 #include "ui.h"
 #include "story.h"
+#include "loadout.h"
 /* test command mailbox (XDEFS=TEST_HOOKS builds only; tools/harness/runrom poke / pokew / waitfor).
  * The harness writes the arguments to dbg_arg[], then the command to dbg_cmd; the next frame_wait
  * clears dbg_cmd, runs the command (one that runs frames of its own, DC_NAME / DC_CONFIRM3, returns
@@ -212,6 +209,38 @@ static void dbg_text(void) {
   tb_codes(9);
   text_lh = 0;
   tb_flush(9);
+}
+
+/* S7: the RNG and the multiplier helpers against their models (tools/harness/loadtest.py) */
+static void dbg_rnd(u16 n, u8 mode, u16 a, u16 b) {
+  static u16 *o;
+  u16 v;
+  o = (u16 *)(ovl + DBG_IO);
+  dbg_res[0] = rnd_state;
+  for (; n; --n, ++o) {
+    switch (mode) {
+    case 0: v = rnd(); break;
+    case 1: v = rnd_range(a & 255, b); break;
+    case 2: v = rnd_below((u8)a); break;
+    case 3: v = rnd_pct(a); break;
+    default: v = rnd_range(0, b); break;
+    }
+    *o = v;
+  }
+  dbg_res[1] = rnd_state;
+}
+
+static void dbg_math(u16 n, u8 mode) {
+  static u16 *o;
+  o = (u16 *)(ovl + DBG_IO);
+  for (; n; --n, o += 4) {
+    pa[0] = o[0]; pa[1] = mode == 0 ? 0 : o[1]; pp = o[2];
+    if (mode == 0) mul_now();
+    else if (mode == 1) div_now();
+    else if (mode == 2) pct_now();
+    else { pa[0] = rnd_mul8(o[0], (u8)o[2]); pa[1] = 0; }
+    o[0] = pa[0]; o[1] = pa[1];
+  }
 }
 
 static void dbg_poll(void) {
@@ -249,6 +278,15 @@ static void dbg_poll(void) {
     break;
   case DC_NUMSPR:
     dbg_res[0] = dbg_numspr((s16)a0, (s16)a1, (s16)a2, (u8)a3, (u8 *)dbg_buf);
+    break;
+  case DC_SOLO: case DC_REACH: case DC_REACH_EQ: case DC_FX: case DC_SOLOALL:
+    dbg_loadout(c, a0, a1);
+    break;
+  case DC_RND:
+    dbg_rnd(a0, (u8)a1, a2, a3);
+    break;
+  case DC_MATH:
+    dbg_math(a0, (u8)a1);
     break;
   default:
     c = DC_UNKNOWN;

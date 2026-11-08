@@ -1225,5 +1225,34 @@
 #define MON_TUTORIAL                 87
 #define TRAINING_HP                  30000
 #define TRAINING_COUNT               1
+#define FR_NONE                      0
+#define FR_ON                        1
+#define FR_COND                      2
+#define FR_RESO                      3
+#define FR_TYPE                      4
+#define FR_ALLSR                     5
+#define FR_BOOST                     6
+#define FR_BERSERK                   7
+#define SOLO_RAR_0                   2  /* RARE_R */
+#define SOLO_OFF_0                   0
+#define SOLO_CNT_0                   33
+#define SOLO_CUM_0                   30  /* roll < this: this rarity (cumulative %) */
+#define SOLO_RAR_1                   3  /* RARE_RP */
+#define SOLO_OFF_1                   33
+#define SOLO_CNT_1                   24
+#define SOLO_CUM_1                   60  /* roll < this: this rarity (cumulative %) */
+#define SOLO_RAR_2                   4  /* RARE_SR */
+#define SOLO_OFF_2                   57
+#define SOLO_CNT_2                   52
+#define SOLO_CUM_2                   85  /* roll < this: this rarity (cumulative %) */
+#define SOLO_RAR_3                   5  /* RARE_SRP */
+#define SOLO_OFF_3                   109
+#define SOLO_CNT_3                   40
+#define SOLO_CUM_3                   100  /* roll < this: this rarity (cumulative %) */
+#define SOLO_NRAR                    4
+#define SOLO_POOL                    1512  /* offset of the 必殺10連 pool in solo_data */
+#define SOLO_POOL_N                  149
+#define SOLO_C                       20  /* classes per skill place (K + 2) */
+#define SOLO_TAB_BYTES               1000
 #include "gtypes.h"
 #endif

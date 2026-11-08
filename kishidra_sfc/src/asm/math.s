@@ -4,6 +4,7 @@
 .include "snes.inc"
 
 .export _pa
+.importzp sp
 
 .segment "LOWBSS"
 _pa:   .res 4          ; the 32-bit argument and result (C: pa[0] low, pa[1] high)
@@ -182,4 +183,166 @@ CFUNC div10_now
   .a8
   .i8
   ldx #0               ; (cc65 return: A, X = high byte)
+  rtl
+
+; void mul_now(void): pa = pa[0] * pp (16 x 16 -> 32 bits)
+CFUNC mul_now
+  php
+  phb
+  A8
+  lda #$80
+  pha
+  plb
+  AXY16
+  lda _pa
+  sta m_a
+  lda _pp
+  sta m_b
+  jsr mul16
+  lda m_lo
+  sta _pa
+  lda m_hi
+  sta _pa+2
+  plb
+  plp
+  rtl
+
+; void div_now(void): pa /= pp (32 bits by the divisor 2..255; the low byte of pp is used)
+CFUNC div_now
+  php
+  phb
+  A8
+  lda #$80
+  pha
+  plb
+  AXY16
+  lda _pp
+  and #$00ff
+  jsr div8
+  plb
+  plp
+  rtl
+
+; ---------------------------------------------------------------- random numbers
+; The port's xorshift (s ^= s << 7; s ^= s >> 9; s ^= s << 8), moved here from sys.c: the same
+; sequence from the same boot value, in 16-bit registers.  _rnd_state is the state (C: rnd_state; the
+; tower snapshot saves it).  rnd_range() (sys.c) and rnd_below() take (r * n) >> 16 with the hardware
+; multiplier for n < 256: r * n = rh * n * 256 + rl * n, so (r * n) >> 16 = (rh * n + (rl * n >> 8)) >> 8
+; exactly (the C value).
+.export _rnd_state
+.segment "DATA"
+_rnd_state: .word $2b7e       ; (crt0 copies DATA to WRAM at power-on: the C version's boot value)
+.segment "ENGINE"
+
+; u16 rnd(void): the next state (A = low, X = high byte).  DB = $7E (the C data bank, as every CFUNC is
+; entered): _rnd_state is in DATA ($7E:2000+, a 16-bit address)
+CFUNC rnd
+  php
+  A16
+  lda _rnd_state
+  sta m_lo
+  asl
+  asl
+  asl
+  asl
+  asl
+  asl
+  asl
+  eor m_lo
+  sta m_lo             ; s ^= s << 7
+  xba
+  and #$00ff
+  lsr
+  eor m_lo
+  sta m_lo             ; s ^= s >> 9
+  xba
+  and #$ff00
+  eor m_lo             ; s ^= s << 8
+  sta _rnd_state
+  plp
+  .a8
+  xba
+  tax                  ; X = the high byte
+  xba                  ; A = the low byte
+  rtl
+
+; (r * n) >> 16 of m_a = r, m_b = n (0..255) in A (A8 on entry, A16 on exit; DB $80)
+mul_rn:
+  .a8
+  lda m_a
+  sta WRMPYA
+  lda m_b
+  sta WRMPYB           ; rl * n
+  nop
+  nop
+  nop
+  nop
+  A16
+  lda RDMPYL
+  xba
+  and #$00ff
+  sta m_c              ; (rl * n) >> 8
+  A8
+  lda m_a+1
+  sta WRMPYA
+  lda m_b
+  sta WRMPYB           ; rh * n
+  nop
+  nop
+  nop
+  nop
+  A16
+  lda RDMPYL
+  clc
+  adc m_c              ; <= 255 * 255 + 254: no carry
+  xba
+  and #$00ff           ; >> 8
+  rts
+
+; u8 __fastcall__ rnd_mul8(u16 r, u8 n): (r * n) >> 16.  C stack: r; A = n.
+CFUNC rnd_mul8
+  php
+  phb
+  AXY16
+  and #$00ff
+  sta m_b
+  lda (sp)
+  sta m_a
+  lda sp
+  clc
+  adc #2
+  sta sp
+  A8
+  lda #$80
+  pha
+  plb
+  jsr mul_rn
+  plb
+  plp
+  .a8
+  .i8
+  ldx #0
+  rtl
+
+; u8 __fastcall__ rnd_below(u8 n): the next rnd() times n, >> 16 (= rnd_range(0, n - 1) for n 1..255,
+; the same value and the same state after it)
+CFUNC rnd_below
+  php
+  phb
+  AXY16
+  and #$00ff
+  sta m_b
+  AXY8
+  jsl rnd_far          ; A = low, X = high (it keeps the register sizes it was called with; DB still $7E)
+  sta m_a
+  stx m_a+1
+  lda #$80
+  pha
+  plb
+  jsr mul_rn
+  plb
+  plp
+  .a8
+  .i8
+  ldx #0
   rtl

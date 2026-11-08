@@ -18,6 +18,11 @@ The saves are made with mksave.py (--v1 for the old layout).  The game is driven
 title A (つづきから), map A, A, A = STAGE 1 of the cursor area -> the battle start writes the save
 (map.c), so the SRAM dump after it shows which slot was written; a full bag cannot sortie, so its
 write is the menu's タイトルへ (Y, UP = the last row, A, はい).
+A save without ST_SOLO (every v1 save, mksave's default story 1) gets its INV_SOLO bits on the first
+load and is written back right away (save.c save_load, step S7): the power-on load writes the other
+slot (seq + 1; a v1 slot stays as the fallback until the second v2 write, the battle start).  The
+title-time SRAM dump (title.srm) shows that write; the expected bits come from the web BFS
+(tools/data/loadout_model.py).
 Exit status 0 when every check passes."""
 import argparse
 import concurrent.futures as cf
@@ -33,11 +38,12 @@ import hrun  # noqa: E402
 import mksave  # noqa: E402
 
 V1_SIZE, V1_NINV, V2_NINV, V2_SIZE = mksave.V1_SIZE, mksave.V1_NINV, mksave.V2_NINV, mksave.V2_SIZE
-HDR, SLOT_B = 12, 0x4000
-SHOPS_SEEN, GUIDES = 636, 628
-GDB_NAV_FORGE = 16
+HDR, SLOT_A, SLOT_B = 12, 0, 0x4000
+SHOPS_SEEN, GUIDES, STORY = 636, 628, 107
+GDB_NAV_FORGE, ST_SOLO, INV_SOLO = 16, 8, 0x40
 
-TITLE = 'loadsram {srm}\nwait 200\nshot {out}/title.ppm\npress A\nwait 150\nwram {out}/map.bin\nshot {out}/map.ppm\n'
+TITLE = ('loadsram {srm}\nwait 200\nshot {out}/title.ppm\nsram {out}/title.srm\npress A\nwait 150\n'
+         'wram {out}/map.bin\nshot {out}/map.ppm\n')
 BATTLE = 'press A\nwait 60\npress A\nwait 60\npress A\nwait 240\nwram {out}/battle.bin\nsram {out}/after.srm\n'
 # a full bag cannot sortie: menu (Y), UP = the last row タイトルへ, A, はい (A) writes the save
 TO_TITLE = 'press Y\nwait 60\npress UP\nwait 10\npress A\nwait 30\npress A\nwait 60\nwram {out}/battle.bin\nsram {out}/after.srm\n'
@@ -111,6 +117,48 @@ def migrated(v1):
     return bytes(img)
 
 
+_solo = None
+
+
+def solo_of(iid, sk):
+    """INV_SOLO of a bag item by the models (a weapon whose skills alone fire a special: web solo_ok)"""
+    global _solo
+    if _solo is None:
+        sys.path.insert(0, os.path.join(hrun.ROOT, 'tools'))
+        sys.path.insert(0, os.path.join(hrun.ROOT, 'tools', 'data'))
+        sys.path.insert(0, os.path.join(hrun.ROOT, 'tools', 'extract'))
+        import make_data
+        import loadout_model
+        g = make_data.Gen()
+        g.build_ids()
+        _solo = (loadout_model.Model(g.s), [k in g.s.weapons for k in g.item_ids], {})
+    m, weapon, cache = _solo
+    if not (iid < len(weapon) and weapon[iid]):
+        return False
+    k = tuple(sk)
+    if k not in cache:
+        cache[k] = bool(m.web_reach([list(sk)]))
+    return cache[k]
+
+
+def fixed(img):
+    """a v2 image (from 12 on) as the first load leaves it: ST_SOLO set, INV_SOLO of every item"""
+    d = bytearray(img)
+    d[STORY] |= ST_SOLO
+    for j in range(u16(d, V2_NINV)):
+        o = V2_NINV + 2 + 8 * j
+        d[o + 4] = (d[o + 4] & ~INV_SOLO) | (INV_SOLO if solo_of(d[o], d[o + 1:o + 4]) else 0)
+    return bytes(d[HDR:used_len(d, V2_NINV)])
+
+
+def no_solo(d, ninv_off):
+    """the bag bytes of an image with the INV_SOLO bits cleared"""
+    d = bytearray(d[ninv_off:ninv_off + 2 + 8 * u16(d, ninv_off)])
+    for o in range(2 + 4, len(d), 8):
+        d[o] &= ~INV_SOLO
+    return bytes(d)
+
+
 def check_write(after, slot_off, seq, sv_now, what):
     """a slot written as v2 with SEQ, its body = the game's sv"""
     s = after[slot_off:slot_off + V2_SIZE]
@@ -163,6 +211,7 @@ def main():
               '--solo', '7', '--mirage-cards', '0x2a5a5', '--shops-seen', '0x22', '--boss-wins', '3,1',
               '--boss-rec', '0:2:40:12:1:2,3,-,1', '3:4:99:50:7:-,-,4,1',
               '--set', '1:ドラゴンたいじ:2,3,-,1', '15::gone,-,4,1')
+    solo9 = mk(P('v2_solo9.srm'), '--story', '9', *base)
     open(P('empty.srm'), 'wb').write(bytes(32768))
 
     jobs = {
@@ -171,6 +220,7 @@ def main():
         'big1': (rom, P('big1'), P('v1_999.srm'), TO_TITLE),
         'big2': (rom, P('big2'), P('v1_1009.srm'), TO_TITLE),
         'allf': (rom, P('allf'), P('v2_all.srm')),
+        'solo9': (rom, P('solo9'), P('v2_solo9.srm'), None),
     }
     if a.old:
         jobs['old'] = (os.path.abspath(a.old), P('old'), P('v1.srm'), None)
@@ -188,29 +238,37 @@ def main():
     n = u16(v1, V1_NINV)
     h = hdr(sv)
     check(h[0] == b'KSFC' and h[3] == V2_SIZE and h[4] == 2, 'sv: ver 2, size 9300 (got ver %d, size %d)' % (h[4], h[3]))
-    check(sv[12:V1_NINV] == v1[12:V1_NINV], 'sv bytes 12..627 = the v1 save')
-    check(u16(sv, V2_NINV) == n and sv[V2_NINV:V2_NINV + 2 + n * 8] == v1[V1_NINV:V1_NINV + 2 + n * 8],
-          'bag moved to 1226 / 1228 and identical (%d items)' % n)
+    want = bytearray(v1[12:V1_NINV])
+    want[STORY - 12] |= ST_SOLO
+    check(sv[12:V1_NINV] == bytes(want), 'sv bytes 12..627 = the v1 save (sv.story + ST_SOLO)')
+    check(u16(sv, V2_NINV) == n and no_solo(sv, V2_NINV) == no_solo(v1, V1_NINV),
+          'bag moved to 1226 / 1228 and identical (%d items; the INV_SOLO bits aside)' % n)
     blk = sv[V1_NINV:V2_NINV]
     nz = [(V1_NINV + i, x) for i, x in enumerate(blk) if x]
     check(nz == [(GUIDES, GDB_NAV_FORGE), (SHOPS_SEEN, 0x2a)],
           'v2 block zero except guides 16 and shops_seen 0x2A (areas 1, 3, 5): %s' % nz)
-    check(sv[:used_len(sv, V2_NINV)] == migrated(v1), 'sv = the expected migrated image')
+    check(sv[HDR:used_len(sv, V2_NINV)] == fixed(migrated(v1)),
+          'sv = the expected migrated image with the INV_SOLO bits of the models')
     if a.old:
         old = sv_of(a.old, P('old', 'map.bin'), V1_SIZE)
-        check(old[12:V1_NINV] == sv[12:V1_NINV], 'the v1 part equals the old ROM\'s sv')
-        check(old[V1_NINV:V1_NINV + 2 + n * 8] == sv[V2_NINV:V2_NINV + 2 + n * 8], 'the bag equals the old ROM\'s bag')
+        want = bytearray(old[12:V1_NINV])
+        want[STORY - 12] |= ST_SOLO
+        check(bytes(want) == sv[12:V1_NINV], 'the v1 part equals the old ROM\'s sv (sv.story + ST_SOLO)')
+        check(no_solo(old, V1_NINV) == no_solo(sv, V2_NINV), 'the bag equals the old ROM\'s bag (INV_SOLO aside)')
         check(open(P('old', 'title.ppm'), 'rb').read() == open(P('mig', 'title.ppm'), 'rb').read(),
               'title shot (v1 slot only) = the old ROM\'s')
         check(open(P('old', 'map.ppm'), 'rb').read() == open(P('mig', 'map.ppm'), 'rb').read(),
               'map shot = the old ROM\'s')
+    t1 = open(P('mig', 'title.srm'), 'rb').read()
+    check(t1[:V1_SIZE] == v1[:V1_SIZE], 'power-on: slot A still the v1 save')
+    check_write(t1, SLOT_B, 2, sv, 'power-on load (INV_SOLO fixed)')
     after = open(P('mig', 'after.srm'), 'rb').read()
-    check(after[:V1_SIZE] == v1[:V1_SIZE], 'battle start: slot A still the v1 save')
-    check_write(after, SLOT_B, 2, sv_of(rom, P('mig', 'battle.bin')), 'battle start')
+    check(after[SLOT_B:] == t1[SLOT_B:], 'battle start: slot B (the first v2 write) unchanged')
+    check_write(after, SLOT_A, 3, sv_of(rom, P('mig', 'battle.bin')), 'battle start (the second v2 write replaces the v1 slot)')
 
     # ---------------------------------------------------------------- 2./3. reload, fallback
     s2 = bytearray(after)
-    bad = bytearray(after)
+    bad = bytearray(t1)                           # slot A = the v1 save, slot B = the power-on write
     bad[SLOT_B + 16] ^= 0x55                      # coins: a summed byte of the v2 slot
     open(P('reload.srm'), 'wb').write(s2)
     open(P('bad.srm'), 'wb').write(bad)
@@ -220,47 +278,62 @@ def main():
         f1.result(), f2.result()
     print('2. reload that SRAM')
     sv2 = sv_of(rom, P('reload', 'map.bin'))
-    nb = used_len(after[SLOT_B:], V2_NINV)
-    check(sv2[:nb] == after[SLOT_B:SLOT_B + nb], 'loads slot B (the v2 slot, seq 2)')
+    nb = used_len(after[SLOT_A:], V2_NINV)
+    check(sv2[:nb] == after[SLOT_A:SLOT_A + nb], 'loads slot A (the newest v2 slot, seq 3)')
+    check(open(P('reload', 'title.srm'), 'rb').read() == bytes(s2), 'power-on: no write (ST_SOLO set)')
     a2 = open(P('reload', 'after.srm'), 'rb').read()
-    check_write(a2, 0, 3, sv_of(rom, P('reload', 'battle.bin')), 'next write')
-    check(a2[SLOT_B:] == after[SLOT_B:], 'slot B unchanged')
-    print('3. one byte of the v2 slot corrupted')
+    check_write(a2, SLOT_B, 4, sv_of(rom, P('reload', 'battle.bin')), 'next write')
+    check(a2[SLOT_A:SLOT_B] == after[SLOT_A:SLOT_B], 'slot A unchanged')
+    print('3. one byte of the v2 slot corrupted (the power-on write of 1)')
     sv3 = sv_of(rom, P('bad', 'map.bin'))
-    check(sv3[:used_len(sv3, V2_NINV)] == migrated(v1), 'falls back to the v1 slot and migrates it')
+    check(sv3[HDR:used_len(sv3, V2_NINV)] == fixed(migrated(v1)), 'falls back to the v1 slot and migrates it')
+    t3 = open(P('bad', 'title.srm'), 'rb').read()
+    check(t3[:V1_SIZE] == v1[:V1_SIZE], 'slot A still the v1 save')
+    check_write(t3, SLOT_B, 2, sv3, 'slot B rewritten by the power-on load')
     a3 = open(P('bad', 'after.srm'), 'rb').read()
-    check(a3[:V1_SIZE] == v1[:V1_SIZE], 'slot A still the v1 save')
-    check_write(a3, SLOT_B, 2, sv_of(rom, P('bad', 'battle.bin')), 'slot B rewritten')
+    check_write(a3, SLOT_A, 3, sv_of(rom, P('bad', 'battle.bin')), 'battle start')
 
     # ---------------------------------------------------------------- 4. mksave v2
     print('4. mksave v2 output')
     sv4 = sv_of(rom, P('mk2', 'map.bin'))
     nv = used_len(v2, V2_NINV)
-    check(sv4[:nv] == v2[:nv], 'loads as written (%d bytes)' % nv)
+    check(sv4[HDR:nv] == fixed(v2), 'loads as written (%d bytes; + ST_SOLO and the INV_SOLO bits of the first load)' % nv)
     mig = bytearray(migrated(v1))
     mig[6:8] = v2[6:8]                            # sum: the migrated sv keeps the v1 sum until its first write
     check(v2[:nv] == bytes(mig), 'mksave v2 = the migrated v1 save (same options; header sum aside)')
     check(open(P('mk2', 'map.ppm'), 'rb').read() == open(P('mig', 'map.ppm'), 'rb').read(), 'map shot = the migrated save\'s')
-    check_write(open(P('mk2', 'after.srm'), 'rb').read(), SLOT_B, 2, sv_of(rom, P('mk2', 'battle.bin')), 'battle start')
+    check_write(open(P('mk2', 'title.srm'), 'rb').read(), SLOT_B, 2, sv4, 'power-on load')
+    check_write(open(P('mk2', 'after.srm'), 'rb').read(), SLOT_A, 3, sv_of(rom, P('mk2', 'battle.bin')), 'battle start')
     sva = sv_of(rom, P('allf', 'map.bin'))
     na = used_len(allf, V2_NINV)
-    check(sva[:na] == allf[:na], 'every v2 option (guides, tickets, cards, shops, wins, records, sets) loads as written')
+    check(sva[HDR:na] == fixed(allf), 'every v2 option (guides, tickets, cards, shops, wins, records, sets) loads as written')
+    ta = open(P('allf', 'title.srm'), 'rb').read()
     aa = open(P('allf', 'after.srm'), 'rb').read()
-    check(aa[SLOT_B + V1_NINV:SLOT_B + V2_NINV] == allf[V1_NINV:V2_NINV], 'and the v2 block is written back unchanged')
-    check_write(aa, SLOT_B, 2, sv_of(rom, P('allf', 'battle.bin')), 'battle start')
+    check(ta[SLOT_B + V1_NINV:SLOT_B + V2_NINV] == allf[V1_NINV:V2_NINV] and
+          aa[SLOT_A + V1_NINV:SLOT_A + V2_NINV] == allf[V1_NINV:V2_NINV], 'and the v2 block is written back unchanged (both writes)')
+    check_write(ta, SLOT_B, 2, sva, 'power-on load')
+    check_write(aa, SLOT_A, 3, sv_of(rom, P('allf', 'battle.bin')), 'battle start')
+    svs = sv_of(rom, P('solo9', 'map.bin'))
+    check(open(P('solo9', 'title.srm'), 'rb').read() == solo9 and svs[:used_len(solo9, V2_NINV)] == solo9[:used_len(solo9, V2_NINV)],
+          'a save with ST_SOLO (mksave --story 9): loaded as written, no write at power-on (its INV_SOLO bits taken as they are)')
 
     # ---------------------------------------------------------------- 5. full bags
     for k, img in (('big1', big1), ('big2', big2)):
         n = u16(img, V1_NINV)
         print('5. a v1 save with %d items' % n)
         svb = sv_of(rom, P(k, 'map.bin'))
-        check(u16(svb, V2_NINV) == n and svb[V2_NINV:V2_NINV + 2 + n * 8] == img[V1_NINV:V1_NINV + 2 + n * 8],
-              'bag identical at 1228 (%d B moved)' % (2 + n * 8))
-        check(svb[:used_len(svb, V2_NINV)] == migrated(img), 'sv = the expected migrated image')
+        check(u16(svb, V2_NINV) == n and no_solo(svb, V2_NINV) == no_solo(img, V1_NINV),
+              'bag identical at 1228 (%d B moved; the INV_SOLO bits aside)' % (2 + n * 8))
+        ns = sum(1 for j in range(n) if svb[V2_NINV + 2 + 8 * j + 4] & INV_SOLO)
+        check(svb[HDR:used_len(svb, V2_NINV)] == fixed(migrated(img)),
+              'sv = the expected migrated image, INV_SOLO of the models (%d solo items)' % ns)
         if k == 'big1' and a.old:
             ob = sv_of(a.old, P('old_big', 'map.bin'), V1_SIZE)
-            check(ob[V1_NINV:V1_NINV + 2 + n * 8] == svb[V2_NINV:V2_NINV + 2 + n * 8], 'the bag equals the old ROM\'s')
-        check_write(open(P(k, 'after.srm'), 'rb').read(), SLOT_B, 2, sv_of(rom, P(k, 'battle.bin')), 'menu タイトルへ')
+            check(no_solo(ob, V1_NINV) == no_solo(svb, V2_NINV), 'the bag equals the old ROM\'s (INV_SOLO aside)')
+        tb = open(P(k, 'title.srm'), 'rb').read()
+        check(tb[:V1_SIZE] == img[:V1_SIZE], 'power-on: slot A still the v1 save')
+        check_write(tb, SLOT_B, 2, svb, 'power-on load')
+        check_write(open(P(k, 'after.srm'), 'rb').read(), SLOT_A, 3, sv_of(rom, P(k, 'battle.bin')), 'menu タイトルへ')
 
     # ---------------------------------------------------------------- 6. title, new game
     print('6. title with only a v1 slot; a new game')
@@ -268,8 +341,12 @@ def main():
     check(t_v1 == open(P('mk2', 'title.ppm'), 'rb').read(), 'title (v1 slot only) = title with a v2 save (つづきから)')
     check(t_v1 != open(P('newgame', 'title.ppm'), 'rb').read(), 'and differs from the title without a save')
     ng = open(P('newgame', 'after.srm'), 'rb').read()
-    check_write(ng, SLOT_B, 1, sv_of(rom, P('newgame', 'map.bin')), 'new game')
+    svn = sv_of(rom, P('newgame', 'map.bin'))
+    check_write(ng, SLOT_B, 1, svn, 'new game')
     check(not any(ng[:HDR]), 'slot A empty')
+    check(svn[STORY] & ST_SOLO and all(bool(svn[V2_NINV + 2 + 8 * j + 4] & INV_SOLO) == solo_of(svn[V2_NINV + 2 + 8 * j], svn[V2_NINV + 3 + 8 * j:V2_NINV + 6 + 8 * j])
+                                       for j in range(u16(svn, V2_NINV))),
+          'new game: ST_SOLO set and the bits of its bag right (no fix-up on the next load)')
 
     if a.old:
         check(open(P('old_v2', 'title.ppm'), 'rb').read() == open(P('newgame', 'title.ppm'), 'rb').read(),

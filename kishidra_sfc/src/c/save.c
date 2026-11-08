@@ -2,6 +2,7 @@
 #include "save.h"
 #include "text.h"
 #include "adventure.h"
+#include "loadout.h"
 #include <stddef.h>
 
 Save sv;
@@ -68,6 +69,7 @@ u16 inv_add(u8 id, const u8 *sk, u8 nsk, s8 slots, u8 over) {
   it->id = id;
   for (i = 0; i < 3; ++i) it->sk[i] = (!item_is_shield(id) && i < nsk) ? sk[i] : 255;
   it->slots = (u8)(slots >= 0 ? slots : roll_slots(id));
+  solo_bag(it, 1);                   /* INV_SOLO (loadout.s) */
   it->enh[0] = it->enh[1] = it->enh[2] = 0;
   add_got(id);
   return sv.ninv++;
@@ -154,6 +156,7 @@ void save_new(void) {
   sv.equip[EQ_MAIN] = inv_add(ITEM_START_WEAPON, start_skills, n, T_ENH_START_SLOTS, 0);
   sv.equip[EQ_SHIELD] = inv_add(ITEM_EQUIP_SHIELD, 0, 0, -1, 0);
   for (i = 0; i < NAME_MAX; ++i) sv.name[i] = 0;
+  sv.story = ST_SOLO;                /* (inv_add sets the INV_SOLO bits) */
 }
 
 /* ---------------------------------------------------------------- SRAM */
@@ -215,7 +218,7 @@ static u8 load_slot(u16 off) {
   return ea[3] == sv.sum;
 }
 
-u8 save_load(void) {
+static u8 load_newest(void) {
   static u8 hb[HDR];
   Save *h = (Save *)hb;
   u16 sa = 0, sb = 0;
@@ -231,8 +234,22 @@ u8 save_load(void) {
     if (load_slot(SLOT_B)) { slot_now = 1; return 1; }
     if (a && load_slot(SLOT_A)) { slot_now = 0; return 1; }
   }
-  save_new();
   return 0;
+}
+
+u8 save_load(void) {
+  if (!load_newest()) {
+    save_new();
+    return 0;
+  }
+  /* a save from before the INV_SOLO cache (v1, mksave, older v2): the bits of the whole bag once
+   * (loadout.s solo_bag: 7 frames for 999 items), written back so the next load skips it */
+  if (!(sv.story & ST_SOLO)) {
+    inv_solo_all();
+    sv.story |= ST_SOLO;
+    save_write();
+  }
+  return 1;
 }
 
 void save_write(void) {

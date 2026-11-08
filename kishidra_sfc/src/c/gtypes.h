@@ -34,6 +34,7 @@ extern const Item items[N_ITEM];
 extern const Skill skills[N_SKILL];
 extern const Special specials[N_SPECIAL];
 extern const Effect effects[N_EFFECT];
+extern const u8 fx_rule[N_EFFECT];          /* FR_* << 4 | parameter (loadout.c fx_state) */
 extern const Ail ails[N_AIL];
 extern const Enemy enemy_rows[N_MON];
 extern const Area areas[N_AREA];

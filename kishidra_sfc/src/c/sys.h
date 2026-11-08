@@ -72,6 +72,23 @@ u16 prof_line(void);
 #define DC_CONFIRM3 6             /* mk_confirm3 on the screen with arg0 lines (1-3: T_NEW_ASK, T_NEW_ASK2,
                                    * T_DBG_NOUNDO), yes = T_NEWGAME -> res0 */
 #define DC_NUMSPR 7               /* mk_num_spr(arg0, arg1, arg2, arg3) from OAM 0 -> res0 sprites, OAM in dbg_buf */
+/* loadout rules and the RNG (S7; tools/harness/loadtest.py).  Records in the arena: ovl[0..511] is the
+ * sp_reach scratch, ovl[DBG_IO..1535] the records (in and out, n = arg0) */
+#define DBG_IO 512
+#define DC_SOLO 8                 /* n lists of 3 skills (255 none) -> [solo_ok_sk | kick << 1 | sp_reach(that
+                                   * one weapon) count << 2 | (arg1: inv_add(arg1 - 1, the list) made it INV_SOLO)
+                                   * << 7 (bit 6: the bag was full), out0, out1] */
+#define DC_REACH 9                /* n loadouts of 9 B (3 weapons x 3 skills; all 255 = no weapon) ->
+                                   * [count, out0, out1, frames lo, hi]; res0 the most frames */
+#define DC_REACH_EQ 10            /* sp_reach_equipped -> res0 count, res1 out bits, res2 frames */
+#define DC_FX 11                  /* n records of 18 B [k, fx, 4 x (item id or 255, sk0, sk1, sk2)] ->
+                                   * [fx_state_of, fx_note lo, hi, fx_slots]; fx 255 = fx_state (the item's) */
+#define DC_SOLOALL 12             /* inv_solo_all -> res0 frames, res1 items with INV_SOLO */
+#define DC_RND 13                 /* arg0 n (<= 512) values as u16: arg1 mode 0 rnd(), 1 rnd_range(arg2 & 255,
+                                   * arg3), 2 rnd_below(arg2), 3 rnd_pct(arg2), 4 rnd_range(0, arg3); res0 / res1
+                                   * rnd_state before / after */
+#define DC_MATH 14                /* n records of 8 B [u32 x, u16 p, u16 0] -> u32 over x: arg1 mode 0 mul_now
+                                   * (x & 0xffff, p), 1 div_now, 2 pct_now, 3 rnd_mul8(x & 0xffff, p) */
 #define DC_UNKNOWN 0xff          /* dbg_ack of a command no one knows */
 #define DS_NONE 0                 /* dbg_scr: screens that take commands set their DS_ id */
 extern u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
@@ -82,11 +99,14 @@ extern u16 dbg_buf[32];
 #define DBG_SCREEN(s)
 #endif
 
-/* random */
+/* random (xorshift; rnd / rnd_mul8 / rnd_below and the state in src/asm/math.s) */
+extern u16 rnd_state;            /* the generator's state (never 0) */
 void rnd_seed(u16 s);
 u16  rnd(void);
 u16  rnd_range(u16 lo, u16 hi);   /* inclusive */
 u8   rnd_pct(u16 p);              /* true with p% */
+u8 __fastcall__ rnd_mul8(u16 r, u8 n);   /* (r * n) >> 16 */
+u8 __fastcall__ rnd_below(u8 n);         /* = rnd_range(0, n - 1) for n 1..255 (the same value) */
 
 /* misc */
 u16  mul_pct16(u16 v, u16 p);
@@ -94,6 +114,8 @@ u32  mul_pct(u32 v, u16 p);
 extern u16 pa[2], pp;           /* math.s: 32-bit argument / result, percentage */
 void pct_now(void);             /* pa = (pa * pp) / 100 */
 u8   div10_now(void);           /* pa /= 10, returns the remainder */
+void mul_now(void);             /* pa = pa[0] * pp (16 x 16 -> 32 bits) */
+void div_now(void);             /* pa /= pp (the divisor 2..255) */
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
