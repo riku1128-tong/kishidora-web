@@ -185,6 +185,7 @@ u16 prof_marks[16];
 #include "ui.h"
 #include "story.h"
 #include "loadout.h"
+#include "battle.h"
 /* test command mailbox (XDEFS=TEST_HOOKS builds only; tools/harness/runrom poke / pokew / waitfor).
  * The harness writes the arguments to dbg_arg[], then the command to dbg_cmd; the next frame_wait
  * clears dbg_cmd, runs the command (one that runs frames of its own, DC_NAME / DC_CONFIRM3, returns
@@ -287,6 +288,13 @@ static void dbg_poll(void) {
     break;
   case DC_MATH:
     dbg_math(a0, (u8)a1);
+    break;
+  case DC_SPECIAL: case DC_CLEAR: case DC_SETHP: case DC_FOE: case DC_CALM: case DC_TALK:
+    if (dbg_scr != DS_BATTLE) { c = DC_UNKNOWN; break; }
+    if (!dbg_battle(c, a0, a1, a2)) { dbg_cmd = c; return; }   /* not now: again in the next frame */
+    break;
+  case DC_MONEYMAT:
+    dbg_money_mat(a0, a1);
     break;
   default:
     c = DC_UNKNOWN;

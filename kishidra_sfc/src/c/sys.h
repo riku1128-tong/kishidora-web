@@ -90,8 +90,31 @@ u16 prof_line(void);
 #define DC_MATH 14                /* n records of 8 B [u32 x, u16 p, u16 0] -> u32 over x: arg1 mode 0 mul_now
                                    * (x & 0xffff, p), 1 div_now, 2 pct_now, 3 rnd_mul8(x & 0xffff, p) */
 #define DC_POOL 15                /* the 必殺10連 pool: n = arg0 bytes solo_pool_id(0 ..) -> the records */
+/* battle (A1; tools/harness/battletest.py).  On the battle screen only (dbg_scr DS_BATTLE, battle_core.c
+ * dbg_battle; elsewhere the ack is DC_UNKNOWN).  DC_SPECIAL, DC_CLEAR, DC_CALM and a kill by DC_SETHP wait for a
+ * calm moment of the fight (the player's turn, no blow, death or flight under way, no talk or form
+ * change due; so after a DC_CLEAR the next one waits for the next WAVE): until
+ * then the command stays in dbg_cmd and runs again in the next frame (waitfor dbg_seq) */
+#define DC_SPECIAL 16             /* enemy arg0 (255 = the target) attacks now with its special (attacks =
+                                   * sp_every) -> res0 1 (0: not targetable), res1 foe_special_next */
+#define DC_CLEAR 17               /* the enemies of mask arg0 (0 = all) are killed as by a blow, the lucky ones
+                                   * first (the web autotest _auto_adv_money) -> res0 how many */
+#define DC_SETHP 18               /* HP of arg0 (255 = the hero, else an enemy) = arg1 | arg2 << 16 (capped at
+                                   * its max; an enemy at 0 is killed as by DC_CLEAR) -> res0 / res1 the HP */
+#define DC_FOE 19                 /* enemy arg0 -> dbg_buf [mon, kind, hp lo, hi, hp_max lo, hi, atk, sp_atk,
+                                   * sp_every, attacks, count, dying | gone << 8, hits_guarded | hits_just
+                                   * << 8 (of its last attack)], res0 b_stage, res1 b_ne,
+                                   * res2 b_turns_stage, res3 b_turns_total */
+#define DC_MONEYMAT 20            /* (any screen) arg0 rolls of the 魔王城の地下 lucky material (battle_hit.c)
+                                   * at drop pct arg1 (0 = 100) -> res0 none, res1 ベル, res2 スーパー強化鉄,
+                                   * res3 強化鉄; dbg_buf[0] / [1] rnd_state before / after */
+#define DC_CALM 21                /* waits for the calm moment (as DC_CLEAR) -> res0 b_turns_total, res1 b_stage,
+                                   * res2 b_turns_stage, res3 b_phase */
+#define DC_TALK 22                /* waits for a talk window that A would close, then closes it (as A) -> res0
+                                   * the talk's text id */
 #define DC_UNKNOWN 0xff          /* dbg_ack of a command no one knows */
 #define DS_NONE 0                 /* dbg_scr: screens that take commands set their DS_ id */
+#define DS_BATTLE 1               /* battle_scene (DC_SPECIAL .. DC_FOE, DC_CALM, DC_TALK) */
 extern u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
 extern u16 dbg_arg[4], dbg_res[4];
 extern u16 dbg_buf[32];

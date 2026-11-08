@@ -1212,6 +1212,7 @@ static void on_event(Ev *e) {
     load_pal(mon_gfx[b_e[e->enemy].mon][1], 96);
     boss_upload(e->enemy, pose_by_code(&act[e->enemy], 0));
     bgm_play(battle_bgm());
+    if (b_mirage) top_dirty = 1;   /* the tower: the next form is the next WAVE */
     break;
   case EV_FORM_RISE:
     bright = 15;
@@ -1262,6 +1263,11 @@ static void on_event(Ev *e) {
     break;
   case EV_MIRAGE_REWARD:
     break;
+#ifdef TEST_HOOKS
+  case EV_DBG_HP:
+    top_dirty = hp_dirty = 1;
+    break;
+#endif
   }
 }
 
@@ -1638,6 +1644,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
   panel_oam_on = 0;
   oam_top = PANEL_OAM;           /* slots 96-127: the panel sprites (sys_init hid them) */
   battle_start(area, men, lo);
+  DBG_SCREEN(DS_BATTLE);
   hero_setup();
   misc_setup();
   bg_setup();
@@ -1715,6 +1722,7 @@ u8 battle_scene(u8 area, u8 men, const Loadout *lo) {
     if (win_t) { if (++win_t > 150) { result = 1; break; } }
     if (lose_t) { if (++lose_t > 180) { result = 0; break; } }
   }
+  DBG_SCREEN(DS_NONE);
   fade_out();
   hdma_on = 0;
   oam_top = 128;

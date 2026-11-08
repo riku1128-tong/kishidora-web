@@ -569,9 +569,22 @@ static u8 mat_roll(u16 pct) { return rnd_pct(MIN(mul_pct16(pct, b_drop_pct), 100
 
 static u8 claw_boss_pct(u8 mon) { return claw_pct[mon]; }
 
+/* 魔王城の地下: every lucky character drops one material (battle_core.gd roll_mat -> _money_mat with the
+ * surface steps of money_mat_steps; miner() is the identity on the surface).  The first step that hits */
+static u8 money_mat(void) {
+  if (mat_roll(D_MAT_BELL_LUCKY_PCT)) return MAT_BELL;
+  if (mat_roll(T_MONEY_MAT_SKYOUKA_PCT)) return MAT_SKYOUKA;
+  return mat_roll(100) ? MAT_KYOUKA : 255;
+}
+
 static u8 roll_mat(Foe *e, u8 boss_like) {
   u8 m = 255;
   u16 pct;
+  if (is_money() && foe_lucky(e)) {
+    m = money_mat();
+    if (m != 255 && b_mats[m] < 250) ++b_mats[m];
+    return m;
+  }
   if (e->race == RC_DRAGON && e->element != EL_NONE) {
     if (boss_like) {
       m = mat_of_el(0, e->element);
@@ -590,6 +603,23 @@ static u8 roll_mat(Foe *e, u8 boss_like) {
   if (m != 255 && b_mats[m] < 250) ++b_mats[m];
   return m;
 }
+
+#ifdef TEST_HOOKS
+/* sys.c DC_MONEYMAT: n rolls of money_mat() at drop pct `drop` (0 = 100) -> dbg_res none / ベル /
+ * スーパー強化鉄 / 強化鉄 (the materials of the run are not touched) */
+void dbg_money_mat(u16 n, u16 drop) {
+  u16 d0 = b_drop_pct;
+  u8 m;
+  b_drop_pct = drop ? drop : 100;
+  dbg_buf[0] = rnd_state;
+  for (; n; --n) {
+    m = money_mat();
+    ++dbg_res[m == MAT_BELL ? 1 : (m == MAT_SKYOUKA ? 2 : (m == MAT_KYOUKA ? 3 : 0))];
+  }
+  dbg_buf[1] = rnd_state;
+  b_drop_pct = d0;
+}
+#endif
 
 static u8 roll_goods(Foe *e, u8 boss_like) {
   u16 pct = boss_like ? T_FUERU_BOSS_PCT : (foe_lucky(e) ? T_FUERU_LUCKY_PCT : 0);

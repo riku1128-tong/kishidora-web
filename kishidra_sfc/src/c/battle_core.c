@@ -37,6 +37,7 @@ u16 b_mirage_buff[N_MIRAGE_KIND];
 u8 b_men_cleared;
 u8 b_reward_got;
 u16 b_turns_total;
+u16 b_turns_stage;
 u8 b_meat_gifts;
 u8 b_history[3], b_nhist;
 u8 b_last_special;
@@ -63,9 +64,29 @@ static u8 nest;
 static Ev evq[EVENT_MAX];
 static u8 ev_head, ev_tail;
 
+#ifdef FORCE_HOOKS
+/* test builds (battle.h): XDEFS FORCE_WAVE=0,0,6 (monster ids) makes every wave of a normal battle these
+ * monsters, FORCE_MIRAGE_WAVE=n starts the tower run at WAVE n; in a TEST_HOOKS ROM both can also be
+ * poked before the battle starts (force_wave 0 0 6 255) */
+#ifndef FORCE_WAVE
+#define FORCE_WAVE MON_NONE
+#endif
+#ifndef FORCE_MIRAGE_WAVE
+#define FORCE_MIRAGE_WAVE 0
+#endif
+u8 force_wave[ENEMY_MAX + 1] = { FORCE_WAVE, MON_NONE };
+u8 force_mwave = FORCE_MIRAGE_WAVE;
+#endif
+
+#ifdef TEST_HOOKS
+u8 dbg_evlog[DBG_EVLOG * 4], dbg_evn;   /* the last DBG_EVLOG events posted: type, enemy, a, b (battle.h) */
+#endif
 void ev_post(u8 type, u8 enemy, u8 a, u8 b, u16 c, u32 v) {
   u8 n = (ev_tail + 1) % EVENT_MAX;
   Ev *e;
+#ifdef TEST_HOOKS
+  { u8 *l = dbg_evlog + (dbg_evn & (DBG_EVLOG - 1)) * 4; l[0] = type; l[1] = enemy; l[2] = a; l[3] = b; ++dbg_evn; }
+#endif
   if (n == ev_head) return;        /* full: drop */
   e = &evq[ev_tail];
   e->type = type; e->enemy = enemy; e->a = a; e->b = b; e->c = c; e->v = v;
@@ -417,8 +438,16 @@ static void start_stage(void) {
     b_e[0].hp = b_e[0].hp_max = TRAINING_HP;
     b_e[0].base = b_e[0].count = TRAINING_COUNT;
   } else {
-    n = pick_formation(ids);
-    add_lucky(ids, &n);
+#ifdef FORCE_HOOKS
+    if (force_wave[0] != MON_NONE && !b_mirage) {
+      for (n = 0; n < ENEMY_MAX && force_wave[n] != MON_NONE; ++n) ids[n] = force_wave[n];
+      mid_def = MON_NONE;
+    } else
+#endif
+    {
+      n = pick_formation(ids);
+      add_lucky(ids, &n);
+    }
     place_enemies(ids, n);
   }
   b_hero_state = HS_NORMAL;
@@ -443,6 +472,7 @@ static void start_stage(void) {
   beg_said = 0;
   for (i = 0; i < b_ne; ++i)
     if (b_e[i].mon == MON_115 && b_e[i].sp_every > 0) { opening_beg = i; break; }
+  b_turns_stage = 0;
   b_target = first_targetable(0);
   if (b_target == 255) b_target = 0;
   if (has_boss()) { b_phase = PH_WARN; b_phase_timer = D_BOSS_WARN_FRAMES; }
@@ -474,6 +504,9 @@ static void start_run(void) {
   b_meat_gifts = 0;
   b_talk = 0; b_talk_req = 0; b_form_who = 255; after_talk = -1;
   b_stage = 1;
+#ifdef FORCE_HOOKS
+  if (b_mirage && force_mwave > 1 && force_mwave <= b_stage_count) b_stage = force_mwave;
+#endif
   b_last_special = 255;
   start_stage();
 }
@@ -616,6 +649,7 @@ static void enemies_turn(void) {
   u8 i, para, d = 2;
   Foe *e;
   ++b_turns_total;
+  ++b_turns_stage;
   aq_n = 0;
   if (b_lock_turns) {
     if (--b_lock_turns == 0) {
@@ -840,11 +874,15 @@ static void barrier_change(Foe *e) {
   ev_post(EV_BARRIER, e->idx, e->weak, 0, 0, 0);
 }
 
+/* the web: no gift once the run holds ITEM_MAX + MEAT_GIFT_EXTRA_MAX items (drops stop at ITEM_MAX) */
+#if D_ITEM_MAX + T_MEAT_GIFT_EXTRA_MAX > ITEMS_RUN_MAX
+#error ITEMS_RUN_MAX is below the meat gift cap
+#endif
 static u8 meat_gift(Foe *e) {
   u8 type, id;
   RunItem *it;
   (void)e;
-  if (b_nitems >= ITEMS_RUN_MAX) return ITEM_NONE;
+  if (b_mode || b_nitems >= D_ITEM_MAX + T_MEAT_GIFT_EXTRA_MAX) return ITEM_NONE;
   id = surface_pick(1, 0, 0, &type);
   it = &b_items[b_nitems++];
   it->item = id;
@@ -984,6 +1022,7 @@ static void form_swap(void) {
   u8 f = forms_index(e->mon), next = maou_forms[f + 1];
   s16 sx = e->sx;
   u8 idx = e->idx;
+  if (b_mirage && b_stage < b_stage_count) { ++b_stage; b_turns_stage = 0; }   /* the tower: each form is a WAVE */
   make_enemy(e, next);
   e->sx = sx;
   e->idx = idx;
@@ -1257,3 +1296,80 @@ u8 battle_bgm(void) {
   if (is_castle() && b_men == D_CASTLE_MEN && b_stage < b_stage_count) return BGM_BOSS;
   return BGM_BOSS;
 }
+
+#ifdef TEST_HOOKS
+/* ------------------------------------------------------------------ test commands (sys.h DC_SPECIAL ..) */
+static u8 dbg_calm(void) {   /* the player's turn with nothing in motion (no blow, death or flight under way) */
+  u8 i;
+  Foe *e;
+  if (!battle_can_command() || b_npending || b_npopups || b_form_who != 255 || b_talk_req) return 0;
+  for (i = 0, e = b_e; i < b_ne; ++i, ++e) if (!e->gone && (e->dying || e->fleeing)) return 0;
+  return 1;
+}
+
+static void dbg_kill(Foe *e) {   /* as a blow that takes the last HP (popup_update) */
+  e->hp = 0;
+  foe_killed(e);
+}
+
+u8 dbg_battle(u8 c, u16 a0, u16 a1, u16 a2) {
+  u8 i, pass, n = 0;
+  u32 v = a1 | ((u32)a2 << 16);
+  Foe *e;
+  u16 *o = dbg_buf;
+  switch (c) {
+  case DC_SPECIAL:
+    if (!dbg_calm()) return 0;
+    i = a0 == 255 ? b_target : (u8)a0;
+    if (i >= b_ne || !foe_targetable(&b_e[i])) break;
+    e = &b_e[i];
+    if (e->sp_every) e->attacks = e->sp_every;
+    force_attack(i);
+    dbg_res[0] = 1;
+    dbg_res[1] = foe_special_next(e);
+    break;
+  case DC_CLEAR:
+    if (!dbg_calm()) return 0;
+    for (pass = 0; pass < 2; ++pass)
+      for (i = 0, e = b_e; i < b_ne; ++i, ++e)
+        if ((!a0 || (a0 & (1 << i))) && foe_targetable(e) && foe_lucky(e) == !pass) { dbg_kill(e); ++n; }
+    dbg_res[0] = n;
+    break;
+  case DC_SETHP:
+    if (a0 == 255) {
+      b_hp = MIN(v, b_hp_max);
+      v = b_hp;
+    } else {
+      if (a0 >= b_ne || !foe_targetable(&b_e[a0])) break;
+      e = &b_e[a0];
+      if (!v) { if (!dbg_calm()) return 0; dbg_kill(e); }
+      else e->hp = MIN(v, e->hp_max);
+      v = e->hp;
+    }
+    dbg_res[0] = (u16)v; dbg_res[1] = (u16)(v >> 16);
+    ev_post(EV_DBG_HP, (u8)a0, 0, 0, 0, 0);
+    break;
+  case DC_FOE:
+    if (a0 >= b_ne) break;
+    e = &b_e[a0];
+    o[0] = e->mon; o[1] = e->kind;
+    o[2] = (u16)e->hp; o[3] = (u16)(e->hp >> 16);
+    o[4] = (u16)e->hp_max; o[5] = (u16)(e->hp_max >> 16);
+    o[6] = e->atk; o[7] = e->sp_atk; o[8] = e->sp_every; o[9] = e->attacks; o[10] = e->count;
+    o[11] = e->dying | (e->gone << 8);
+    o[12] = e->hits_guarded | (e->hits_just << 8);
+    dbg_res[0] = b_stage; dbg_res[1] = b_ne; dbg_res[2] = b_turns_stage; dbg_res[3] = b_turns_total;
+    break;
+  case DC_CALM:
+    if (!dbg_calm()) return 0;
+    dbg_res[0] = b_turns_total; dbg_res[1] = b_stage; dbg_res[2] = b_turns_stage; dbg_res[3] = b_phase;
+    break;
+  case DC_TALK:                  /* the next battle_step closes it (talk_frame), as the A of battle_scene */
+    if (b_phase != PH_TALK || talk_timer < D_TALK_MIN_FRAMES) return 0;
+    dbg_res[0] = b_talk_text;
+    in_next = 1;
+    break;
+  }
+  return 1;
+}
+#endif

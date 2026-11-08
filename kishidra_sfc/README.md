@@ -108,11 +108,17 @@ python build.py rom
   装備の共通ルールと乱数のテスト `loadtest.py`（`tools/data/loadout_model.py` の Python のモデル〈Safari 版の
   必殺技の探索・特殊効果のようす〉と、TEST_HOOKS の ROM のテスト用の命令の答えを比べる）、
   文字と窓の道具のテスト `kitcheck.py`（TEST_HOOKS の ROM で `t/s6_*.txt` を動かす: `{k}`、行の間隔 `text_lh`、
-  あとから開いた窓の下で閉じる窓、名前の入力 `name_input`、3 行の確認 `mk_confirm3`、数字のスプライト `mk_num_spr`）。
+  あとから開いた窓の下で閉じる窓、名前の入力 `name_input`、3 行の確認 `mk_confirm3`、数字のスプライト `mk_num_spr`）、
+  戦闘のテスト `battletest.py`（TEST_HOOKS の ROM で戦闘のテスト用の命令〈必殺技をいま出させる・WAVE の敵を倒す・HP を決める・
+  敵のようす・落ち着くまで待つ・会話を閉じる、`sys.h` の `DC_SPECIAL` 〜 `DC_TALK`〉を使い、蜃気楼の斜塔で魔王の形態が
+  WAVE を進めること、WAVE ごとのターン数 `b_turns_stage`、肉のお礼が 15 個で止まること、魔王城の地下のラッキーキャラが
+  かならず素材を落とすこと〈10,000 回の抽選を Python のモデルと比べる〉、`FORCE_WAVE` / `FORCE_MIRAGE_WAVE` を調べる）。
   `runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl` で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
   `XDEFS="TEST_HOOKS …" python build.py rom` でテストだけの定義を入れた ROM を作る
   （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない。`t/se_all.txt` は BGM を止めて
-  効果音を 1 つずつ鳴らして録音する）
+  効果音を 1 つずつ鳴らして録音する。`FORCE_WAVE=0,0,6`: ふつうの戦闘の WAVE をすべてこのモンスター〈番号〉にする、
+  `FORCE_MIRAGE_WAVE=n`: 蜃気楼の斜塔を WAVE n から始める。TEST_HOOKS の ROM では `force_wave` / `force_mwave` を
+  戦闘の前に poke してもよい）
 - NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる
   （残りは次のフレーム）。勇者・雑魚のポーズとスキルのアイコンの絵は、それを描く OAM と同じ NMI で送る
   （絵と並びがずれたフレームが出ない）。戦闘のメッセージ・コンボ・カードの文字は BG3 マップと同じ NMI で送る

@@ -25,7 +25,8 @@ enum {
   EV_COUNT_RESET, EV_SLOW, EV_SPECIAL_CANCEL, EV_GUARD_COUNTER, EV_DRAIN, EV_STDRAIN, EV_LOCK, EV_LOCK_GUARDED, EV_UNLOCK,
   EV_TALK, EV_TALK_END, EV_FORM_START, EV_FORM_BEAT, EV_FORM_DARK, EV_FORM_SWAP, EV_FORM_RISE, EV_FORM_END, EV_AWAKEN,
   EV_BARRIER, EV_STAGE_CLEAR, EV_VICTORY, EV_GAMEOVER, EV_ST_GAIN, EV_HP_COST, EV_MEAT_BEG, EV_MEAT_GIFT, EV_FUNBARI,
-  EV_TARGET, EV_MIRAGE_REWARD, EV_HIT_ROLL, EV_GUARD_BLOCKED
+  EV_TARGET, EV_MIRAGE_REWARD, EV_HIT_ROLL, EV_GUARD_BLOCKED,
+  EV_DBG_HP                      /* (test builds: a test command set an HP; redraw the bars) */
 };
 
 typedef struct {
@@ -109,6 +110,7 @@ extern u16 b_mirage_buff[N_MIRAGE_KIND];
 extern u8 b_men_cleared;
 extern u8 b_reward_got;
 extern u16 b_turns_total;
+extern u16 b_turns_stage;      /* enemy turns since this WAVE started (the tower: since this form) */
 extern u8 b_meat_gifts;
 extern u8 b_history[3], b_nhist;
 extern u8 b_last_special;      /* special id of the last attack (255 none) */
@@ -152,6 +154,17 @@ u8   surface_pick(u8 boss_like, u8 lucky, u8 sure, u8 *type);
 u32  calc_hp_max(void);
 u8   stage_boss_kind(void);
 u8   battle_bgm(void);
+#if defined(TEST_HOOKS) || defined(FORCE_WAVE) || defined(FORCE_MIRAGE_WAVE)
+#define FORCE_HOOKS
+extern u8 force_wave[ENEMY_MAX + 1];   /* every wave of a normal battle: these monsters (MON_NONE ends; off when [0] is) */
+extern u8 force_mwave;                 /* the tower run starts at this WAVE (0 / 1: at WAVE 1) */
+#endif
+#ifdef TEST_HOOKS
+#define DBG_EVLOG 32                        /* events in the ring (a power of 2) */
+extern u8 dbg_evlog[DBG_EVLOG * 4], dbg_evn;   /* ev_post: entry (dbg_evn - 1) & 31 is the last one */
+u8   dbg_battle(u8 c, u16 a0, u16 a1, u16 a2);   /* sys.c DC_SPECIAL .. DC_FOE, DC_CALM, DC_TALK: 0 = not now (again next frame) */
+void dbg_money_mat(u16 n, u16 drop);             /* sys.c DC_MONEYMAT (battle_hit.c) */
+#endif
 
 /* battle_hit.c */
 void use_skill(u8 slot);
