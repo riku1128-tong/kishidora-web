@@ -10,7 +10,15 @@
 zstandard（pip install pillow zstandard）、BGM の変換には ffmpeg も使う。
 
 出力: build/kishidra.sfc（LoROM / FastROM / 4MB / SRAM 32KB）、build/kishidra.map と
-build/kishidra.lbl（リンクの記号。tools/harness の runrom などが読む）
+build/kishidra.lbl（リンクの記号。tools/harness の runrom などが読む）、build/kishidra.place.txt
+（データの置き場所）
+
+データの置き場所: 変換スクリプトはバンクを決めない。data/gen のファイルと data/gen/place/*.json
+（tools/romplace.py）を書き、ここで 2 回リンクする。1 回目はデータなしでコードと固定の領域
+（C のコード、ENGINE、TABLES など）の大きさを測り、tools/romplace.py が残りの場所にデータを置いて
+2 回目をリンクする。ROM のデータのバンクは .bank(label) で書く（8 ビットなら #<.bank(x) /
+.byte <.bank(x)、^label は不可）。lda f:label で読むデータは TABLES か固定の領域に置くか、
+manifest で "long": true にする（ビルドのとき check_far_reads() が調べる）
 
 テスト用の ROM（環境変数）:
     PROFILE=1                計測用（tools/harness の prof.py / textcheck.py）
@@ -32,6 +40,7 @@ OBJ = os.path.join(ROOT, 'build', 'obj')
 OUT = os.path.join(ROOT, 'build', 'kishidra.sfc')
 
 ROM_BANKS = 128          # 4MB LoROM: banks $80-$FF
+TABLE_BANK = 0xC0        # segment TABLES (first in $C0): tables read with f: that point at placed data
 CC65_HOME = os.environ.get('CC65_HOME', '')
 
 
@@ -170,8 +179,29 @@ def build_rom():
     cfg = os.path.join(OBJ, 'kishidra.cfg')
     open(cfg, 'w').write(linker_cfg(sorted(set(banks.values()))))
     mp = os.path.join(ROOT, 'build', 'kishidra.map')
+    # data placement (tools/romplace.py): pass 1 links without the placed blobs (their labels in the
+    # unwritten area PLSTUB), the placer fills the space left in every bank, pass 2 links the result
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    import romplace
+    entries = romplace.load(GEN)
+    pp = os.path.join(OBJ, 'place.s')
+    po = os.path.join(OBJ, 'a_place.o')
+    open(pp, 'w').write(romplace.stub(entries))
+    check_far_reads(sfiles + [pp] + sorted(glob.glob(os.path.join(SRC, 'asm', '*.inc'))) +
+                    [os.path.join(OBJ, os.path.splitext(os.path.basename(c))[0] + '.s') for c in cfiles], entries)
+    run([tool('ca65'), '--cpu', '65816'] + asm_inc + ['-o', po, pp])
+    run([tool('ld65'), '-C', cfg, '-o', OUT, '-m', mp] + objs + [po, none_lib()])
+    used = area_used(mp, cfg)
+    # long blobs (read with lda f:label) never go into the code banks $81-$9F (bank 0 addresses)
+    pbanks = [{'bank': b, 'base': 0x8000, 'used': used.get(b, 0), 'speed': 'fast', 'long': b > 0x80 + C_BANK_LAST}
+              for b in range(0x81, 0x80 + ROM_BANKS)]
+    txt, rep, where = romplace.place(entries, pbanks)
+    open(pp, 'w').write(txt)
+    open(os.path.join(ROOT, 'build', 'kishidra.place.txt'), 'w').write(romplace.listing(where))
+    run([tool('ca65'), '--cpu', '65816'] + DBG + asm_inc + ['-o', po, pp])
     run([tool('ld65'), '-C', cfg, '-o', OUT, '-m', mp, '--dbgfile', os.path.join(ROOT, 'build', 'kishidra.dbg'),
-         '-Ln', os.path.join(ROOT, 'build', 'kishidra.lbl')] + objs + [none_lib()])
+         '-Ln', os.path.join(ROOT, 'build', 'kishidra.lbl')] + objs + [po, none_lib()])
+    print('\n'.join(rep))
     fix_checksum(OUT)
     usage(mp)
     tags = (['PROFILE'] if os.environ.get('PROFILE') else []) + os.environ.get('XDEFS', '').split()
@@ -179,12 +209,16 @@ def build_rom():
 
 
 def linker_cfg(cbanks):
+    """Every ROM memory area carries its bank attribute, so .bank(label) is right in all of them (in
+    the code banks $81-$9F the area starts at $8000: cc65 code uses 16-bit jsr, and there ^label is
+    0).  TABLES is the first segment of $C0; in every area the placed segment PLxx is the last one."""
     mem = ['MEMORY {',
            '  ZP: start=$0000, size=$80, type=rw;',
            '  ENGZP: start=$80, size=$80, type=rw;',
            '  LOWRAM: start=$0200, size=$1e00, type=rw;',
            '  CRAM: start=$2000, size=$d700, type=rw, bank=$7e;',
-           '  ROM00: start=$808000, size=$8000, fill=yes, fillval=$ff, file=%O;']
+           '  ROM00: start=$808000, size=$8000, fill=yes, fillval=$ff, file=%O, bank=$80;',
+           '  PLSTUB: start=$0000, size=$10000, file="", bank=$00;']
     seg = ['SEGMENTS {',
            '  ZEROPAGE: load=ZP, type=zp;',
            '  ENGZP: load=ENGZP, type=zp, optional=yes;',
@@ -197,7 +231,8 @@ def linker_cfg(cbanks):
            '  DATA: load=ROM00, run=CRAM, type=rw, define=yes;',
            '  BSS: load=CRAM, type=bss, define=yes;',
            '  HEADER: load=ROM00, start=$80ffb0, type=ro;',
-           '  VECTORS: load=ROM00, start=$80ffe0, type=ro;']
+           '  VECTORS: load=ROM00, start=$80ffe0, type=ro;',
+           '  PLSTUB: load=PLSTUB, type=ro, optional=yes;']
     for b in range(1, ROM_BANKS):
         bank = 0x80 + b
         if 1 <= b <= C_BANK_LAST:
@@ -205,11 +240,89 @@ def linker_cfg(cbanks):
             seg.append('  CODE%d: load=ROM%02X, type=ro, optional=yes;' % (b, b))
             seg.append('  ENG%d: load=ROM%02X, type=ro, optional=yes;' % (b, b))
         else:
-            mem.append('  ROM%02X: start=$%02x8000, size=$8000, fill=yes, fillval=$ff, file=%%O;' % (b, bank))
+            mem.append('  ROM%02X: start=$%02x8000, size=$8000, fill=yes, fillval=$ff, file=%%O, bank=$%02x;' % (b, bank, bank))
+        if bank == TABLE_BANK:
+            seg.append('  TABLES: load=ROM%02X, type=ro;' % b)
         seg.append('  BANK%02X: load=ROM%02X, type=ro, optional=yes;' % (bank, b))
+        seg.append('  PL%02X: load=ROM%02X, type=ro, optional=yes;' % (bank, b))
     mem.append('}')
     seg.append('}')
     return '\n'.join(mem + seg) + '\n'
+
+
+def area_used(mp, cfg):
+    """bytes used in each ROM bank (CPU bank byte) by the segments of a link (from its map)"""
+    txt = open(mp).read()
+    m = re.search(r'Segment list:.*?\n\n', txt, re.S)
+    seg2mem = dict(re.findall(r'^\s+(\w+): load=(\w+)', open(cfg).read(), re.M))
+    used = {}
+    for line in m.group(0).splitlines():
+        p = line.split()
+        if len(p) >= 4 and re.match(r'^[0-9A-F]{6}$', p[1]):
+            mem = seg2mem.get(p[0], '')
+            if not re.match(r'^ROM[0-9A-F]{2}$', mem) or mem == 'ROM00':
+                continue
+            bank = 0x80 + int(mem[3:], 16)
+            used[bank] = used.get(bank, 0) + int(p[3], 16)
+    return used
+
+
+# a 24-bit read (lda f:label) or ^label of a label in one of these segments gets bank 0
+# (their memory areas start at $8000): such data must be in TABLES, a fixed data segment or
+# a placed blob marked "long" (README / tools/romplace.py)
+BANK0_SEGS = re.compile(r'^(CODE\d+|ENG\d+|BANK[89][0-9A-F]|PL[89][0-9A-F]|PLSTUB)$')
+
+
+def check_far_reads(asm_files, entries):
+    """Build-time check of the f: / ^ rule: every label read as 'f:label' or used as '^label' in the
+    assembler sources (src/asm, data/gen, the cc65 output) must be a WRAM / ROM00 label, a constant,
+    a label of TABLES or of a fixed segment in $A0-$FF, or a placed blob marked long ('^' never for
+    placed data: use <.bank())."""
+    placed = {e['label']: e for e in entries}
+    seg_of, consts = {}, set()
+    for f in asm_files:
+        cur = 'CODE'
+        for line in open(f, encoding='utf-8', errors='replace'):
+            line = line.split(';')[0]
+            m = re.match(r'\s*\.segment\s+"(\w+)"', line)
+            if m:
+                cur = m.group(1)
+                continue
+            m = re.match(r'\s*([A-Za-z_]\w*)\s*:?=', line)
+            if m:
+                consts.add(m.group(1))
+                continue
+            m = re.match(r'\s*([A-Za-z_]\w*):', line)
+            if m:
+                seg_of.setdefault(m.group(1), cur)
+    bad = []
+    for f in asm_files:
+        params = set()
+        for k, line in enumerate(open(f, encoding='utf-8', errors='replace'), 1):
+            code = line.split(';')[0]
+            m = re.match(r'\s*\.macro\s+\w+\s*(.*)', code)
+            if m:
+                params = set(re.findall(r'\w+', m.group(1)))
+                continue
+            if re.match(r'\s*\.endmacro', code):
+                params = set()
+            for kind, name in re.findall(r'(?<![\w@.])(f:|\^)\s*([A-Za-z_]\w*)', code):
+                if name in consts or name in params or name.startswith('__'):
+                    continue            # constants, macro arguments, linker symbols (__X_LOAD__)
+                where = '%s:%d: %s%s' % (os.path.relpath(f, ROOT), k, kind, name)
+                if name in placed:
+                    if kind == '^' or not placed[name]['long']:
+                        bad.append('%s is placed data (%s): %s' % (
+                            where, placed[name]['_from'],
+                            'use <.bank(%s)' % name if kind == '^' else 'mark it "long" in the manifest'))
+                    continue
+                seg = seg_of.get(name)
+                if seg is None:
+                    bad.append('%s: label not found' % where)
+                elif BANK0_SEGS.match(seg):
+                    bad.append('%s is in segment %s (bank 0 address): put it in TABLES or a long blob' % (where, seg))
+    if bad:
+        sys.exit('f: / ^ の規則（build.py check_far_reads）:\n  ' + '\n  '.join(bad))
 
 
 def fix_checksum(path):

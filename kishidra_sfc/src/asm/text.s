@@ -1215,7 +1215,7 @@ draw_glyph:
   adc #.loword(font_glyphs)
   sta t_glyph
   A8
-  lda #^font_glyphs
+  lda #<.bank(font_glyphs)
   sta t_glyph+2
   A16
   bra @font
@@ -1232,7 +1232,7 @@ draw_glyph:
   adc #.loword(font_glyphs_s)
   sta t_glyph
   A8
-  lda #^font_glyphs_s
+  lda #<.bank(font_glyphs_s)
   sta t_glyph+2
   A16
 @font:

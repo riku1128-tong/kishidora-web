@@ -542,7 +542,7 @@ CFUNC estat_block
   lda f:estat_index+2,x
   sta _ea+4
   A8
-  lda #^estat_data
+  lda #<.bank(estat_data)
   sta fc_src+2
   lda #$7e
   sta fc_dst+2

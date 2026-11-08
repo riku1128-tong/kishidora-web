@@ -1,6 +1,7 @@
 # Regression audio (shared_infra t/reg2, + the A that starts the battle): title from frame 400 (the first
 # ~3.3 s race the SE upload against the stream and move with any timing change), 15 s of battle 魔王の城10.
-# The save is made from the #!mksave line by hrun.py.
+# The save is made from the #!mksave line by hrun.py.  The battle part moves by a few samples (and its
+# sound effects against the music) whenever the stream code's timing changes: compare with wavcmp.py.
 #!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3
 loadsram s1.srm
 wait 400

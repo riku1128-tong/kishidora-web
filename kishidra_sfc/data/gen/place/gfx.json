@@ -1,0 +1,7606 @@
+{
+"entries": [
+{
+"label": "gfx_title_tiles",
+"file": "gfx/title_tiles.bin",
+"size": 28704,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_title_map",
+"file": "gfx/title_map.bin",
+"size": 1792,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_title_pal",
+"file": "gfx/title_pal.bin",
+"size": 192,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_worldmap_tiles",
+"file": "gfx/worldmap_tiles.bin",
+"size": 32416,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_worldmap_map",
+"file": "gfx/worldmap_map.bin",
+"size": 2048,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_worldmap_pal",
+"file": "gfx/worldmap_pal.bin",
+"size": 192,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_abyss_tiles",
+"file": "gfx/bg_abyss_tiles.bin",
+"size": 14304,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_abyss_map",
+"file": "gfx/bg_abyss_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_abyss_pal",
+"file": "gfx/bg_abyss_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_ancient_tiles",
+"file": "gfx/bg_ancient_tiles.bin",
+"size": 14336,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_ancient_map",
+"file": "gfx/bg_ancient_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_ancient_pal",
+"file": "gfx/bg_ancient_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_arcadia_tiles",
+"file": "gfx/bg_arcadia_tiles.bin",
+"size": 14336,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_arcadia_map",
+"file": "gfx/bg_arcadia_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_arcadia_pal",
+"file": "gfx/bg_arcadia_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_castle_tiles",
+"file": "gfx/bg_castle_tiles.bin",
+"size": 14144,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_castle_map",
+"file": "gfx/bg_castle_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_castle_pal",
+"file": "gfx/bg_castle_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_castle_throne_tiles",
+"file": "gfx/bg_castle_throne_tiles.bin",
+"size": 11168,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_castle_throne_map",
+"file": "gfx/bg_castle_throne_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_castle_throne_pal",
+"file": "gfx/bg_castle_throne_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_cave_tiles",
+"file": "gfx/bg_cave_tiles.bin",
+"size": 14144,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_cave_map",
+"file": "gfx/bg_cave_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_cave_pal",
+"file": "gfx/bg_cave_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_field_tiles",
+"file": "gfx/bg_field_tiles.bin",
+"size": 13888,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_field_map",
+"file": "gfx/bg_field_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_field_pal",
+"file": "gfx/bg_field_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_fishing_tiles",
+"file": "gfx/bg_fishing_tiles.bin",
+"size": 14240,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_fishing_map",
+"file": "gfx/bg_fishing_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_fishing_pal",
+"file": "gfx/bg_fishing_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_icecave_tiles",
+"file": "gfx/bg_icecave_tiles.bin",
+"size": 14336,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_icecave_map",
+"file": "gfx/bg_icecave_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_icecave_pal",
+"file": "gfx/bg_icecave_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_icepal_tiles",
+"file": "gfx/bg_icepal_tiles.bin",
+"size": 14336,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_icepal_map",
+"file": "gfx/bg_icepal_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_icepal_pal",
+"file": "gfx/bg_icepal_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_inferno_tiles",
+"file": "gfx/bg_inferno_tiles.bin",
+"size": 13344,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_inferno_map",
+"file": "gfx/bg_inferno_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_inferno_pal",
+"file": "gfx/bg_inferno_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_island_tiles",
+"file": "gfx/bg_island_tiles.bin",
+"size": 14272,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_island_map",
+"file": "gfx/bg_island_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_island_pal",
+"file": "gfx/bg_island_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_islet_tiles",
+"file": "gfx/bg_islet_tiles.bin",
+"size": 12288,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_islet_map",
+"file": "gfx/bg_islet_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_islet_pal",
+"file": "gfx/bg_islet_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_mirage_tower_tiles",
+"file": "gfx/bg_mirage_tower_tiles.bin",
+"size": 13984,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_mirage_tower_map",
+"file": "gfx/bg_mirage_tower_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_mirage_tower_pal",
+"file": "gfx/bg_mirage_tower_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_oasis_tiles",
+"file": "gfx/bg_oasis_tiles.bin",
+"size": 13248,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_oasis_map",
+"file": "gfx/bg_oasis_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_oasis_pal",
+"file": "gfx/bg_oasis_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_palace_tiles",
+"file": "gfx/bg_palace_tiles.bin",
+"size": 14304,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_palace_map",
+"file": "gfx/bg_palace_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_palace_pal",
+"file": "gfx/bg_palace_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_plain_tiles",
+"file": "gfx/bg_plain_tiles.bin",
+"size": 13824,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_plain_map",
+"file": "gfx/bg_plain_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_plain_pal",
+"file": "gfx/bg_plain_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_potos_tiles",
+"file": "gfx/bg_potos_tiles.bin",
+"size": 13920,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_potos_map",
+"file": "gfx/bg_potos_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_potos_pal",
+"file": "gfx/bg_potos_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_ruins_tiles",
+"file": "gfx/bg_ruins_tiles.bin",
+"size": 13920,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_ruins_map",
+"file": "gfx/bg_ruins_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_ruins_pal",
+"file": "gfx/bg_ruins_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_secret_tiles",
+"file": "gfx/bg_secret_tiles.bin",
+"size": 13280,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_secret_map",
+"file": "gfx/bg_secret_map.bin",
+"size": 896,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_bg_secret_pal",
+"file": "gfx/bg_secret_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_000_normal",
+"file": "gfx/mon_000_normal.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_000_attack",
+"file": "gfx/mon_000_attack.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_000_hurt",
+"file": "gfx/mon_000_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_000_defeat",
+"file": "gfx/mon_000_defeat.bin",
+"size": 649,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_000_pal",
+"file": "gfx/mon_000_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_000_desc",
+"file": "gfx/mon_000_desc.bin",
+"size": 63,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_001_normal",
+"file": "gfx/mon_001_normal.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_001_idle2",
+"file": "gfx/mon_001_idle2.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_001_attack",
+"file": "gfx/mon_001_attack.bin",
+"size": 973,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_001_hurt",
+"file": "gfx/mon_001_hurt.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_001_defeat",
+"file": "gfx/mon_001_defeat.bin",
+"size": 713,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_001_pal",
+"file": "gfx/mon_001_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_001_desc",
+"file": "gfx/mon_001_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_002_normal",
+"file": "gfx/mon_002_normal.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_002_idle2",
+"file": "gfx/mon_002_idle2.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_002_attack",
+"file": "gfx/mon_002_attack.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_002_hurt",
+"file": "gfx/mon_002_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_002_defeat",
+"file": "gfx/mon_002_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_002_pal",
+"file": "gfx/mon_002_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_002_desc",
+"file": "gfx/mon_002_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_003_normal",
+"file": "gfx/mon_003_normal.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_003_idle2",
+"file": "gfx/mon_003_idle2.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_003_attack",
+"file": "gfx/mon_003_attack.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_003_hurt",
+"file": "gfx/mon_003_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_003_defeat",
+"file": "gfx/mon_003_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_003_pal",
+"file": "gfx/mon_003_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_003_desc",
+"file": "gfx/mon_003_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_004_normal",
+"file": "gfx/mon_004_normal.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_004_idle2",
+"file": "gfx/mon_004_idle2.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_004_attack",
+"file": "gfx/mon_004_attack.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_004_hurt",
+"file": "gfx/mon_004_hurt.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_004_defeat",
+"file": "gfx/mon_004_defeat.bin",
+"size": 649,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_004_pal",
+"file": "gfx/mon_004_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_004_desc",
+"file": "gfx/mon_004_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_005_normal",
+"file": "gfx/mon_005_normal.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_005_idle2",
+"file": "gfx/mon_005_idle2.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_005_attack",
+"file": "gfx/mon_005_attack.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_005_hurt",
+"file": "gfx/mon_005_hurt.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_005_defeat",
+"file": "gfx/mon_005_defeat.bin",
+"size": 649,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_005_pal",
+"file": "gfx/mon_005_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_005_desc",
+"file": "gfx/mon_005_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_006_normal",
+"file": "gfx/mon_006_normal.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_006_idle2",
+"file": "gfx/mon_006_idle2.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_006_attack",
+"file": "gfx/mon_006_attack.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_006_hurt",
+"file": "gfx/mon_006_hurt.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_006_defeat",
+"file": "gfx/mon_006_defeat.bin",
+"size": 617,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_006_pal",
+"file": "gfx/mon_006_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_006_desc",
+"file": "gfx/mon_006_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_007_normal_t",
+"file": "gfx/boss_007_normal_t.bin",
+"size": 4149,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_normal_m",
+"file": "gfx/boss_007_normal_m.bin",
+"size": 326,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_idle2_t",
+"file": "gfx/boss_007_idle2_t.bin",
+"size": 4110,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_idle2_m",
+"file": "gfx/boss_007_idle2_m.bin",
+"size": 328,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_attack_t",
+"file": "gfx/boss_007_attack_t.bin",
+"size": 4303,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_attack_m",
+"file": "gfx/boss_007_attack_m.bin",
+"size": 385,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_hurt_t",
+"file": "gfx/boss_007_hurt_t.bin",
+"size": 4310,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_hurt_m",
+"file": "gfx/boss_007_hurt_m.bin",
+"size": 358,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_defeat_t",
+"file": "gfx/boss_007_defeat_t.bin",
+"size": 4512,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_defeat_m",
+"file": "gfx/boss_007_defeat_m.bin",
+"size": 360,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_007_special_t",
+"file": "gfx/boss_007_special_t.bin",
+"size": 4386,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_special_m",
+"file": "gfx/boss_007_special_m.bin",
+"size": 372,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_007_pal",
+"file": "gfx/boss_007_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_007_desc",
+"file": "gfx/boss_007_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_008_normal_t",
+"file": "gfx/boss_008_normal_t.bin",
+"size": 4200,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_normal_m",
+"file": "gfx/boss_008_normal_m.bin",
+"size": 334,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_attack_t",
+"file": "gfx/boss_008_attack_t.bin",
+"size": 4308,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_attack_m",
+"file": "gfx/boss_008_attack_m.bin",
+"size": 384,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_hurt_t",
+"file": "gfx/boss_008_hurt_t.bin",
+"size": 4319,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_hurt_m",
+"file": "gfx/boss_008_hurt_m.bin",
+"size": 359,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_defeat_t",
+"file": "gfx/boss_008_defeat_t.bin",
+"size": 4024,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_defeat_m",
+"file": "gfx/boss_008_defeat_m.bin",
+"size": 329,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_special_t",
+"file": "gfx/boss_008_special_t.bin",
+"size": 4373,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_special_m",
+"file": "gfx/boss_008_special_m.bin",
+"size": 379,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_008_pal",
+"file": "gfx/boss_008_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_008_desc",
+"file": "gfx/boss_008_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_009_normal_t",
+"file": "gfx/boss_009_normal_t.bin",
+"size": 4127,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_normal_m",
+"file": "gfx/boss_009_normal_m.bin",
+"size": 327,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_idle2_t",
+"file": "gfx/boss_009_idle2_t.bin",
+"size": 4107,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_idle2_m",
+"file": "gfx/boss_009_idle2_m.bin",
+"size": 327,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_attack_t",
+"file": "gfx/boss_009_attack_t.bin",
+"size": 4220,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_attack_m",
+"file": "gfx/boss_009_attack_m.bin",
+"size": 354,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_hurt_t",
+"file": "gfx/boss_009_hurt_t.bin",
+"size": 4226,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_hurt_m",
+"file": "gfx/boss_009_hurt_m.bin",
+"size": 358,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_defeat_t",
+"file": "gfx/boss_009_defeat_t.bin",
+"size": 4301,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_defeat_m",
+"file": "gfx/boss_009_defeat_m.bin",
+"size": 367,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_special_t",
+"file": "gfx/boss_009_special_t.bin",
+"size": 4627,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_special_m",
+"file": "gfx/boss_009_special_m.bin",
+"size": 389,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_009_pal",
+"file": "gfx/boss_009_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_009_desc",
+"file": "gfx/boss_009_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_010_normal_t",
+"file": "gfx/boss_010_normal_t.bin",
+"size": 4248,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_normal_m",
+"file": "gfx/boss_010_normal_m.bin",
+"size": 336,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_attack_t",
+"file": "gfx/boss_010_attack_t.bin",
+"size": 4778,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_attack_m",
+"file": "gfx/boss_010_attack_m.bin",
+"size": 380,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_hurt_t",
+"file": "gfx/boss_010_hurt_t.bin",
+"size": 4326,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_hurt_m",
+"file": "gfx/boss_010_hurt_m.bin",
+"size": 357,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_defeat_t",
+"file": "gfx/boss_010_defeat_t.bin",
+"size": 3737,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_defeat_m",
+"file": "gfx/boss_010_defeat_m.bin",
+"size": 318,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_special_t",
+"file": "gfx/boss_010_special_t.bin",
+"size": 5076,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_special_m",
+"file": "gfx/boss_010_special_m.bin",
+"size": 412,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_010_pal",
+"file": "gfx/boss_010_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_010_desc",
+"file": "gfx/boss_010_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_011_normal_t",
+"file": "gfx/boss_011_normal_t.bin",
+"size": 4260,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_normal_m",
+"file": "gfx/boss_011_normal_m.bin",
+"size": 334,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_idle2_t",
+"file": "gfx/boss_011_idle2_t.bin",
+"size": 4218,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_idle2_m",
+"file": "gfx/boss_011_idle2_m.bin",
+"size": 334,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_attack_t",
+"file": "gfx/boss_011_attack_t.bin",
+"size": 4438,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_attack_m",
+"file": "gfx/boss_011_attack_m.bin",
+"size": 380,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_hurt_t",
+"file": "gfx/boss_011_hurt_t.bin",
+"size": 4366,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_hurt_m",
+"file": "gfx/boss_011_hurt_m.bin",
+"size": 361,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_defeat_t",
+"file": "gfx/boss_011_defeat_t.bin",
+"size": 4585,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_defeat_m",
+"file": "gfx/boss_011_defeat_m.bin",
+"size": 360,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_011_special_t",
+"file": "gfx/boss_011_special_t.bin",
+"size": 4789,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_special_m",
+"file": "gfx/boss_011_special_m.bin",
+"size": 418,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_011_pal",
+"file": "gfx/boss_011_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_011_desc",
+"file": "gfx/boss_011_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_012_normal_t",
+"file": "gfx/boss_012_normal_t.bin",
+"size": 4178,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_normal_m",
+"file": "gfx/boss_012_normal_m.bin",
+"size": 333,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_idle2_t",
+"file": "gfx/boss_012_idle2_t.bin",
+"size": 4153,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_idle2_m",
+"file": "gfx/boss_012_idle2_m.bin",
+"size": 335,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_attack_t",
+"file": "gfx/boss_012_attack_t.bin",
+"size": 3994,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_attack_m",
+"file": "gfx/boss_012_attack_m.bin",
+"size": 336,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_hurt_t",
+"file": "gfx/boss_012_hurt_t.bin",
+"size": 4374,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_hurt_m",
+"file": "gfx/boss_012_hurt_m.bin",
+"size": 357,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_defeat_t",
+"file": "gfx/boss_012_defeat_t.bin",
+"size": 4368,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_defeat_m",
+"file": "gfx/boss_012_defeat_m.bin",
+"size": 368,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_special_t",
+"file": "gfx/boss_012_special_t.bin",
+"size": 4365,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_special_m",
+"file": "gfx/boss_012_special_m.bin",
+"size": 374,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_012_pal",
+"file": "gfx/boss_012_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_012_desc",
+"file": "gfx/boss_012_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_013_normal_t",
+"file": "gfx/boss_013_normal_t.bin",
+"size": 5104,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_normal_m",
+"file": "gfx/boss_013_normal_m.bin",
+"size": 409,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_idle2_t",
+"file": "gfx/boss_013_idle2_t.bin",
+"size": 5051,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_idle2_m",
+"file": "gfx/boss_013_idle2_m.bin",
+"size": 409,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_attack_t",
+"file": "gfx/boss_013_attack_t.bin",
+"size": 5303,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_attack_m",
+"file": "gfx/boss_013_attack_m.bin",
+"size": 422,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_hurt_t",
+"file": "gfx/boss_013_hurt_t.bin",
+"size": 4885,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_hurt_m",
+"file": "gfx/boss_013_hurt_m.bin",
+"size": 390,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_defeat_t",
+"file": "gfx/boss_013_defeat_t.bin",
+"size": 5095,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_defeat_m",
+"file": "gfx/boss_013_defeat_m.bin",
+"size": 408,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_special_t",
+"file": "gfx/boss_013_special_t.bin",
+"size": 5086,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_special_m",
+"file": "gfx/boss_013_special_m.bin",
+"size": 409,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_013_pal",
+"file": "gfx/boss_013_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_013_desc",
+"file": "gfx/boss_013_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_014_normal_t",
+"file": "gfx/boss_014_normal_t.bin",
+"size": 4571,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_normal_m",
+"file": "gfx/boss_014_normal_m.bin",
+"size": 375,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_idle2_t",
+"file": "gfx/boss_014_idle2_t.bin",
+"size": 4529,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_idle2_m",
+"file": "gfx/boss_014_idle2_m.bin",
+"size": 375,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_attack_t",
+"file": "gfx/boss_014_attack_t.bin",
+"size": 3576,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_attack_m",
+"file": "gfx/boss_014_attack_m.bin",
+"size": 305,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_hurt_t",
+"file": "gfx/boss_014_hurt_t.bin",
+"size": 4427,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_hurt_m",
+"file": "gfx/boss_014_hurt_m.bin",
+"size": 365,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_defeat_t",
+"file": "gfx/boss_014_defeat_t.bin",
+"size": 4117,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_defeat_m",
+"file": "gfx/boss_014_defeat_m.bin",
+"size": 350,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_special_t",
+"file": "gfx/boss_014_special_t.bin",
+"size": 3826,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_special_m",
+"file": "gfx/boss_014_special_m.bin",
+"size": 328,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_014_pal",
+"file": "gfx/boss_014_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_014_desc",
+"file": "gfx/boss_014_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_015_normal_t",
+"file": "gfx/boss_015_normal_t.bin",
+"size": 5000,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_normal_m",
+"file": "gfx/boss_015_normal_m.bin",
+"size": 384,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_015_attack_t",
+"file": "gfx/boss_015_attack_t.bin",
+"size": 4901,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_attack_m",
+"file": "gfx/boss_015_attack_m.bin",
+"size": 386,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_hurt_t",
+"file": "gfx/boss_015_hurt_t.bin",
+"size": 5013,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_hurt_m",
+"file": "gfx/boss_015_hurt_m.bin",
+"size": 402,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_defeat_t",
+"file": "gfx/boss_015_defeat_t.bin",
+"size": 3846,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_defeat_m",
+"file": "gfx/boss_015_defeat_m.bin",
+"size": 318,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_special_t",
+"file": "gfx/boss_015_special_t.bin",
+"size": 5117,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_015_special_m",
+"file": "gfx/boss_015_special_m.bin",
+"size": 408,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_015_pal",
+"file": "gfx/boss_015_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_015_desc",
+"file": "gfx/boss_015_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_016_normal_t",
+"file": "gfx/boss_016_normal_t.bin",
+"size": 4340,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_normal_m",
+"file": "gfx/boss_016_normal_m.bin",
+"size": 360,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_016_attack_t",
+"file": "gfx/boss_016_attack_t.bin",
+"size": 4360,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_attack_m",
+"file": "gfx/boss_016_attack_m.bin",
+"size": 365,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_hurt_t",
+"file": "gfx/boss_016_hurt_t.bin",
+"size": 4366,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_hurt_m",
+"file": "gfx/boss_016_hurt_m.bin",
+"size": 366,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_defeat_t",
+"file": "gfx/boss_016_defeat_t.bin",
+"size": 4418,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_defeat_m",
+"file": "gfx/boss_016_defeat_m.bin",
+"size": 371,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_special_t",
+"file": "gfx/boss_016_special_t.bin",
+"size": 4834,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_special_m",
+"file": "gfx/boss_016_special_m.bin",
+"size": 393,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_016_pal",
+"file": "gfx/boss_016_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_016_desc",
+"file": "gfx/boss_016_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_017_normal_t",
+"file": "gfx/boss_017_normal_t.bin",
+"size": 3679,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_normal_m",
+"file": "gfx/boss_017_normal_m.bin",
+"size": 294,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_attack_t",
+"file": "gfx/boss_017_attack_t.bin",
+"size": 4126,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_attack_m",
+"file": "gfx/boss_017_attack_m.bin",
+"size": 336,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_017_hurt_t",
+"file": "gfx/boss_017_hurt_t.bin",
+"size": 4205,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_hurt_m",
+"file": "gfx/boss_017_hurt_m.bin",
+"size": 331,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_defeat_t",
+"file": "gfx/boss_017_defeat_t.bin",
+"size": 4575,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_defeat_m",
+"file": "gfx/boss_017_defeat_m.bin",
+"size": 361,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_special_t",
+"file": "gfx/boss_017_special_t.bin",
+"size": 4427,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_special_m",
+"file": "gfx/boss_017_special_m.bin",
+"size": 362,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_017_pal",
+"file": "gfx/boss_017_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_017_desc",
+"file": "gfx/boss_017_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_018_normal_t",
+"file": "gfx/boss_018_normal_t.bin",
+"size": 3934,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_normal_m",
+"file": "gfx/boss_018_normal_m.bin",
+"size": 304,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_attack_t",
+"file": "gfx/boss_018_attack_t.bin",
+"size": 4380,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_attack_m",
+"file": "gfx/boss_018_attack_m.bin",
+"size": 360,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_018_hurt_t",
+"file": "gfx/boss_018_hurt_t.bin",
+"size": 5773,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_hurt_m",
+"file": "gfx/boss_018_hurt_m.bin",
+"size": 458,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_defeat_t",
+"file": "gfx/boss_018_defeat_t.bin",
+"size": 4190,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_defeat_m",
+"file": "gfx/boss_018_defeat_m.bin",
+"size": 348,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_special_t",
+"file": "gfx/boss_018_special_t.bin",
+"size": 4745,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_special_m",
+"file": "gfx/boss_018_special_m.bin",
+"size": 372,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_018_pal",
+"file": "gfx/boss_018_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_018_desc",
+"file": "gfx/boss_018_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_019_normal_t",
+"file": "gfx/boss_019_normal_t.bin",
+"size": 3359,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_normal_m",
+"file": "gfx/boss_019_normal_m.bin",
+"size": 282,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_attack_t",
+"file": "gfx/boss_019_attack_t.bin",
+"size": 3321,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_attack_m",
+"file": "gfx/boss_019_attack_m.bin",
+"size": 260,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_019_hurt_t",
+"file": "gfx/boss_019_hurt_t.bin",
+"size": 3915,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_hurt_m",
+"file": "gfx/boss_019_hurt_m.bin",
+"size": 326,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_defeat_t",
+"file": "gfx/boss_019_defeat_t.bin",
+"size": 3460,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_defeat_m",
+"file": "gfx/boss_019_defeat_m.bin",
+"size": 284,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_special_t",
+"file": "gfx/boss_019_special_t.bin",
+"size": 3056,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_special_m",
+"file": "gfx/boss_019_special_m.bin",
+"size": 261,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_019_pal",
+"file": "gfx/boss_019_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_019_desc",
+"file": "gfx/boss_019_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_020_normal",
+"file": "gfx/mon_020_normal.bin",
+"size": 1263,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_020_idle2",
+"file": "gfx/mon_020_idle2.bin",
+"size": 1231,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_020_attack",
+"file": "gfx/mon_020_attack.bin",
+"size": 1005,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_020_hurt",
+"file": "gfx/mon_020_hurt.bin",
+"size": 1167,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_020_defeat",
+"file": "gfx/mon_020_defeat.bin",
+"size": 1521,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_020_pal",
+"file": "gfx/mon_020_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_020_desc",
+"file": "gfx/mon_020_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_021_normal",
+"file": "gfx/mon_021_normal.bin",
+"size": 1103,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_021_idle2",
+"file": "gfx/mon_021_idle2.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_021_attack",
+"file": "gfx/mon_021_attack.bin",
+"size": 1003,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_021_hurt",
+"file": "gfx/mon_021_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_021_defeat",
+"file": "gfx/mon_021_defeat.bin",
+"size": 909,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_021_pal",
+"file": "gfx/mon_021_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_021_desc",
+"file": "gfx/mon_021_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_022_normal",
+"file": "gfx/mon_022_normal.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_022_idle2",
+"file": "gfx/mon_022_idle2.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_022_attack",
+"file": "gfx/mon_022_attack.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_022_hurt",
+"file": "gfx/mon_022_hurt.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_022_defeat",
+"file": "gfx/mon_022_defeat.bin",
+"size": 715,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_022_pal",
+"file": "gfx/mon_022_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_022_desc",
+"file": "gfx/mon_022_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_023_normal",
+"file": "gfx/mon_023_normal.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_023_idle2",
+"file": "gfx/mon_023_idle2.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_023_attack",
+"file": "gfx/mon_023_attack.bin",
+"size": 1327,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_023_hurt",
+"file": "gfx/mon_023_hurt.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_023_defeat",
+"file": "gfx/mon_023_defeat.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_023_pal",
+"file": "gfx/mon_023_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_023_desc",
+"file": "gfx/mon_023_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_024_normal",
+"file": "gfx/mon_024_normal.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_024_idle2",
+"file": "gfx/mon_024_idle2.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_024_attack",
+"file": "gfx/mon_024_attack.bin",
+"size": 1073,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_024_hurt",
+"file": "gfx/mon_024_hurt.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_024_defeat",
+"file": "gfx/mon_024_defeat.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_024_pal",
+"file": "gfx/mon_024_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_024_desc",
+"file": "gfx/mon_024_desc.bin",
+"size": 83,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_025_normal",
+"file": "gfx/mon_025_normal.bin",
+"size": 717,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_025_idle2",
+"file": "gfx/mon_025_idle2.bin",
+"size": 717,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_025_attack",
+"file": "gfx/mon_025_attack.bin",
+"size": 715,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_025_hurt",
+"file": "gfx/mon_025_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_025_defeat",
+"file": "gfx/mon_025_defeat.bin",
+"size": 1103,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_025_pal",
+"file": "gfx/mon_025_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_025_desc",
+"file": "gfx/mon_025_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_026_normal",
+"file": "gfx/mon_026_normal.bin",
+"size": 1299,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_026_idle2",
+"file": "gfx/mon_026_idle2.bin",
+"size": 1267,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_026_attack",
+"file": "gfx/mon_026_attack.bin",
+"size": 1199,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_026_hurt",
+"file": "gfx/mon_026_hurt.bin",
+"size": 1263,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_026_defeat",
+"file": "gfx/mon_026_defeat.bin",
+"size": 973,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_026_pal",
+"file": "gfx/mon_026_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_026_desc",
+"file": "gfx/mon_026_desc.bin",
+"size": 83,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_027_normal",
+"file": "gfx/mon_027_normal.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_027_idle2",
+"file": "gfx/mon_027_idle2.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_027_attack",
+"file": "gfx/mon_027_attack.bin",
+"size": 1135,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_027_hurt",
+"file": "gfx/mon_027_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_027_defeat",
+"file": "gfx/mon_027_defeat.bin",
+"size": 813,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_027_pal",
+"file": "gfx/mon_027_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_027_desc",
+"file": "gfx/mon_027_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_028_normal",
+"file": "gfx/mon_028_normal.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_028_idle2",
+"file": "gfx/mon_028_idle2.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_028_attack",
+"file": "gfx/mon_028_attack.bin",
+"size": 945,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_028_hurt",
+"file": "gfx/mon_028_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_028_defeat",
+"file": "gfx/mon_028_defeat.bin",
+"size": 745,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_028_pal",
+"file": "gfx/mon_028_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_028_desc",
+"file": "gfx/mon_028_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_029_normal",
+"file": "gfx/mon_029_normal.bin",
+"size": 977,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_029_idle2",
+"file": "gfx/mon_029_idle2.bin",
+"size": 977,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_029_attack",
+"file": "gfx/mon_029_attack.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_029_hurt",
+"file": "gfx/mon_029_hurt.bin",
+"size": 1169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_029_defeat",
+"file": "gfx/mon_029_defeat.bin",
+"size": 811,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_029_pal",
+"file": "gfx/mon_029_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_029_desc",
+"file": "gfx/mon_029_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_030_normal",
+"file": "gfx/mon_030_normal.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_030_idle2",
+"file": "gfx/mon_030_idle2.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_030_attack",
+"file": "gfx/mon_030_attack.bin",
+"size": 1203,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_030_hurt",
+"file": "gfx/mon_030_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_030_defeat",
+"file": "gfx/mon_030_defeat.bin",
+"size": 715,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_030_pal",
+"file": "gfx/mon_030_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_030_desc",
+"file": "gfx/mon_030_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_031_normal",
+"file": "gfx/mon_031_normal.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_031_idle2",
+"file": "gfx/mon_031_idle2.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_031_attack",
+"file": "gfx/mon_031_attack.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_031_hurt",
+"file": "gfx/mon_031_hurt.bin",
+"size": 1045,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_031_defeat",
+"file": "gfx/mon_031_defeat.bin",
+"size": 713,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_031_pal",
+"file": "gfx/mon_031_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_031_desc",
+"file": "gfx/mon_031_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_032_normal",
+"file": "gfx/mon_032_normal.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_032_idle2",
+"file": "gfx/mon_032_idle2.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_032_attack",
+"file": "gfx/mon_032_attack.bin",
+"size": 881,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_032_hurt",
+"file": "gfx/mon_032_hurt.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_032_defeat",
+"file": "gfx/mon_032_defeat.bin",
+"size": 811,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_032_pal",
+"file": "gfx/mon_032_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_032_desc",
+"file": "gfx/mon_032_desc.bin",
+"size": 77,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_033_normal",
+"file": "gfx/mon_033_normal.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_033_idle2",
+"file": "gfx/mon_033_idle2.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_033_attack",
+"file": "gfx/mon_033_attack.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_033_hurt",
+"file": "gfx/mon_033_hurt.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_033_defeat",
+"file": "gfx/mon_033_defeat.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_033_pal",
+"file": "gfx/mon_033_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_033_desc",
+"file": "gfx/mon_033_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_034_normal",
+"file": "gfx/mon_034_normal.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_034_idle2",
+"file": "gfx/mon_034_idle2.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_034_attack",
+"file": "gfx/mon_034_attack.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_034_hurt",
+"file": "gfx/mon_034_hurt.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_034_defeat",
+"file": "gfx/mon_034_defeat.bin",
+"size": 715,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_034_pal",
+"file": "gfx/mon_034_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_034_desc",
+"file": "gfx/mon_034_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_035_normal",
+"file": "gfx/mon_035_normal.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_035_idle2",
+"file": "gfx/mon_035_idle2.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_035_attack",
+"file": "gfx/mon_035_attack.bin",
+"size": 1037,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_035_hurt",
+"file": "gfx/mon_035_hurt.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_035_defeat",
+"file": "gfx/mon_035_defeat.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_035_pal",
+"file": "gfx/mon_035_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_035_desc",
+"file": "gfx/mon_035_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_036_normal",
+"file": "gfx/mon_036_normal.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_036_idle2",
+"file": "gfx/mon_036_idle2.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_036_attack",
+"file": "gfx/mon_036_attack.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_036_hurt",
+"file": "gfx/mon_036_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_036_defeat",
+"file": "gfx/mon_036_defeat.bin",
+"size": 813,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_036_pal",
+"file": "gfx/mon_036_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_036_desc",
+"file": "gfx/mon_036_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_037_normal",
+"file": "gfx/mon_037_normal.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_037_idle2",
+"file": "gfx/mon_037_idle2.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_037_attack",
+"file": "gfx/mon_037_attack.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_037_hurt",
+"file": "gfx/mon_037_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_037_defeat",
+"file": "gfx/mon_037_defeat.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_037_pal",
+"file": "gfx/mon_037_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_037_desc",
+"file": "gfx/mon_037_desc.bin",
+"size": 83,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_038_normal",
+"file": "gfx/mon_038_normal.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_038_idle2",
+"file": "gfx/mon_038_idle2.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_038_attack",
+"file": "gfx/mon_038_attack.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_038_hurt",
+"file": "gfx/mon_038_hurt.bin",
+"size": 849,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_038_defeat",
+"file": "gfx/mon_038_defeat.bin",
+"size": 553,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_038_pal",
+"file": "gfx/mon_038_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_038_desc",
+"file": "gfx/mon_038_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_039_normal",
+"file": "gfx/mon_039_normal.bin",
+"size": 717,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_039_idle2",
+"file": "gfx/mon_039_idle2.bin",
+"size": 717,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_039_attack",
+"file": "gfx/mon_039_attack.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_039_hurt",
+"file": "gfx/mon_039_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_039_defeat",
+"file": "gfx/mon_039_defeat.bin",
+"size": 845,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_039_pal",
+"file": "gfx/mon_039_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_039_desc",
+"file": "gfx/mon_039_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_040_normal",
+"file": "gfx/mon_040_normal.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_040_idle2",
+"file": "gfx/mon_040_idle2.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_040_attack",
+"file": "gfx/mon_040_attack.bin",
+"size": 909,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_040_hurt",
+"file": "gfx/mon_040_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_040_defeat",
+"file": "gfx/mon_040_defeat.bin",
+"size": 1005,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_040_pal",
+"file": "gfx/mon_040_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_040_desc",
+"file": "gfx/mon_040_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_041_normal",
+"file": "gfx/mon_041_normal.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_041_idle2",
+"file": "gfx/mon_041_idle2.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_041_attack",
+"file": "gfx/mon_041_attack.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_041_hurt",
+"file": "gfx/mon_041_hurt.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_041_defeat",
+"file": "gfx/mon_041_defeat.bin",
+"size": 845,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_041_pal",
+"file": "gfx/mon_041_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_041_desc",
+"file": "gfx/mon_041_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_042_normal",
+"file": "gfx/mon_042_normal.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_042_idle2",
+"file": "gfx/mon_042_idle2.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_042_attack",
+"file": "gfx/mon_042_attack.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_042_hurt",
+"file": "gfx/mon_042_hurt.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_042_defeat",
+"file": "gfx/mon_042_defeat.bin",
+"size": 683,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_042_pal",
+"file": "gfx/mon_042_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_042_desc",
+"file": "gfx/mon_042_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_043_normal",
+"file": "gfx/mon_043_normal.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_043_idle2",
+"file": "gfx/mon_043_idle2.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_043_attack",
+"file": "gfx/mon_043_attack.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_043_hurt",
+"file": "gfx/mon_043_hurt.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_043_defeat",
+"file": "gfx/mon_043_defeat.bin",
+"size": 649,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_043_pal",
+"file": "gfx/mon_043_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_043_desc",
+"file": "gfx/mon_043_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_044_normal",
+"file": "gfx/mon_044_normal.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_044_idle2",
+"file": "gfx/mon_044_idle2.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_044_attack",
+"file": "gfx/mon_044_attack.bin",
+"size": 941,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_044_hurt",
+"file": "gfx/mon_044_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_044_defeat",
+"file": "gfx/mon_044_defeat.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_044_pal",
+"file": "gfx/mon_044_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_044_desc",
+"file": "gfx/mon_044_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_045_normal",
+"file": "gfx/mon_045_normal.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_045_idle2",
+"file": "gfx/mon_045_idle2.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_045_attack",
+"file": "gfx/mon_045_attack.bin",
+"size": 1103,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_045_hurt",
+"file": "gfx/mon_045_hurt.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_045_defeat",
+"file": "gfx/mon_045_defeat.bin",
+"size": 909,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_045_pal",
+"file": "gfx/mon_045_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_045_desc",
+"file": "gfx/mon_045_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_046_normal",
+"file": "gfx/mon_046_normal.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_046_idle2",
+"file": "gfx/mon_046_idle2.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_046_attack",
+"file": "gfx/mon_046_attack.bin",
+"size": 845,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_046_hurt",
+"file": "gfx/mon_046_hurt.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_046_defeat",
+"file": "gfx/mon_046_defeat.bin",
+"size": 907,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_046_pal",
+"file": "gfx/mon_046_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_046_desc",
+"file": "gfx/mon_046_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_047_normal",
+"file": "gfx/mon_047_normal.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_047_idle2",
+"file": "gfx/mon_047_idle2.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_047_attack",
+"file": "gfx/mon_047_attack.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_047_hurt",
+"file": "gfx/mon_047_hurt.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_047_defeat",
+"file": "gfx/mon_047_defeat.bin",
+"size": 875,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_047_pal",
+"file": "gfx/mon_047_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_047_desc",
+"file": "gfx/mon_047_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_048_normal",
+"file": "gfx/mon_048_normal.bin",
+"size": 751,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_048_idle2",
+"file": "gfx/mon_048_idle2.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_048_attack",
+"file": "gfx/mon_048_attack.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_048_hurt",
+"file": "gfx/mon_048_hurt.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_048_defeat",
+"file": "gfx/mon_048_defeat.bin",
+"size": 875,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_048_pal",
+"file": "gfx/mon_048_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_048_desc",
+"file": "gfx/mon_048_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_049_normal",
+"file": "gfx/mon_049_normal.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_049_idle2",
+"file": "gfx/mon_049_idle2.bin",
+"size": 751,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_049_attack",
+"file": "gfx/mon_049_attack.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_049_hurt",
+"file": "gfx/mon_049_hurt.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_049_defeat",
+"file": "gfx/mon_049_defeat.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_049_pal",
+"file": "gfx/mon_049_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_049_desc",
+"file": "gfx/mon_049_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_050_normal",
+"file": "gfx/mon_050_normal.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_050_idle2",
+"file": "gfx/mon_050_idle2.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_050_attack",
+"file": "gfx/mon_050_attack.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_050_hurt",
+"file": "gfx/mon_050_hurt.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_050_defeat",
+"file": "gfx/mon_050_defeat.bin",
+"size": 587,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_050_pal",
+"file": "gfx/mon_050_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_050_desc",
+"file": "gfx/mon_050_desc.bin",
+"size": 62,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_051_normal",
+"file": "gfx/mon_051_normal.bin",
+"size": 655,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_051_idle2",
+"file": "gfx/mon_051_idle2.bin",
+"size": 687,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_051_attack",
+"file": "gfx/mon_051_attack.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_051_hurt",
+"file": "gfx/mon_051_hurt.bin",
+"size": 975,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_051_defeat",
+"file": "gfx/mon_051_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_051_pal",
+"file": "gfx/mon_051_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_051_desc",
+"file": "gfx/mon_051_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_052_normal",
+"file": "gfx/mon_052_normal.bin",
+"size": 685,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_052_idle2",
+"file": "gfx/mon_052_idle2.bin",
+"size": 685,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_052_attack",
+"file": "gfx/mon_052_attack.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_052_hurt",
+"file": "gfx/mon_052_hurt.bin",
+"size": 751,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_052_defeat",
+"file": "gfx/mon_052_defeat.bin",
+"size": 585,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_052_pal",
+"file": "gfx/mon_052_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_052_desc",
+"file": "gfx/mon_052_desc.bin",
+"size": 59,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_053_normal",
+"file": "gfx/mon_053_normal.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_053_idle2",
+"file": "gfx/mon_053_idle2.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_053_attack",
+"file": "gfx/mon_053_attack.bin",
+"size": 909,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_053_hurt",
+"file": "gfx/mon_053_hurt.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_053_defeat",
+"file": "gfx/mon_053_defeat.bin",
+"size": 713,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_053_pal",
+"file": "gfx/mon_053_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_053_desc",
+"file": "gfx/mon_053_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_054_normal",
+"file": "gfx/mon_054_normal.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_054_idle2",
+"file": "gfx/mon_054_idle2.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_054_attack",
+"file": "gfx/mon_054_attack.bin",
+"size": 1233,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_054_hurt",
+"file": "gfx/mon_054_hurt.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_054_defeat",
+"file": "gfx/mon_054_defeat.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_054_pal",
+"file": "gfx/mon_054_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_054_desc",
+"file": "gfx/mon_054_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_055_normal",
+"file": "gfx/mon_055_normal.bin",
+"size": 655,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_055_idle2",
+"file": "gfx/mon_055_idle2.bin",
+"size": 655,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_055_attack",
+"file": "gfx/mon_055_attack.bin",
+"size": 717,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_055_hurt",
+"file": "gfx/mon_055_hurt.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_055_defeat",
+"file": "gfx/mon_055_defeat.bin",
+"size": 649,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_055_pal",
+"file": "gfx/mon_055_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_055_desc",
+"file": "gfx/mon_055_desc.bin",
+"size": 65,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_056_normal",
+"file": "gfx/mon_056_normal.bin",
+"size": 843,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_056_idle2",
+"file": "gfx/mon_056_idle2.bin",
+"size": 843,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_056_attack",
+"file": "gfx/mon_056_attack.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_056_hurt",
+"file": "gfx/mon_056_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_056_defeat",
+"file": "gfx/mon_056_defeat.bin",
+"size": 941,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_056_pal",
+"file": "gfx/mon_056_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_056_desc",
+"file": "gfx/mon_056_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_057_normal",
+"file": "gfx/mon_057_normal.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_057_idle2",
+"file": "gfx/mon_057_idle2.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_057_attack",
+"file": "gfx/mon_057_attack.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_057_hurt",
+"file": "gfx/mon_057_hurt.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_057_defeat",
+"file": "gfx/mon_057_defeat.bin",
+"size": 649,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_057_pal",
+"file": "gfx/mon_057_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_057_desc",
+"file": "gfx/mon_057_desc.bin",
+"size": 68,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_058_normal",
+"file": "gfx/mon_058_normal.bin",
+"size": 591,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_058_idle2",
+"file": "gfx/mon_058_idle2.bin",
+"size": 591,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_058_attack",
+"file": "gfx/mon_058_attack.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_058_hurt",
+"file": "gfx/mon_058_hurt.bin",
+"size": 751,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_058_defeat",
+"file": "gfx/mon_058_defeat.bin",
+"size": 619,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_058_pal",
+"file": "gfx/mon_058_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_058_desc",
+"file": "gfx/mon_058_desc.bin",
+"size": 65,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_059_normal",
+"file": "gfx/mon_059_normal.bin",
+"size": 843,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_059_idle2",
+"file": "gfx/mon_059_idle2.bin",
+"size": 843,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_059_attack",
+"file": "gfx/mon_059_attack.bin",
+"size": 1199,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_059_hurt",
+"file": "gfx/mon_059_hurt.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_059_defeat",
+"file": "gfx/mon_059_defeat.bin",
+"size": 843,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_059_pal",
+"file": "gfx/mon_059_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_059_desc",
+"file": "gfx/mon_059_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_060_normal",
+"file": "gfx/mon_060_normal.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_060_idle2",
+"file": "gfx/mon_060_idle2.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_060_attack",
+"file": "gfx/mon_060_attack.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_060_hurt",
+"file": "gfx/mon_060_hurt.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_060_defeat",
+"file": "gfx/mon_060_defeat.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_060_pal",
+"file": "gfx/mon_060_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_060_desc",
+"file": "gfx/mon_060_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_061_normal",
+"file": "gfx/mon_061_normal.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_061_idle2",
+"file": "gfx/mon_061_idle2.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_061_attack",
+"file": "gfx/mon_061_attack.bin",
+"size": 781,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_061_hurt",
+"file": "gfx/mon_061_hurt.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_061_defeat",
+"file": "gfx/mon_061_defeat.bin",
+"size": 651,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_061_pal",
+"file": "gfx/mon_061_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_061_desc",
+"file": "gfx/mon_061_desc.bin",
+"size": 62,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_062_normal",
+"file": "gfx/mon_062_normal.bin",
+"size": 687,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_062_idle2",
+"file": "gfx/mon_062_idle2.bin",
+"size": 687,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_062_attack",
+"file": "gfx/mon_062_attack.bin",
+"size": 845,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_062_hurt",
+"file": "gfx/mon_062_hurt.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_062_defeat",
+"file": "gfx/mon_062_defeat.bin",
+"size": 713,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_062_pal",
+"file": "gfx/mon_062_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_062_desc",
+"file": "gfx/mon_062_desc.bin",
+"size": 65,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_063_normal",
+"file": "gfx/mon_063_normal.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_063_idle2",
+"file": "gfx/mon_063_idle2.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_063_attack",
+"file": "gfx/mon_063_attack.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_063_hurt",
+"file": "gfx/mon_063_hurt.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_063_defeat",
+"file": "gfx/mon_063_defeat.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_063_pal",
+"file": "gfx/mon_063_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_063_desc",
+"file": "gfx/mon_063_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_064_normal",
+"file": "gfx/mon_064_normal.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_064_idle2",
+"file": "gfx/mon_064_idle2.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_064_attack",
+"file": "gfx/mon_064_attack.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_064_hurt",
+"file": "gfx/mon_064_hurt.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_064_defeat",
+"file": "gfx/mon_064_defeat.bin",
+"size": 811,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_064_pal",
+"file": "gfx/mon_064_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_064_desc",
+"file": "gfx/mon_064_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_065_normal",
+"file": "gfx/mon_065_normal.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_065_idle2",
+"file": "gfx/mon_065_idle2.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_065_attack",
+"file": "gfx/mon_065_attack.bin",
+"size": 1005,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_065_hurt",
+"file": "gfx/mon_065_hurt.bin",
+"size": 1267,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_065_defeat",
+"file": "gfx/mon_065_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_065_pal",
+"file": "gfx/mon_065_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_065_desc",
+"file": "gfx/mon_065_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_066_normal",
+"file": "gfx/mon_066_normal.bin",
+"size": 1003,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_066_idle2",
+"file": "gfx/mon_066_idle2.bin",
+"size": 1003,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_066_attack",
+"file": "gfx/mon_066_attack.bin",
+"size": 1069,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_066_hurt",
+"file": "gfx/mon_066_hurt.bin",
+"size": 1235,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_066_defeat",
+"file": "gfx/mon_066_defeat.bin",
+"size": 841,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_066_pal",
+"file": "gfx/mon_066_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_066_desc",
+"file": "gfx/mon_066_desc.bin",
+"size": 77,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_067_normal",
+"file": "gfx/mon_067_normal.bin",
+"size": 1171,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_067_idle2",
+"file": "gfx/mon_067_idle2.bin",
+"size": 1105,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_067_attack",
+"file": "gfx/mon_067_attack.bin",
+"size": 1005,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_067_hurt",
+"file": "gfx/mon_067_hurt.bin",
+"size": 1303,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_067_defeat",
+"file": "gfx/mon_067_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_067_pal",
+"file": "gfx/mon_067_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_067_desc",
+"file": "gfx/mon_067_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_068_normal",
+"file": "gfx/mon_068_normal.bin",
+"size": 1267,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_068_idle2",
+"file": "gfx/mon_068_idle2.bin",
+"size": 1169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_068_attack",
+"file": "gfx/mon_068_attack.bin",
+"size": 1195,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_068_hurt",
+"file": "gfx/mon_068_hurt.bin",
+"size": 1519,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_068_defeat",
+"file": "gfx/mon_068_defeat.bin",
+"size": 619,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_068_pal",
+"file": "gfx/mon_068_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_068_desc",
+"file": "gfx/mon_068_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_069_normal",
+"file": "gfx/mon_069_normal.bin",
+"size": 1235,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_069_idle2",
+"file": "gfx/mon_069_idle2.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_069_attack",
+"file": "gfx/mon_069_attack.bin",
+"size": 1037,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_069_hurt",
+"file": "gfx/mon_069_hurt.bin",
+"size": 1299,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_069_defeat",
+"file": "gfx/mon_069_defeat.bin",
+"size": 777,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_069_pal",
+"file": "gfx/mon_069_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_069_desc",
+"file": "gfx/mon_069_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_070_normal",
+"file": "gfx/mon_070_normal.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_070_idle2",
+"file": "gfx/mon_070_idle2.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_070_attack",
+"file": "gfx/mon_070_attack.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_070_hurt",
+"file": "gfx/mon_070_hurt.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_070_defeat",
+"file": "gfx/mon_070_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_070_pal",
+"file": "gfx/mon_070_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_070_desc",
+"file": "gfx/mon_070_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_071_normal",
+"file": "gfx/mon_071_normal.bin",
+"size": 1265,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_071_idle2",
+"file": "gfx/mon_071_idle2.bin",
+"size": 1265,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_071_attack",
+"file": "gfx/mon_071_attack.bin",
+"size": 1461,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_071_hurt",
+"file": "gfx/mon_071_hurt.bin",
+"size": 1681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_071_defeat",
+"file": "gfx/mon_071_defeat.bin",
+"size": 713,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_071_pal",
+"file": "gfx/mon_071_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_071_desc",
+"file": "gfx/mon_071_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_072_normal",
+"file": "gfx/mon_072_normal.bin",
+"size": 1201,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_072_idle2",
+"file": "gfx/mon_072_idle2.bin",
+"size": 1233,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_072_attack",
+"file": "gfx/mon_072_attack.bin",
+"size": 1459,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_072_hurt",
+"file": "gfx/mon_072_hurt.bin",
+"size": 1427,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_072_defeat",
+"file": "gfx/mon_072_defeat.bin",
+"size": 681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_072_pal",
+"file": "gfx/mon_072_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_072_desc",
+"file": "gfx/mon_072_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_073_normal",
+"file": "gfx/mon_073_normal.bin",
+"size": 1425,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_073_idle2",
+"file": "gfx/mon_073_idle2.bin",
+"size": 1393,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_073_attack",
+"file": "gfx/mon_073_attack.bin",
+"size": 1681,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_073_hurt",
+"file": "gfx/mon_073_hurt.bin",
+"size": 1459,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_073_defeat",
+"file": "gfx/mon_073_defeat.bin",
+"size": 745,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_073_pal",
+"file": "gfx/mon_073_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_073_desc",
+"file": "gfx/mon_073_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_074_normal",
+"file": "gfx/mon_074_normal.bin",
+"size": 1491,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_074_idle2",
+"file": "gfx/mon_074_idle2.bin",
+"size": 1393,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_074_attack",
+"file": "gfx/mon_074_attack.bin",
+"size": 1519,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_074_hurt",
+"file": "gfx/mon_074_hurt.bin",
+"size": 1521,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_074_defeat",
+"file": "gfx/mon_074_defeat.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_074_pal",
+"file": "gfx/mon_074_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_074_desc",
+"file": "gfx/mon_074_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_075_normal",
+"file": "gfx/mon_075_normal.bin",
+"size": 1325,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_075_idle2",
+"file": "gfx/mon_075_idle2.bin",
+"size": 1325,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_075_attack",
+"file": "gfx/mon_075_attack.bin",
+"size": 1101,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_075_hurt",
+"file": "gfx/mon_075_hurt.bin",
+"size": 1487,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_075_defeat",
+"file": "gfx/mon_075_defeat.bin",
+"size": 713,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_075_pal",
+"file": "gfx/mon_075_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_075_desc",
+"file": "gfx/mon_075_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_076_normal",
+"file": "gfx/mon_076_normal.bin",
+"size": 1325,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_076_idle2",
+"file": "gfx/mon_076_idle2.bin",
+"size": 1325,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_076_attack",
+"file": "gfx/mon_076_attack.bin",
+"size": 1229,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_076_hurt",
+"file": "gfx/mon_076_hurt.bin",
+"size": 1455,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_076_defeat",
+"file": "gfx/mon_076_defeat.bin",
+"size": 875,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_076_pal",
+"file": "gfx/mon_076_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_076_desc",
+"file": "gfx/mon_076_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_077_normal",
+"file": "gfx/mon_077_normal.bin",
+"size": 1297,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_077_idle2",
+"file": "gfx/mon_077_idle2.bin",
+"size": 1297,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_077_attack",
+"file": "gfx/mon_077_attack.bin",
+"size": 1133,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_077_hurt",
+"file": "gfx/mon_077_hurt.bin",
+"size": 1457,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_077_defeat",
+"file": "gfx/mon_077_defeat.bin",
+"size": 875,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_077_pal",
+"file": "gfx/mon_077_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_077_desc",
+"file": "gfx/mon_077_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_078_normal",
+"file": "gfx/mon_078_normal.bin",
+"size": 1295,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_078_idle2",
+"file": "gfx/mon_078_idle2.bin",
+"size": 1295,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_078_attack",
+"file": "gfx/mon_078_attack.bin",
+"size": 1133,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_078_hurt",
+"file": "gfx/mon_078_hurt.bin",
+"size": 1553,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_078_defeat",
+"file": "gfx/mon_078_defeat.bin",
+"size": 683,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_078_pal",
+"file": "gfx/mon_078_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_078_desc",
+"file": "gfx/mon_078_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_079_normal",
+"file": "gfx/mon_079_normal.bin",
+"size": 1295,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_079_idle2",
+"file": "gfx/mon_079_idle2.bin",
+"size": 1295,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_079_attack",
+"file": "gfx/mon_079_attack.bin",
+"size": 1199,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_079_hurt",
+"file": "gfx/mon_079_hurt.bin",
+"size": 1361,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_079_defeat",
+"file": "gfx/mon_079_defeat.bin",
+"size": 875,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_079_pal",
+"file": "gfx/mon_079_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_079_desc",
+"file": "gfx/mon_079_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_080_normal",
+"file": "gfx/mon_080_normal.bin",
+"size": 1581,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_080_idle2",
+"file": "gfx/mon_080_idle2.bin",
+"size": 1581,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_080_attack",
+"file": "gfx/mon_080_attack.bin",
+"size": 1357,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_080_hurt",
+"file": "gfx/mon_080_hurt.bin",
+"size": 1679,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_080_defeat",
+"file": "gfx/mon_080_defeat.bin",
+"size": 907,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_080_pal",
+"file": "gfx/mon_080_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_080_desc",
+"file": "gfx/mon_080_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_081_normal",
+"file": "gfx/mon_081_normal.bin",
+"size": 1169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_081_idle2",
+"file": "gfx/mon_081_idle2.bin",
+"size": 1171,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_081_attack",
+"file": "gfx/mon_081_attack.bin",
+"size": 1199,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_081_hurt",
+"file": "gfx/mon_081_hurt.bin",
+"size": 1201,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_081_defeat",
+"file": "gfx/mon_081_defeat.bin",
+"size": 1163,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_081_pal",
+"file": "gfx/mon_081_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_081_desc",
+"file": "gfx/mon_081_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_082_normal",
+"file": "gfx/mon_082_normal.bin",
+"size": 1133,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_082_idle2",
+"file": "gfx/mon_082_idle2.bin",
+"size": 1133,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_082_attack",
+"file": "gfx/mon_082_attack.bin",
+"size": 1141,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_082_hurt",
+"file": "gfx/mon_082_hurt.bin",
+"size": 1393,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_082_defeat",
+"file": "gfx/mon_082_defeat.bin",
+"size": 1103,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_082_pal",
+"file": "gfx/mon_082_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_082_desc",
+"file": "gfx/mon_082_desc.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_083_normal",
+"file": "gfx/mon_083_normal.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_083_idle2",
+"file": "gfx/mon_083_idle2.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_083_attack",
+"file": "gfx/mon_083_attack.bin",
+"size": 1011,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_083_hurt",
+"file": "gfx/mon_083_hurt.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_083_defeat",
+"file": "gfx/mon_083_defeat.bin",
+"size": 749,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_083_pal",
+"file": "gfx/mon_083_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_083_desc",
+"file": "gfx/mon_083_desc.bin",
+"size": 74,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_084_normal",
+"file": "gfx/mon_084_normal.bin",
+"size": 1041,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_084_idle2",
+"file": "gfx/mon_084_idle2.bin",
+"size": 1073,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_084_attack",
+"file": "gfx/mon_084_attack.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_084_hurt",
+"file": "gfx/mon_084_hurt.bin",
+"size": 1233,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_084_defeat",
+"file": "gfx/mon_084_defeat.bin",
+"size": 1003,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_084_pal",
+"file": "gfx/mon_084_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_084_desc",
+"file": "gfx/mon_084_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_085_normal_t",
+"file": "gfx/boss_085_normal_t.bin",
+"size": 2718,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_normal_m",
+"file": "gfx/boss_085_normal_m.bin",
+"size": 216,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_085_idle2_t",
+"file": "gfx/boss_085_idle2_t.bin",
+"size": 2710,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_idle2_m",
+"file": "gfx/boss_085_idle2_m.bin",
+"size": 216,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_085_attack_t",
+"file": "gfx/boss_085_attack_t.bin",
+"size": 2357,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_attack_m",
+"file": "gfx/boss_085_attack_m.bin",
+"size": 207,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_hurt_t",
+"file": "gfx/boss_085_hurt_t.bin",
+"size": 2924,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_hurt_m",
+"file": "gfx/boss_085_hurt_m.bin",
+"size": 258,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_defeat_t",
+"file": "gfx/boss_085_defeat_t.bin",
+"size": 2341,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_defeat_m",
+"file": "gfx/boss_085_defeat_m.bin",
+"size": 196,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_special_t",
+"file": "gfx/boss_085_special_t.bin",
+"size": 4222,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_special_m",
+"file": "gfx/boss_085_special_m.bin",
+"size": 368,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_085_pal",
+"file": "gfx/boss_085_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_085_desc",
+"file": "gfx/boss_085_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_086_normal_t",
+"file": "gfx/boss_086_normal_t.bin",
+"size": 5483,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_normal_m",
+"file": "gfx/boss_086_normal_m.bin",
+"size": 446,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_attack_t",
+"file": "gfx/boss_086_attack_t.bin",
+"size": 5547,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_attack_m",
+"file": "gfx/boss_086_attack_m.bin",
+"size": 461,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_hurt_t",
+"file": "gfx/boss_086_hurt_t.bin",
+"size": 5493,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_hurt_m",
+"file": "gfx/boss_086_hurt_m.bin",
+"size": 441,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_defeat_t",
+"file": "gfx/boss_086_defeat_t.bin",
+"size": 5463,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_defeat_m",
+"file": "gfx/boss_086_defeat_m.bin",
+"size": 447,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_special_t",
+"file": "gfx/boss_086_special_t.bin",
+"size": 5449,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_special_m",
+"file": "gfx/boss_086_special_m.bin",
+"size": 438,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_086_pal",
+"file": "gfx/boss_086_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_086_desc",
+"file": "gfx/boss_086_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_087_normal",
+"file": "gfx/mon_087_normal.bin",
+"size": 849,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_087_idle2",
+"file": "gfx/mon_087_idle2.bin",
+"size": 817,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_087_attack",
+"file": "gfx/mon_087_attack.bin",
+"size": 751,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_087_hurt",
+"file": "gfx/mon_087_hurt.bin",
+"size": 979,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_087_defeat",
+"file": "gfx/mon_087_defeat.bin",
+"size": 941,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_087_pal",
+"file": "gfx/mon_087_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_087_desc",
+"file": "gfx/mon_087_desc.bin",
+"size": 86,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_088_normal_t",
+"file": "gfx/boss_088_normal_t.bin",
+"size": 2936,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_normal_m",
+"file": "gfx/boss_088_normal_m.bin",
+"size": 240,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_088_idle2_t",
+"file": "gfx/boss_088_idle2_t.bin",
+"size": 2941,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_idle2_m",
+"file": "gfx/boss_088_idle2_m.bin",
+"size": 240,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_088_attack_t",
+"file": "gfx/boss_088_attack_t.bin",
+"size": 3066,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_attack_m",
+"file": "gfx/boss_088_attack_m.bin",
+"size": 274,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_hurt_t",
+"file": "gfx/boss_088_hurt_t.bin",
+"size": 3200,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_hurt_m",
+"file": "gfx/boss_088_hurt_m.bin",
+"size": 251,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_defeat_t",
+"file": "gfx/boss_088_defeat_t.bin",
+"size": 2485,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_defeat_m",
+"file": "gfx/boss_088_defeat_m.bin",
+"size": 205,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_special_t",
+"file": "gfx/boss_088_special_t.bin",
+"size": 3798,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_special_m",
+"file": "gfx/boss_088_special_m.bin",
+"size": 326,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_088_pal",
+"file": "gfx/boss_088_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_088_desc",
+"file": "gfx/boss_088_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_089_normal_t",
+"file": "gfx/boss_089_normal_t.bin",
+"size": 2207,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_normal_m",
+"file": "gfx/boss_089_normal_m.bin",
+"size": 198,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_089_idle2_t",
+"file": "gfx/boss_089_idle2_t.bin",
+"size": 2169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_idle2_m",
+"file": "gfx/boss_089_idle2_m.bin",
+"size": 198,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_089_attack_t",
+"file": "gfx/boss_089_attack_t.bin",
+"size": 2442,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_attack_m",
+"file": "gfx/boss_089_attack_m.bin",
+"size": 198,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_089_hurt_t",
+"file": "gfx/boss_089_hurt_t.bin",
+"size": 2388,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_hurt_m",
+"file": "gfx/boss_089_hurt_m.bin",
+"size": 202,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_defeat_t",
+"file": "gfx/boss_089_defeat_t.bin",
+"size": 2447,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_defeat_m",
+"file": "gfx/boss_089_defeat_m.bin",
+"size": 223,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_special_t",
+"file": "gfx/boss_089_special_t.bin",
+"size": 3116,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_special_m",
+"file": "gfx/boss_089_special_m.bin",
+"size": 281,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_089_pal",
+"file": "gfx/boss_089_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_089_desc",
+"file": "gfx/boss_089_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_090_normal_t",
+"file": "gfx/boss_090_normal_t.bin",
+"size": 2049,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_normal_m",
+"file": "gfx/boss_090_normal_m.bin",
+"size": 164,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_idle2_t",
+"file": "gfx/boss_090_idle2_t.bin",
+"size": 2026,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_idle2_m",
+"file": "gfx/boss_090_idle2_m.bin",
+"size": 166,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_attack_t",
+"file": "gfx/boss_090_attack_t.bin",
+"size": 1940,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_attack_m",
+"file": "gfx/boss_090_attack_m.bin",
+"size": 167,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_hurt_t",
+"file": "gfx/boss_090_hurt_t.bin",
+"size": 2514,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_hurt_m",
+"file": "gfx/boss_090_hurt_m.bin",
+"size": 225,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_defeat_t",
+"file": "gfx/boss_090_defeat_t.bin",
+"size": 2102,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_defeat_m",
+"file": "gfx/boss_090_defeat_m.bin",
+"size": 180,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_special_t",
+"file": "gfx/boss_090_special_t.bin",
+"size": 2437,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_special_m",
+"file": "gfx/boss_090_special_m.bin",
+"size": 211,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_guard_t",
+"file": "gfx/boss_090_guard_t.bin",
+"size": 2439,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_guard_m",
+"file": "gfx/boss_090_guard_m.bin",
+"size": 206,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_090_pal",
+"file": "gfx/boss_090_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_090_desc",
+"file": "gfx/boss_090_desc.bin",
+"size": 78,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_normal_t",
+"file": "gfx/boss_091_normal_t.bin",
+"size": 3456,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_normal_m",
+"file": "gfx/boss_091_normal_m.bin",
+"size": 240,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_idle2_t",
+"file": "gfx/boss_091_idle2_t.bin",
+"size": 3456,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_idle2_m",
+"file": "gfx/boss_091_idle2_m.bin",
+"size": 240,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_attack_t",
+"file": "gfx/boss_091_attack_t.bin",
+"size": 3897,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_091_attack_m",
+"file": "gfx/boss_091_attack_m.bin",
+"size": 294,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_091_hurt_t",
+"file": "gfx/boss_091_hurt_t.bin",
+"size": 3592,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_091_hurt_m",
+"file": "gfx/boss_091_hurt_m.bin",
+"size": 285,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_091_defeat_t",
+"file": "gfx/boss_091_defeat_t.bin",
+"size": 3424,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_defeat_m",
+"file": "gfx/boss_091_defeat_m.bin",
+"size": 240,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_special_t",
+"file": "gfx/boss_091_special_t.bin",
+"size": 4358,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_091_special_m",
+"file": "gfx/boss_091_special_m.bin",
+"size": 353,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_091_pal",
+"file": "gfx/boss_091_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_091_desc",
+"file": "gfx/boss_091_desc.bin",
+"size": 67,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_092_normal_t",
+"file": "gfx/boss_092_normal_t.bin",
+"size": 3583,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_normal_m",
+"file": "gfx/boss_092_normal_m.bin",
+"size": 289,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_attack_t",
+"file": "gfx/boss_092_attack_t.bin",
+"size": 3347,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_attack_m",
+"file": "gfx/boss_092_attack_m.bin",
+"size": 269,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_hurt_t",
+"file": "gfx/boss_092_hurt_t.bin",
+"size": 4897,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_hurt_m",
+"file": "gfx/boss_092_hurt_m.bin",
+"size": 390,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_defeat_t",
+"file": "gfx/boss_092_defeat_t.bin",
+"size": 3705,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_defeat_m",
+"file": "gfx/boss_092_defeat_m.bin",
+"size": 286,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_special_t",
+"file": "gfx/boss_092_special_t.bin",
+"size": 4660,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_boss_092_special_m",
+"file": "gfx/boss_092_special_m.bin",
+"size": 336,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_092_pal",
+"file": "gfx/boss_092_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_boss_092_desc",
+"file": "gfx/boss_092_desc.bin",
+"size": 56,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_093_normal",
+"file": "gfx/mon_093_normal.bin",
+"size": 689,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_093_idle2",
+"file": "gfx/mon_093_idle2.bin",
+"size": 689,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_093_attack",
+"file": "gfx/mon_093_attack.bin",
+"size": 593,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_093_hurt",
+"file": "gfx/mon_093_hurt.bin",
+"size": 493,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_mon_093_pal",
+"file": "gfx/mon_093_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_mon_093_desc",
+"file": "gfx/mon_093_desc.bin",
+"size": 62,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_hero_idle1",
+"file": "gfx/hero_idle1.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_idle2",
+"file": "gfx/hero_idle2.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_blink",
+"file": "gfx/hero_blink.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_guard",
+"file": "gfx/hero_guard.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_parry",
+"file": "gfx/hero_parry.bin",
+"size": 655,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_recoil",
+"file": "gfx/hero_recoil.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_recoil_big",
+"file": "gfx/hero_recoil_big.bin",
+"size": 653,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_down",
+"file": "gfx/hero_down.bin",
+"size": 361,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_eat1",
+"file": "gfx/hero_eat1.bin",
+"size": 655,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_eat2",
+"file": "gfx/hero_eat2.bin",
+"size": 685,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_eat3",
+"file": "gfx/hero_eat3.bin",
+"size": 619,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_walk1",
+"file": "gfx/hero_walk1.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_walk2",
+"file": "gfx/hero_walk2.bin",
+"size": 623,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_walk3",
+"file": "gfx/hero_walk3.bin",
+"size": 653,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_walk4",
+"file": "gfx/hero_walk4.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_kick_ready",
+"file": "gfx/hero_kick_ready.bin",
+"size": 945,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_kick",
+"file": "gfx/hero_kick.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_shout_ready",
+"file": "gfx/hero_shout_ready.bin",
+"size": 655,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_shout",
+"file": "gfx/hero_shout.bin",
+"size": 817,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sword_windup_s",
+"file": "gfx/hero_sword_windup_s.bin",
+"size": 851,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sword_swing_s",
+"file": "gfx/hero_sword_swing_s.bin",
+"size": 913,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sword_ready2_s",
+"file": "gfx/hero_sword_ready2_s.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sword_thrust_s",
+"file": "gfx/hero_sword_thrust_s.bin",
+"size": 847,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_spear_ready_p",
+"file": "gfx/hero_spear_ready_p.bin",
+"size": 719,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_spear_thrust_p",
+"file": "gfx/hero_spear_thrust_p.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_hammer_up_h",
+"file": "gfx/hero_hammer_up_h.bin",
+"size": 845,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_hammer_down_h",
+"file": "gfx/hero_hammer_down_h.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_charge_s",
+"file": "gfx/hero_charge_s.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_charge_p",
+"file": "gfx/hero_charge_p.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_charge_h",
+"file": "gfx/hero_charge_h.bin",
+"size": 783,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_victory_s",
+"file": "gfx/hero_victory_s.bin",
+"size": 683,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_victory_p",
+"file": "gfx/hero_victory_p.bin",
+"size": 621,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_victory_h",
+"file": "gfx/hero_victory_h.bin",
+"size": 687,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_1",
+"file": "gfx/hero_sp_jumpgiri_1.bin",
+"size": 977,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_2",
+"file": "gfx/hero_sp_jumpgiri_2.bin",
+"size": 877,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_3",
+"file": "gfx/hero_sp_jumpgiri_3.bin",
+"size": 913,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_4",
+"file": "gfx/hero_sp_jumpgiri_4.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_5",
+"file": "gfx/hero_sp_jumpgiri_5.bin",
+"size": 1141,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_6",
+"file": "gfx/hero_sp_jumpgiri_6.bin",
+"size": 1045,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_7",
+"file": "gfx/hero_sp_jumpgiri_7.bin",
+"size": 1205,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_jumpgiri_8",
+"file": "gfx/hero_sp_jumpgiri_8.bin",
+"size": 849,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_1",
+"file": "gfx/hero_sp_moaclimb_1.bin",
+"size": 945,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_2",
+"file": "gfx/hero_sp_moaclimb_2.bin",
+"size": 1041,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_3",
+"file": "gfx/hero_sp_moaclimb_3.bin",
+"size": 881,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_4",
+"file": "gfx/hero_sp_moaclimb_4.bin",
+"size": 1077,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_5",
+"file": "gfx/hero_sp_moaclimb_5.bin",
+"size": 1077,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_6",
+"file": "gfx/hero_sp_moaclimb_6.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_7",
+"file": "gfx/hero_sp_moaclimb_7.bin",
+"size": 1011,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_moaclimb_8",
+"file": "gfx/hero_sp_moaclimb_8.bin",
+"size": 1003,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_1",
+"file": "gfx/hero_sp_cyclone_1.bin",
+"size": 979,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_2",
+"file": "gfx/hero_sp_cyclone_2.bin",
+"size": 1239,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_3",
+"file": "gfx/hero_sp_cyclone_3.bin",
+"size": 1239,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_4",
+"file": "gfx/hero_sp_cyclone_4.bin",
+"size": 1365,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_5",
+"file": "gfx/hero_sp_cyclone_5.bin",
+"size": 1239,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_6",
+"file": "gfx/hero_sp_cyclone_6.bin",
+"size": 1395,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_7",
+"file": "gfx/hero_sp_cyclone_7.bin",
+"size": 1201,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_cyclone_8",
+"file": "gfx/hero_sp_cyclone_8.bin",
+"size": 971,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_1",
+"file": "gfx/hero_sp_sworddance_1.bin",
+"size": 1077,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_2",
+"file": "gfx/hero_sp_sworddance_2.bin",
+"size": 1011,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_3",
+"file": "gfx/hero_sp_sworddance_3.bin",
+"size": 1111,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_4",
+"file": "gfx/hero_sp_sworddance_4.bin",
+"size": 1203,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_5",
+"file": "gfx/hero_sp_sworddance_5.bin",
+"size": 1239,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_6",
+"file": "gfx/hero_sp_sworddance_6.bin",
+"size": 1169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_7",
+"file": "gfx/hero_sp_sworddance_7.bin",
+"size": 1333,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_sworddance_8",
+"file": "gfx/hero_sp_sworddance_8.bin",
+"size": 845,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_1",
+"file": "gfx/hero_sp_kabutowari_1.bin",
+"size": 943,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_2",
+"file": "gfx/hero_sp_kabutowari_2.bin",
+"size": 1269,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_3",
+"file": "gfx/hero_sp_kabutowari_3.bin",
+"size": 1137,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_4",
+"file": "gfx/hero_sp_kabutowari_4.bin",
+"size": 1299,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_5",
+"file": "gfx/hero_sp_kabutowari_5.bin",
+"size": 1271,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_6",
+"file": "gfx/hero_sp_kabutowari_6.bin",
+"size": 1523,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_7",
+"file": "gfx/hero_sp_kabutowari_7.bin",
+"size": 1295,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kabutowari_8",
+"file": "gfx/hero_sp_kabutowari_8.bin",
+"size": 1107,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_1",
+"file": "gfx/hero_sp_shouryuu_1.bin",
+"size": 947,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_2",
+"file": "gfx/hero_sp_shouryuu_2.bin",
+"size": 1075,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_3",
+"file": "gfx/hero_sp_shouryuu_3.bin",
+"size": 1077,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_4",
+"file": "gfx/hero_sp_shouryuu_4.bin",
+"size": 1107,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_5",
+"file": "gfx/hero_sp_shouryuu_5.bin",
+"size": 1335,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_6",
+"file": "gfx/hero_sp_shouryuu_6.bin",
+"size": 779,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_7",
+"file": "gfx/hero_sp_shouryuu_7.bin",
+"size": 1011,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_shouryuu_8",
+"file": "gfx/hero_sp_shouryuu_8.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_1",
+"file": "gfx/hero_sp_megaroll_1.bin",
+"size": 1207,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_2",
+"file": "gfx/hero_sp_megaroll_2.bin",
+"size": 1043,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_3",
+"file": "gfx/hero_sp_megaroll_3.bin",
+"size": 977,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_4",
+"file": "gfx/hero_sp_megaroll_4.bin",
+"size": 1169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_5",
+"file": "gfx/hero_sp_megaroll_5.bin",
+"size": 717,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_6",
+"file": "gfx/hero_sp_megaroll_6.bin",
+"size": 1073,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_7",
+"file": "gfx/hero_sp_megaroll_7.bin",
+"size": 911,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_megaroll_8",
+"file": "gfx/hero_sp_megaroll_8.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_1",
+"file": "gfx/hero_sp_heavybomb_1.bin",
+"size": 1073,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_2",
+"file": "gfx/hero_sp_heavybomb_2.bin",
+"size": 815,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_3",
+"file": "gfx/hero_sp_heavybomb_3.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_4",
+"file": "gfx/hero_sp_heavybomb_4.bin",
+"size": 945,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_5",
+"file": "gfx/hero_sp_heavybomb_5.bin",
+"size": 1077,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_6",
+"file": "gfx/hero_sp_heavybomb_6.bin",
+"size": 1045,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_7",
+"file": "gfx/hero_sp_heavybomb_7.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_heavybomb_8",
+"file": "gfx/hero_sp_heavybomb_8.bin",
+"size": 1107,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_1",
+"file": "gfx/hero_sp_kantsuu_1.bin",
+"size": 947,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_2",
+"file": "gfx/hero_sp_kantsuu_2.bin",
+"size": 1171,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_3",
+"file": "gfx/hero_sp_kantsuu_3.bin",
+"size": 1333,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_4",
+"file": "gfx/hero_sp_kantsuu_4.bin",
+"size": 1267,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_5",
+"file": "gfx/hero_sp_kantsuu_5.bin",
+"size": 1237,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_6",
+"file": "gfx/hero_sp_kantsuu_6.bin",
+"size": 1205,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_7",
+"file": "gfx/hero_sp_kantsuu_7.bin",
+"size": 1395,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_kantsuu_8",
+"file": "gfx/hero_sp_kantsuu_8.bin",
+"size": 1005,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_1",
+"file": "gfx/hero_sp_skydive_1.bin",
+"size": 719,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_2",
+"file": "gfx/hero_sp_skydive_2.bin",
+"size": 909,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_3",
+"file": "gfx/hero_sp_skydive_3.bin",
+"size": 781,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_4",
+"file": "gfx/hero_sp_skydive_4.bin",
+"size": 1007,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_5",
+"file": "gfx/hero_sp_skydive_5.bin",
+"size": 883,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_6",
+"file": "gfx/hero_sp_skydive_6.bin",
+"size": 947,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_7",
+"file": "gfx/hero_sp_skydive_7.bin",
+"size": 811,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_skydive_8",
+"file": "gfx/hero_sp_skydive_8.bin",
+"size": 747,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_1",
+"file": "gfx/hero_sp_senpuu_1.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_2",
+"file": "gfx/hero_sp_senpuu_2.bin",
+"size": 945,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_3",
+"file": "gfx/hero_sp_senpuu_3.bin",
+"size": 977,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_4",
+"file": "gfx/hero_sp_senpuu_4.bin",
+"size": 1141,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_5",
+"file": "gfx/hero_sp_senpuu_5.bin",
+"size": 1043,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_6",
+"file": "gfx/hero_sp_senpuu_6.bin",
+"size": 1075,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_7",
+"file": "gfx/hero_sp_senpuu_7.bin",
+"size": 1141,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_senpuu_8",
+"file": "gfx/hero_sp_senpuu_8.bin",
+"size": 907,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_1",
+"file": "gfx/hero_sp_multilance_1.bin",
+"size": 879,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_2",
+"file": "gfx/hero_sp_multilance_2.bin",
+"size": 1009,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_3",
+"file": "gfx/hero_sp_multilance_3.bin",
+"size": 1043,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_4",
+"file": "gfx/hero_sp_multilance_4.bin",
+"size": 1039,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_5",
+"file": "gfx/hero_sp_multilance_5.bin",
+"size": 1071,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_6",
+"file": "gfx/hero_sp_multilance_6.bin",
+"size": 1169,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_7",
+"file": "gfx/hero_sp_multilance_7.bin",
+"size": 1395,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_sp_multilance_8",
+"file": "gfx/hero_sp_multilance_8.bin",
+"size": 945,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_hero_pal",
+"file": "gfx/hero_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_hero_desc",
+"file": "gfx/hero_desc.bin",
+"size": 1990,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_icons16",
+"file": "gfx/icons16.bin",
+"size": 21920,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_icons16_pal",
+"file": "gfx/icons16_pal.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_icons16_sel",
+"file": "gfx/icons16_sel.bin",
+"size": 256,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_00",
+"file": "gfx/shield_00.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_00_pal",
+"file": "gfx/shield_00_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_01",
+"file": "gfx/shield_01.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_01_pal",
+"file": "gfx/shield_01_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_02",
+"file": "gfx/shield_02.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_02_pal",
+"file": "gfx/shield_02_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_03",
+"file": "gfx/shield_03.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_03_pal",
+"file": "gfx/shield_03_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_04",
+"file": "gfx/shield_04.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_04_pal",
+"file": "gfx/shield_04_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_05",
+"file": "gfx/shield_05.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_05_pal",
+"file": "gfx/shield_05_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_06",
+"file": "gfx/shield_06.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_06_pal",
+"file": "gfx/shield_06_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_07",
+"file": "gfx/shield_07.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_07_pal",
+"file": "gfx/shield_07_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_08",
+"file": "gfx/shield_08.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_08_pal",
+"file": "gfx/shield_08_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_09",
+"file": "gfx/shield_09.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_09_pal",
+"file": "gfx/shield_09_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_10",
+"file": "gfx/shield_10.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_10_pal",
+"file": "gfx/shield_10_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_11",
+"file": "gfx/shield_11.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_11_pal",
+"file": "gfx/shield_11_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_12",
+"file": "gfx/shield_12.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_12_pal",
+"file": "gfx/shield_12_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_13",
+"file": "gfx/shield_13.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_13_pal",
+"file": "gfx/shield_13_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_14",
+"file": "gfx/shield_14.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_14_pal",
+"file": "gfx/shield_14_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_15",
+"file": "gfx/shield_15.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_15_pal",
+"file": "gfx/shield_15_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_16",
+"file": "gfx/shield_16.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_16_pal",
+"file": "gfx/shield_16_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_17",
+"file": "gfx/shield_17.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_17_pal",
+"file": "gfx/shield_17_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_18",
+"file": "gfx/shield_18.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_18_pal",
+"file": "gfx/shield_18_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_19",
+"file": "gfx/shield_19.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_19_pal",
+"file": "gfx/shield_19_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_20",
+"file": "gfx/shield_20.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_20_pal",
+"file": "gfx/shield_20_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_21",
+"file": "gfx/shield_21.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_21_pal",
+"file": "gfx/shield_21_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_22",
+"file": "gfx/shield_22.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_22_pal",
+"file": "gfx/shield_22_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_23",
+"file": "gfx/shield_23.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_23_pal",
+"file": "gfx/shield_23_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_24",
+"file": "gfx/shield_24.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_24_pal",
+"file": "gfx/shield_24_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_25",
+"file": "gfx/shield_25.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_25_pal",
+"file": "gfx/shield_25_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_26",
+"file": "gfx/shield_26.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_26_pal",
+"file": "gfx/shield_26_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_27",
+"file": "gfx/shield_27.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_27_pal",
+"file": "gfx/shield_27_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_28",
+"file": "gfx/shield_28.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_28_pal",
+"file": "gfx/shield_28_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_29",
+"file": "gfx/shield_29.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_29_pal",
+"file": "gfx/shield_29_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_30",
+"file": "gfx/shield_30.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_30_pal",
+"file": "gfx/shield_30_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_31",
+"file": "gfx/shield_31.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_31_pal",
+"file": "gfx/shield_31_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_32",
+"file": "gfx/shield_32.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_32_pal",
+"file": "gfx/shield_32_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_33",
+"file": "gfx/shield_33.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_33_pal",
+"file": "gfx/shield_33_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_34",
+"file": "gfx/shield_34.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_34_pal",
+"file": "gfx/shield_34_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_35",
+"file": "gfx/shield_35.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_35_pal",
+"file": "gfx/shield_35_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_36",
+"file": "gfx/shield_36.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_36_pal",
+"file": "gfx/shield_36_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_37",
+"file": "gfx/shield_37.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_37_pal",
+"file": "gfx/shield_37_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_38",
+"file": "gfx/shield_38.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_38_pal",
+"file": "gfx/shield_38_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_39",
+"file": "gfx/shield_39.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_39_pal",
+"file": "gfx/shield_39_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_40",
+"file": "gfx/shield_40.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_40_pal",
+"file": "gfx/shield_40_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_41",
+"file": "gfx/shield_41.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_41_pal",
+"file": "gfx/shield_41_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_42",
+"file": "gfx/shield_42.bin",
+"size": 128,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_shield_42_pal",
+"file": "gfx/shield_42_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_skill_icons",
+"file": "gfx/skill_icons.bin",
+"size": 6400,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_skill_icons_pal",
+"file": "gfx/skill_icons_pal.bin",
+"size": 64,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_skill_icons_sel",
+"file": "gfx/skill_icons_sel.bin",
+"size": 50,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_fx_strip",
+"file": "gfx/fx_strip.bin",
+"size": 741,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_fx_misc",
+"file": "gfx/fx_misc.bin",
+"size": 464,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_fx_pal",
+"file": "gfx/fx_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_fx_cells",
+"file": "gfx/fx_cells.bin",
+"size": 575,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_panel_tiles",
+"file": "gfx/panel_tiles.bin",
+"size": 1824,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_panel_map",
+"file": "gfx/panel_map.bin",
+"size": 768,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_panel_card_empty",
+"file": "gfx/panel_card_empty.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_panel_next_none",
+"file": "gfx/panel_next_none.bin",
+"size": 48,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_panel_guard_off",
+"file": "gfx/panel_guard_off.bin",
+"size": 80,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_panel_meat_off",
+"file": "gfx/panel_meat_off.bin",
+"size": 48,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_panel_pal",
+"file": "gfx/panel_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_hud_tiles",
+"file": "gfx/hud_tiles.bin",
+"size": 698,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_panel_icons",
+"file": "gfx/panel_icons.bin",
+"size": 30720,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_menu_obj",
+"file": "gfx/menu_obj.bin",
+"size": 414,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_menu_obj_pal",
+"file": "gfx/menu_obj_pal.bin",
+"size": 32,
+"kind": "whole",
+"speed": "any"
+},
+{
+"label": "gfx_king_obj",
+"file": "gfx/king_obj.bin",
+"size": 2112,
+"kind": "whole",
+"speed": "fast"
+},
+{
+"label": "gfx_king_pal",
+"file": "gfx/king_pal.bin",
+"size": 96,
+"kind": "whole",
+"speed": "any"
+}
+]
+}

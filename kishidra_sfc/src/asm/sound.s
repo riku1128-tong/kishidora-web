@@ -2,7 +2,7 @@
 ; (protocol: tools/audio/driver.py)
 .include "snes.inc"
 
-.import bgm_table, bgm_banks, spc_image, se_dir, se_vol, _ea, _frame
+.import bgm_table, bgm_seg_bank, bgm_seg_ptr, bgm_seg_len, spc_image, se_dir, se_vol, _ea, _frame
 .import SPC_IMAGE_LEN_LO, SPC_IMAGE_LEN_HI, SPC_BOOT_LEN, SPC_SPLIT_END, se_thr
 .export spc_boot_far, stream_idle
 
@@ -10,7 +10,6 @@ APU0 = $2140
 APU1 = $2141
 APU2 = $2142
 APU3 = $2143
-BLOCKS_PER_BANK = 3640
 RING_BLOCKS = 1813
 PREFILL = 640
 PER_FRAME = 13          ; blocks per frame while the ring is nearly full (11.5 are played)
@@ -26,8 +25,8 @@ s_lptr:  .res 3        ; sound effect samples still to upload
 .segment "LOWBSS"
 s_on:    .res 1        ; 0 = off, 1 = streaming, 2 = silence tail
 s_seq:   .res 1
-s_bi:    .res 1        ; index into bgm_banks
-s_left:  .res 2        ; blocks left in this bank
+s_bi:    .res 1        ; stream segment (bgm_seg_*)
+s_left:  .res 2        ; blocks left in this segment
 s_rem:   .res 3        ; blocks left in the track
 s_trk:   .res 2        ; bgm_table offset of the track
 s_tail:  .res 2
@@ -76,7 +75,7 @@ spc_boot_far:
 :
   cmp APU0
   bne :-
-  lda #^spc_image
+  lda #<.bank(spc_image)
   sta s_ptr+2
   ldx #.loword(spc_image)
   stx s_ptr
@@ -374,13 +373,12 @@ load_pos:
   lda f:bgm_table+7,x
   sta s_rem+2
   phx
-  ldx #0
   lda s_bi
   A16
   and #$00ff
   tax
   A8
-  lda f:bgm_banks,x
+  lda f:bgm_seg_bank,x
   sta s_ptr+2
   plx
   rts
@@ -411,19 +409,22 @@ stream_one:
   sta s_ptr
   dec s_left
   bne :+
-  A8
+  A8                   ; next segment of the stream: bank, start, length (tools/romplace.py)
   inc s_bi
   lda s_bi
   A16
   and #$00ff
   tax
   A8
-  lda f:bgm_banks,x
+  lda f:bgm_seg_bank,x
   sta s_ptr+2
   A16
-  lda #$8000
+  txa
+  asl
+  tax
+  lda f:bgm_seg_ptr,x
   sta s_ptr
-  lda #BLOCKS_PER_BANK
+  lda f:bgm_seg_len,x
   sta s_left
 :
   ; blocks left in the track (24-bit)

@@ -1218,6 +1218,5 @@
 #define MON_TUTORIAL                 87
 #define TRAINING_HP                  30000
 #define TRAINING_COUNT               1
-#define TEXT_LAST_BANK               193
 #include "gtypes.h"
 #endif

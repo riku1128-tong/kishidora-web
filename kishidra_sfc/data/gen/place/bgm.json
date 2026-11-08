@@ -1,0 +1,64 @@
+{
+"entries": [
+{
+"label": "bgm",
+"file": "audio/bgm.brr",
+"size": 1925793,
+"kind": "stream",
+"unit": 9,
+"min": 64,
+"speed": "slow",
+"hook": "bgm",
+"tracks": [
+{
+"name": "BGM_OPENING",
+"first": 0,
+"blocks": 38542,
+"loop": 11023
+},
+{
+"name": "BGM_ZAKO",
+"first": 38542,
+"blocks": 18153,
+"loop": 0
+},
+{
+"name": "BGM_BOSS",
+"first": 56695,
+"blocks": 20973,
+"loop": 0
+},
+{
+"name": "BGM_MAOU",
+"first": 77668,
+"blocks": 18854,
+"loop": 0
+},
+{
+"name": "BGM_MAOU_FINAL",
+"first": 96522,
+"blocks": 23243,
+"loop": 0
+},
+{
+"name": "BGM_PEKO",
+"first": 119765,
+"blocks": 79764,
+"loop": 44539
+},
+{
+"name": "BGM_VICTORY",
+"first": 199529,
+"blocks": 8256,
+"loop": null
+},
+{
+"name": "BGM_GAMEOVER",
+"first": 207785,
+"blocks": 6192,
+"loop": null
+}
+]
+}
+]
+}

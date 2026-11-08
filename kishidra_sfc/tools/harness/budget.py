@@ -5,7 +5,8 @@ usage: budget.py [MAP]      (default build/kishidra.map; exit status 1 when a ga
 
   bank $80     STARTUP + ENGINE + the load images of CODE / STUBS / RODATA / DATA + header / vectors
                (gate: <= 30 KB)
-  code banks   CODEn + ENGn of each bank $81-$9F with code (gate: <= 30 KB each; + data placed there)
+  code banks   CODEn + ENGn of each bank $81-$9F with code (gate: <= 30 KB each; + the data in the
+               rest of the bank: BANKxx + PLxx, placed by tools/romplace.py)
   low WRAM     CODE + STUBS + LOWBSS in $0200-$1FFF (gate: >= 0.5 KB free)
   WRAM $7E     RODATA + DATA + BSS in $7E:2000-$F6FF (the C data; reported)"""
 import os
@@ -43,7 +44,7 @@ def main():
     rows = []
     for b in range(1, 32):
         code = g('CODE%d' % b, 0) + g('ENG%d' % b, 0)
-        data = g('BANK%02X' % (0x80 + b), 0)
+        data = g('BANK%02X' % (0x80 + b), 0) + g('PL%02X' % (0x80 + b), 0)   # fixed + placed data
         if code:
             rows.append('$%02X %6d%s' % (0x80 + b, code, ' (+%d data)' % data if data else ''))
             if code > BANK_MAX:

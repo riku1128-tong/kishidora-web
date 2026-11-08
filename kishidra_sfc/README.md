@@ -69,6 +69,13 @@ python build.py rom
 - `src/c/` ゲーム本体（cc65）。`battle_core.c` / `battle_hit.c` が Safari 版 battle_core.gd の移植、`battle_view.c` が戦闘画面、
   `map.c` `menu.c` `gacha.c` `forge.c` `story.c` `rewards.c` が冒険部分、`save.c` `adventure.c` がセーブとルール
 - `tools/make_data.py` `tools/make_gfx.py` `tools/make_audio.py` 変換スクリプト、`tools/audio/` SPC700 ドライバとアセンブラ・BRR 変換
+- `tools/romplace.py` ROM のデータの置き場所。変換スクリプトはバンクを決めず、`data/gen` のファイルと
+  `data/gen/place/*.json`（ラベル・大きさ・種類）を書く。`build.py` は 2 回リンクする（1 回目はデータなしで
+  コードと固定の領域の大きさを測り、残りの場所にデータを置いて 2 回目）。置いた場所は `build/kishidra.place.txt`。
+  アセット・文字列・BGM の表は `TABLES`（$C0 の先頭）。アセンブラでは ROM のデータのバンクを `.bank()` で書く
+  （8 ビットは `#<.bank(x)` / `.byte <.bank(x)`。`^label` はコードのバンク $81〜$9F で 0 になる）。
+  `lda f:label` で読むデータは `TABLES` か固定の領域に置くか、manifest で `"long": true`（$A0 以降に置かれる）。
+  ビルドのときに `f:` と `^` の使い方を調べる。同じ中身のアセット・文字列は 1 つだけ置く
 - `tools/harness/` テスト用（libretro コアで ROM を動かしてスクリーンショット・メモリ・音を保存する `runrom`、セーブ作成 `mksave.py`、
   処理時間の内訳 `prof.py`、文字のはみ出し・枠かぶり・色の混ざり・重なりの検査 `textcheck.py`
   〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要。計測用 ROM は NMI の転送が終わった走査線も
@@ -76,8 +83,10 @@ python build.py rom
 - テストの道具（`tools/harness/`）: `runrom` のスクリプトで WRAM を書く・読む `poke` / `pokew` / `pokel` / `peek` /
   `waitfor`（アドレスはリンクの記号で `sv+16` のように書ける。記号は build.py が書く `build/kishidra.lbl` から）、
   2 つの ROM で同じ操作をして画面・音・メモリを比べる `abtest.py`（`t/reg1.txt` が画面、`t/reg2.txt` が音の一巡り。
-  セーブはスクリプトの `#!mksave` 行から作る）、ラグの計測 `lag.py`、走査線ごとのスプライト数 `oamlines.py`、
-  バンク・WRAM の予算 `budget.py`。`runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl`
+  セーブはスクリプトの `#!mksave` 行から作る）、録音を少しの時間のずれを許して区間ごとに比べる `wavcmp.py`、
+  2 つの ROM が読むデータ（アセット・文字列・フォント・敵の能力・SPC・BGM を流す順）を比べる `romdata.py`、
+  置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド）、ラグの計測 `lag.py`、
+  走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`。`runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl`
   で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
   `XDEFS="TEST_HOOKS …" python build.py rom` でテストだけの定義を入れた ROM を作る
   （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない）

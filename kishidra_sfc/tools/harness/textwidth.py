@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Pixel widths of game texts (from data/gen/textdata.s and the font widths), for laying out boxes.
+"""Pixel widths of game texts (from data/gen/textdata.s, text/strings.bin and the font widths), for laying
+out boxes.
 
 usage: textwidth.py REGEX [REGEX ...]   text id names to show (e.g. 'T_DIFF_.*' 'SPN_\\d+')
 Each line: name, widest line in pixels, number of lines, the text.  {n} counts as N_DIGITS digits,
 {s} (an inserted text) as the widest text of S_WIDTH pixels (env), shown with a '+s'."""
+import json
 import os
 import re
 import sys
@@ -14,38 +16,23 @@ S_WIDTH = int(os.environ.get('S_WIDTH', '0'))
 
 
 def load():
-    src = open(os.path.join(ROOT, 'data', 'gen', 'textdata.s')).read()
-    # text_table: .word addr / .byte bank per text
-    tab = src[src.index('text_table:'):]
-    ptrs = re.findall(r'\.word \$([0-9a-f]+)\s*\n\s*\.byte \$([0-9a-f]+)', tab)
-    # banks of bytes: segment name -> bytes in order
-    data = {}
-    cur = None
-    for line in src[:src.index('text_table:')].splitlines():
-        m = re.match(r'\.segment "BANK([0-9A-F]+)"', line)
-        if m:
-            cur = int(m.group(1), 16)
-            data.setdefault(cur, bytearray())
-            continue
-        if line.strip().startswith('.byte') and cur is not None:
-            data[cur] += bytes(int(v, 16) for v in re.findall(r'\$([0-9a-f]+)', line))
+    gen = os.path.join(ROOT, 'data', 'gen')
+    src = open(os.path.join(gen, 'textdata.s')).read()
+    # text_table: one row per text, naming its body tx_N (data/gen/place/text.json: offset in
+    # text/strings.bin; identical texts share a body)
+    labels = re.findall(r'\.word \.loword\((\w+)\)', src[src.index('text_table:'):])
+    body = {e['label']: e for e in json.load(open(os.path.join(gen, 'place', 'text.json')))['entries']}
+    blob = open(os.path.join(gen, 'text', 'strings.bin'), 'rb').read()
     wid = open(os.path.join(ROOT, 'data', 'gen', 'font.bin.wid'), 'rb').read()
     chars = open(os.path.join(ROOT, 'data', 'gen', 'font.bin.chars'), encoding='utf-8').read().split('\n')
     names = {}
     for m in re.finditer(r'#define\s+(\w+)\s+(\d+)', open(os.path.join(ROOT, 'data', 'gen', 'text.h')).read()):
         names.setdefault(int(m.group(2)), m.group(1))
     texts = {}
-    for i, (a, b) in enumerate(ptrs):
-        bank, addr = int(b, 16), int(a, 16) - 0x8000
-        d = data.get(bank & 0x7f) or data.get(bank)
-        codes = []
-        while True:
-            c = d[addr] | d[addr + 1] << 8
-            addr += 2
-            if c == 0:
-                break
-            codes.append(c)
-        texts[names.get(i, '#%d' % i)] = codes
+    for i, lab in enumerate(labels):
+        e = body[lab]
+        d = blob[e['off']:e['off'] + e['size']]
+        texts[names.get(i, '#%d' % i)] = [d[k] | d[k + 1] << 8 for k in range(0, len(d) - 2, 2)]
     return texts, wid, chars
 
 

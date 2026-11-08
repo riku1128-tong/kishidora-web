@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Graphics for the SFC build, converted from the Safari build's art.
 
-Writes data/gen/gfx.s, data/gen/gfx.h and data/gen/gfx/*.bin (see tools/gfx/assets.py).
+Writes data/gen/gfx.s, data/gen/gfx.h, data/gen/gfx/*.bin and data/gen/place/gfx.json (see
+tools/gfx/assets.py; tools/romplace.py places the blobs).
 Preview PNGs of every converted screen go to build/preview/.
 """
 import json
@@ -20,7 +21,6 @@ from assets import Assets  # noqa: E402
 import webbuild  # noqa: E402
 
 PREVIEW = os.path.join(ROOT, 'build', 'preview')
-GFX_BANKS = list(range(0xC3, 0xE0)) + list(range(0xA0, 0xC0))
 
 POSE_CODE = {'normal': 0, 'idle2': 1, 'attack': 2, 'hurt': 3, 'defeat': 4, 'special': 5, 'guard': 6}
 SCALE = 0.73          # HD native pixel art -> SFC size (same as the Safari "pitch" ratio)
@@ -61,7 +61,7 @@ def preview_bg(path, data, words, pal, size, pal_base=2):
 class Gfx:
     def __init__(self):
         self.wb = webbuild.get()
-        self.a = Assets('gfx', GFX_BANKS)
+        self.a = Assets('gfx')
 
     def img(self, path):
         return self.wb.image(path)

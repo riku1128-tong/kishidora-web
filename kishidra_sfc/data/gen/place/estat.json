@@ -1,0 +1,19 @@
+{
+"entries": [
+{
+"label": "estat_index",
+"file": "estat_index.bin",
+"size": 1428,
+"kind": "whole",
+"speed": "fast",
+"long": true
+},
+{
+"label": "estat_data",
+"file": "estat_data.bin",
+"size": 16344,
+"kind": "whole",
+"speed": "fast"
+}
+]
+}

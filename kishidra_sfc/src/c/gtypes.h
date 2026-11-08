@@ -15,7 +15,7 @@ typedef struct { u8 item; u32 coins; u8 mats[7][2]; } EvolveSpecial;
 typedef struct { u8 v[MIRAGE_TIERS]; u8 stock[MIRAGE_TIERS]; } MirageReward;
 typedef struct { u8 area, men; } OrbRow;
 
-/* precomputed enemy stats (data/gen/estat.s), ESTAT_SIZE bytes */
+/* precomputed enemy stats (data/gen/estat_data.bin, placed by tools/romplace.py), ESTAT_SIZE bytes */
 typedef struct {
   u8 mon, stage, role, base;
   u32 hp;
