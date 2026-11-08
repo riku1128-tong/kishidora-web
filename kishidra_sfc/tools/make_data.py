@@ -3,7 +3,8 @@
 
 Output (data/gen):
   gdata.h     ids, counts, constants, struct types
-  tables.c    item / skill / special / effect / enemy / area tables (C, copied to WRAM)
+  tables.c    item / skill / special / effect / enemy / area tables, the songs of the monster cards and
+              zako STAGEs (BGM_* of audio.h) (C, copied to WRAM)
   estat_index.bin, estat_data.bin
               precomputed enemy stats per area x 面 (ROM)
   textdata.s  text_table (segment TABLES); text/strings.bin every distinct string as glyph codes
@@ -13,6 +14,7 @@ Output (data/gen):
               the ROM blobs above, placed by tools/romplace.py when build.py links
   gfx*.s      graphics (tools/make_gfx.py)
 """
+import ast
 import glob
 import json
 import os
@@ -481,23 +483,6 @@ class Gen:
                     mask[m] |= 1 << i
         assert len(s.tables['AREA_TABLE']) <= 16
         c.append('const u16 mon_areas[N_MON] = { %s };' % ', '.join(str(mask[m]) for m in self.mon_ids))
-        # BGM heard on the monster's card (DexData.monster_bgm, mapped onto the SFC tracks)
-        forms = s.num('MAOU_FORMS')
-        zako_any = set()
-        for a in s.tables['AREA_TABLE']:
-            zako_any |= set(s.zako_pool(a['id']))
-        mids = {a.get('mid', '') for a in s.tables['AREA_TABLE']}
-
-        def bgm(m):
-            if m == s.num('AWAKEN_MON'):
-                return 4                      # ペコラータ
-            if m in forms:
-                return 3 if forms.index(m) == 2 else 2
-            if s.enemies[m]['kind'] == 'EK_BOSS' or (m in mids and m not in zako_any):
-                return 1
-            return 0
-        c.append('const u8 mon_bgm[N_MON] = { %s };   /* 0 zako, 1 boss, 2 maou, 3 maou final, 4 peko */' %
-                 ', '.join(str(bgm(m)) if m in s.enemies else '0' for m in self.mon_ids))
         # evolution: from (reverse of items[].evolve); 254 = the target is not in this game
         frm = [255] * len(self.item_ids)
         to_gone = [0] * len(self.item_ids)
@@ -514,6 +499,193 @@ class Gen:
             self.text('TGTN_%d' % i, descs.TARGET[t])
         for i, z in enumerate(SIZES):
             self.text('SZN_%d' % i, z[3:])
+
+    # ------------------------------------------------------------ BGM routing (battle_core.c battle_bgm, dex.c)
+    def build_songs(self):
+        """Which song plays where, as the song ids of tools/make_audio.py (BGM_* of data/gen/audio.h):
+          mon_song[m]   the monster's card (DexData.monster_bgm), which is also the song of its tower WAVE;
+                        0 = none (the card keeps the map song)
+          area_song[a]  the area's zako STAGEs (BattleCore.stage_bgm, kind 0)
+          SONG_*        the fixed songs of battle_bgm (mid-boss, 魔王の城 10 WAVEs 1-4, its 魔王 fallback, the
+                        treasure / 金策 guard)
+        A web song id is a file of GameData.bgm_files after Tuning.BGM_SWAP (so BGM_ZAKO_LATE (14) plays
+        15_zako_castle and BGM_ZAKO_CASTLE (15) plays 14_zako_late); the SFC id is the make_audio track of
+        that file, 0 for a file the SFC lacks (07_worldmap) or -1.  The rule of battle_bgm is then run here
+        on these tables for every surface STAGE (each 魔王 form on the field of 10-5), the tutorial, the
+        training and every tower WAVE, and must give the song of the web stage_bgm (shipped battle_core.gd
+        1648) with music in every battle; else the build stops."""
+        s, T = self.s, self.T
+        num = s.num
+        tree = ast.parse(open(os.path.join(HERE, 'make_audio.py'), encoding='utf-8').read())
+        tracks = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign)
+                      and any(getattr(t, 'id', '') == 'BGM' for t in n.targets))
+        sfc = {f.rsplit('.', 1)[0]: name for name, f, shape in tracks}
+        files = {}
+        for f in ('assets/bgm/bgm.json', 'assets/bgm/bgm_phone.json'):
+            for k, v in json.loads(s.wb.read(f)).items():
+                files[int(k)] = v
+        swapped = {int(k): files.get(int(v), '') for k, v in T['BGM_SWAP'].items()}
+        files.update((k, v) for k, v in swapped.items() if v)
+
+        def song(web):
+            return sfc.get(files.get(web, ''), '0')
+
+        AT = s.tables['AREA_TABLE']
+        aidx = {a['id']: i for i, a in enumerate(AT)}
+        ABB, BB = num('AREA_BOSS_BGM'), T['BOSS_BGM']
+        castle, secret, forms = num('AREA_CASTLE'), num('AREA_SECRET'), num('MAOU_FORMS')
+
+        def monster_bgm(m):          # dex_data.gd 388 (surface)
+            if m in BB:
+                return BB[m]
+            if m in forms:
+                return ABB[aidx[castle]]
+            if m in num('CASTLE_FINAL'):
+                return T['CASTLE_LAST_WAVES_BGM']
+            if m == num('AWAKEN_MON'):
+                return ABB[aidx[secret]]
+            for i, a in enumerate(AT):
+                if a['boss'] == m:
+                    return ABB[i]
+            best, share = -1, 0.0
+            for i, a in enumerate(AT):
+                pool = s.zako_pool(a['id'])
+                sh = pool.count(m) / float(max(1, len(pool)))
+                if sh > share:
+                    best, share = i, sh
+            if best >= 0:
+                return num(AT[best]['bgm'], -1)
+            if any(a['mid'] == m for a in AT):
+                return num('BGM_BOSS', -1)
+            if s.enemies.get(m, {}).get('kind') == 'EK_LUCKY':
+                return num(AT[0]['bgm'], -1)
+            if m == num('TUTORIAL_MON'):
+                return num(s.areas[num('TUTORIAL_AREA')]['bgm'], -1)
+            return -1
+
+        core = enemies.Core(s)
+
+        def web_stage(area, men, stage, field, count=None):   # battle_core.gd stage_bgm (surface, not classic)
+            c = core
+            c.start_men(area, men)
+            if count is not None:
+                c.stage_count = count
+            c.stage = stage
+            kind = c.stage_boss_kind()
+            a = s.areas[area]
+            if kind == 0:
+                return a['bgm_no'] if 'bgm_no' in a else num(a['bgm'])
+            if c.is_treasure() or c.is_money():
+                mimic = BB.get(num('TREASURE_GUARD'), num('BGM_BOSS'))
+                guard = c.treasure_row(area).get('guard', num('TREASURE_GUARD')) if c.is_treasure() else num('TREASURE_GUARD')
+                return BB.get(guard, mimic)
+            if kind == 1:
+                return num('BGM_BOSS')
+            boss = ''
+            if c.is_castle():
+                if men != num('CASTLE_MEN'):
+                    boss = num('CASTLE_BOSSES')[men - 1]
+                elif stage < c.stage_count:
+                    return T['CASTLE_LAST_WAVES_BGM']
+                else:
+                    for m in field:
+                        if m in forms:
+                            boss = m
+            elif not c.is_secret():
+                boss = a['boss']
+            if boss in BB:
+                return BB[boss]
+            if c.is_castle() and men != num('CASTLE_MEN'):
+                for i in range(aidx[castle]):
+                    if AT[i]['boss'] == boss:
+                        return ABB[i]
+            return ABB[aidx[area]]
+
+        mon_song = {m: song(monster_bgm(m)) if m in s.enemies else '0' for m in self.mon_ids}
+        area_song = {}
+        for k in self.area_ids:
+            a = s.areas.get(k)
+            area_song[k] = song(a['bgm_no'] if 'bgm_no' in a else num(a['bgm'])) if a else '0'
+        songs = {'SONG_MID': song(num('BGM_BOSS')), 'SONG_CASTLE_WAVES': song(T['CASTLE_LAST_WAVES_BGM']),
+                 'SONG_CASTLE_BOSS': song(ABB[aidx[castle]]),
+                 'SONG_GUARD': song(BB.get(num('TREASURE_GUARD'), num('BGM_BOSS')))}
+
+        # the SFC rule: battle_core.c stage_boss_kind / battle_bgm on the tables above
+        trea = {r['area'] for r in s.tables['TREASURE_TABLE']}
+
+        def sfc_stage(area, men, stage, count, field, mirage=False):
+            if mirage:
+                return mon_song[field[0]]
+            c_castle = area == castle and men != T['MONEY_MEN']
+            c_money = area == castle and men == T['MONEY_MEN']
+            c_treasure = men == num('TREASURE_MEN') and area in trea
+            if stage != count and not (c_castle and men == num('CASTLE_MEN')):
+                kind = 0
+            elif c_castle or area == secret or men == num('AREA_MEN') or c_treasure or c_money:
+                kind = 2
+            else:
+                kind = 1 if men == num('AREA_MEN') - 1 else 0
+            if kind == 0:
+                return area_song[area]
+            if c_treasure or c_money:
+                return songs['SONG_GUARD']
+            if kind == 1:
+                return songs['SONG_MID']
+            if not c_castle:
+                return mon_song[s.areas[area]['boss']]
+            if men != num('CASTLE_MEN'):
+                return mon_song[num('CASTLE_BOSSES')[men - 1]]
+            if stage < count:
+                return songs['SONG_CASTLE_WAVES']
+            r = songs['SONG_CASTLE_BOSS']
+            for m in field:
+                if m in forms:
+                    r = mon_song[m]
+            return r
+
+        cases = []     # (what, web song, SFC song)
+
+        def add_case(what, web, got):
+            cases.append((what, song(web), got))
+        for a in AT:
+            k = a['id']
+            if k == castle:
+                mens = list(range(1, num('CASTLE_MEN') + 1)) + [T['MONEY_MEN']]
+            elif k == secret:
+                mens = [1]
+            else:
+                mens = list(range(1, num('AREA_MEN') + 1)) + ([num('TREASURE_MEN')] if k in trea else [])
+            for men in mens:
+                n = core.stage_count_for(k, men)
+                # the SFC's stage counts (battle_core.c battle_start)
+                sn = (T['MONEY_STAGES'] if men == T['MONEY_MEN'] else num('CASTLE_STAGES')) if k == castle else (
+                    num('SECRET_STAGES') if k == secret else (num('TREASURE_STAGES') if men == num('TREASURE_MEN') else num('MEN_STAGES')))
+                assert n == sn, (k, men, n, sn)
+                for st in range(1, n + 1):
+                    fields = [[f] for f in forms] if k == castle and men == num('CASTLE_MEN') and st == n else [[]]
+                    for fd in fields:
+                        add_case('%s %d-%d%s' % (k, men, st, ' ' + fd[0] if fd else ''),
+                             web_stage(k, men, st, fd), sfc_stage(k, men, st, n, fd))
+        tut = num('TUTORIAL_AREA')
+        assert tut == self.area_ids[0], 'the tutorial / training rows are in the first area (map.c make_rows)'
+        for st in range(1, T['TUTORIAL_STAGES'] + 1):
+            add_case('tutorial %d' % st, web_stage(tut, 0, st, [], T['TUTORIAL_STAGES']), sfc_stage(tut, 1, st, T['TUTORIAL_STAGES'], []))
+        add_case('training', web_stage(tut, 0, 1, [], 1), sfc_stage(tut, 1, 1, 1, []))
+        for w, ent in enumerate(enemies.mirage_rush(s)):
+            add_case('tower WAVE %d %s' % (w + 1, ent['mon']), web_stage(ent['home'], ent['men'], ent['stage'], [ent['mon']]),
+                 sfc_stage(None, 0, 0, 0, [ent['mon']], True))
+        bad = ['%s: web %s, SFC %s' % x for x in cases if x[1] != x[2] or x[2] == '0']
+        if bad:
+            sys.exit('battle_bgm differs from the web stage_bgm (or plays no music):\n  ' + '\n  '.join(bad))
+        for k, v in songs.items():
+            self.define(k, v)
+        c = self.c
+        c.append('/* songs (tools/make_data.py build_songs): monster card / tower WAVE (0: the map song), zako STAGEs */')
+        c.append('const u8 mon_song[N_MON] = { %s };' % ', '.join(mon_song[m] for m in self.mon_ids))
+        c.append('const u8 area_song[N_AREA] = { %s };' % ', '.join(area_song[k] for k in self.area_ids))
+        print('songs: %d cards (%d with a song), battle_bgm == web stage_bgm on %d STAGEs / WAVEs, %d songs used' % (
+            len(self.mon_ids), sum(v != '0' for v in mon_song.values()), len(cases),
+            len({x[2] for x in cases} | set(mon_song.values()) - {'0'})))
 
     # ------------------------------------------------------------ loadout rules (src/c/loadout.c)
     def build_solo(self):
@@ -926,7 +1098,8 @@ class Gen:
         self.h.append('#include "gtypes.h"')
         self.h.append('#endif')
         open(os.path.join(GEN, 'gdata.h'), 'w', encoding='utf-8').write('\n'.join(self.h) + '\n')
-        c = ['/* generated by tools/make_data.py - do not edit */', '#include "gdata.h"'] + self.c
+        c = ['/* generated by tools/make_data.py - do not edit */', '#include "gdata.h"',
+             '#include "audio.h"   /* the song ids BGM_* (tools/make_audio.py) */'] + self.c
         open(os.path.join(GEN, 'tables.c'), 'w', encoding='utf-8').write('\n'.join(c) + '\n')
 
 
@@ -937,6 +1110,7 @@ def main():
     g.build_ids()
     g.build_consts()
     g.build_tables()
+    g.build_songs()
     g.build_estats()
     g.build_dex()
     g.build_story()

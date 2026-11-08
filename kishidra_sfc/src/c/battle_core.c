@@ -1278,23 +1278,24 @@ void battle_step(void) {
 
 /* ------------------------------------------------------------------ BGM choice */
 #include "sound.h"
+/* BattleCore.stage_bgm (web): a zako STAGE plays the area's song, a mid-boss SONG_MID, the treasure / 金策 guard
+ * SONG_GUARD, an area boss (ペコラータ too) its card's song, 魔王の城 1-9 its floor boss's, 10 WAVEs 1-4
+ * SONG_CASTLE_WAVES, then the song of the 魔王 form on the field; a tower WAVE plays its boss's card song (= its
+ * home STAGE's).  make_data.py build_songs checks this rule against the web's on every STAGE and WAVE.
+ * EV_STAGE_START and EV_FORM_SWAP call it; bgm_play keeps a song that is already playing */
 u8 battle_bgm(void) {
-  u8 kind = stage_boss_kind(), i;
-  if (b_mirage) {
-    u8 m = b_ne ? b_e[0].mon : MON_NONE;
-    if (m == MON_117) return BGM_PEKO;
-    if (forms_index(m) == 2) return BGM_MAOU_FINAL;
-    if (forms_index(m) != 255) return BGM_MAOU;
-    return BGM_BOSS;
-  }
-  if (!kind) return BGM_ZAKO;
-  for (i = 0; i < b_ne; ++i) {
-    if (b_e[i].mon == MON_117) return BGM_PEKO;
-    if (forms_index(b_e[i].mon) == 2) return BGM_MAOU_FINAL;
-    if (forms_index(b_e[i].mon) != 255) return BGM_MAOU;
-  }
-  if (is_castle() && b_men == D_CASTLE_MEN && b_stage < b_stage_count) return BGM_BOSS;
-  return BGM_BOSS;
+  u8 kind = stage_boss_kind(), i, s;
+  const Foe *e;
+  if (b_mirage) return mon_song[b_e[0].mon];
+  if (!kind) return area_song[b_area];          /* the tutorial and the training are in アーケディア城 */
+  if (is_treasure() || is_money()) return SONG_GUARD;
+  if (kind == 1) return SONG_MID;
+  if (!is_castle()) return mon_song[areas[b_area].boss];
+  if (b_men != D_CASTLE_MEN) return mon_song[castle_bosses[b_men - 1]];
+  if (b_stage < b_stage_count) return SONG_CASTLE_WAVES;
+  s = SONG_CASTLE_BOSS;
+  for (i = b_ne, e = b_e; i; --i, ++e) if (forms_index(e->mon) != 255) s = mon_song[e->mon];
+  return s;
 }
 
 #ifdef TEST_HOOKS

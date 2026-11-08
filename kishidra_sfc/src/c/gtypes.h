@@ -63,7 +63,9 @@ extern const u16 name_grid[3][90];
 extern const u16 default_name[7];
 extern const u8 tut_goal[N_TUT_STEP];
 extern const u8 tut_stage_first[4];
-extern const u8 dex_mon[N_DEX_MON], dex_item[N_DEX_ITEM], mon_bgm[N_MON];
+extern const u8 dex_mon[N_DEX_MON], dex_item[N_DEX_ITEM];
+/* songs (make_data.py build_songs): a monster's card / tower WAVE (0 = the map song), an area's zako STAGEs */
+extern const u8 mon_song[N_MON], area_song[N_AREA];
 extern const u16 mon_areas[N_MON];
 extern const u8 item_evo_from[N_ITEM], item_evo_lost[N_ITEM];
 

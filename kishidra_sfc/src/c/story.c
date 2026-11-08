@@ -278,6 +278,7 @@ void king_opening2(void) {
 
 void ending(void) {
   u8 i;
+  bgm_play(BGM_ENDING);            /* map.gd _king_return: Tuning.ENDING_BGM for the talk, epilogue and credits */
   talk(KING_RET_0, N_KING_RET, NAME_KING, 1);
   mk_screen();
   screen_on();

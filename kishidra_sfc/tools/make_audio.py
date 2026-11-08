@@ -12,7 +12,8 @@ loop point (plus a short crossfade at the join):
   ('loop',)     the Safari loop itself (loop point to the end of the file)
 SE: one variation per sound, trimmed, 10240 Hz BRR inside the SPC image.
 
-Outputs data/gen/audio.s (SPC image, SE tables), data/gen/audio.h, data/gen/audio/*.bin,
+Outputs data/gen/audio.s (SPC image, SE tables), data/gen/audio.h (TRACK_* and the song ids BGM_* of
+bgm_play, which sound.h takes from here), data/gen/audio/*.bin,
 data/gen/audio/bgm_loops.json (where each track's loop comes from in the source and how its join
 measures: tools/harness/bgmjoin.py) and data/gen/place/bgm.json (the BGM stream: tools/romplace.py
 places it and writes bgm_table)."""
@@ -477,6 +478,11 @@ def main():
          '#define BGM_PITCH %d' % PITCH, '#define N_BGM_TRACKS %d' % len(tracks)]
     for k, (name, first, n, loop) in enumerate(tracks):
         h.append('#define TRACK_%s %d' % (name[4:], k))
+    # the song ids of bgm_play (sound.c: track = id - 1; 0 = no music), in the order of BGM above
+    h.append('#define BGM_NONE 0')
+    for k, (name, first, n, loop) in enumerate(tracks):
+        h.append('#define %s %d' % (name, k + 1))
+    h.append('#define N_BGM %d' % (len(tracks) + 1))
     s.append('se_dir:')
     s.append('  .byte 0, ' + ', '.join(str(d) for d, v in se_dir))
     s.append('se_vol:')

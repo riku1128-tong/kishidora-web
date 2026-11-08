@@ -101,6 +101,10 @@ python build.py rom
   BGM のループのつなぎ目を聞くための短い音（ループの終わり 4 秒 + 頭 4 秒、ROM が流す BRR から）を書き、
   つなぎ目のリズムのずれ（小節で切った曲は 12 ms 以内）とストリームが元の曲のその部分であることを調べる `bgmjoin.py`
   （`-o DIR`、`--check`。ループの位置は `make_audio.py` が書く `data/gen/audio/bgm_loops.json`）、
+  録音がどの BGM か（ROM が流すストリームとループを含めて 50 ms ごとに比べる。正しければ相関の中央値 0.99 以上）を調べる
+  `wavref.py`（`--which` で全曲から探す）と、それで場所ごとの曲を確かめる `bgmroute.py`（TEST_HOOKS の ROM で
+  雑魚・中ボス・ボス・宝の部屋・魔王の城・魔王城の地下・月見の島・蜃気楼の斜塔・チュートリアル・カカシ・図鑑のカード・
+  エンディングを録音し、Safari 版の決まりの曲と比べる。曲の表は `make_data.py` が書き、その場で Safari 版の決まりと照らす）、
   2 つの data/gen の絵をアセットごとに比べ、変わったスプライトのポーズを描いて並べる `gfxdiff.py`（`-o` で PNG）、
   置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド。4MB と 8MB）、ラグの計測 `lag.py`、
   ROM のヘッダー・バンク $00 の写し・チェックサムと、snes9x・bsnes / ares・FXPak Pro・Mesen2 がどの形と読むかの検査

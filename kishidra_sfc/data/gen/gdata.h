@@ -1187,6 +1187,10 @@
 #define MK_CRIT                      5
 #define MK_SP                        6
 #define MK_STUN                      7
+#define SONG_MID                     BGM_DRAGON
+#define SONG_CASTLE_WAVES            BGM_CASTLE_WAVES
+#define SONG_CASTLE_BOSS             BGM_MAOU
+#define SONG_GUARD                   BGM_B_MIMIKKUN
 #define MIRAGE_WAVES                 18
 #define ESTAT_SIZE                   24
 #define ESTAT_MEN_MAX                20

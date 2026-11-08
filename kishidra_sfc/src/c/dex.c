@@ -336,11 +336,6 @@ static void pic_sprites(void) {
   }
 }
 
-static u8 mon_track(u8 m) {
-  static const u8 t[5] = { BGM_ZAKO, BGM_BOSS, BGM_MAOU, BGM_MAOU_FINAL, BGM_PEKO };
-  return t[mon_bgm[m]];
-}
-
 /* ---------------------------------------------------------------- cards */
 static void card_head(u16 no, u16 name) {
   box(BX_HEAD, 0, 0, 32, 2, T_HEAD, PAL_W, BOX_OPAQUE);
@@ -397,7 +392,7 @@ static u16 mon_card(u8 pos) {
   tb_flush(BX_INFO);
   oam_next = 0; pic_sprites(); oam_finish();
   screen_on();
-  bgm_play(known ? mon_track(m) : BGM_OPENING);
+  bgm_play(known && mon_song[m] ? mon_song[m] : BGM_OPENING);   /* DexData.monster_bgm; none: the map song */
   for (;;) {
     oam_next = 0; pic_sprites(); oam_finish();
     frame_wait();
