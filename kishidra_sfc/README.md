@@ -52,6 +52,12 @@ python build.py rom
 
 `data/gen/` に変換済みのデータが入っているので、ROM を作るだけならこれだけで足ります。
 
+ROM の大きさは環境変数 `ROM_MB` で選べます（既定は 4）。`ROM_MB=8 python build.py rom` で ExLoROM 8MB
+（`ROM_MB=6` で 6MB）。先頭 4MB は 4MB の ROM と同じ並びで、その先（バンク $01〜$7D、SlowROM）には BGM と
+DMA で読む絵だけを置きます。ExLoROM が動くのは snes9x 1.54 以降（RetroArch の snes9x コアを含む）、bsnes v115 / ares、
+FXPak Pro / SD2SNES（ファームウェア 1.8.0 以降）、MiSTer。Mesen2、Super EverDrive、snes9x 1.50〜1.53（6MB なら可）、
+Wii・ゲームキューブ版 snes9x（6MB まで）、bsnes-mercury では動きません。セーブ（SRAM）の形はどの大きさでも同じです。
+
 ### データの作り直し（Safari 版から変換し直すとき）
 
 追加で必要なもの: Pillow、numpy、ffmpeg、gcc（BRR 変換プログラムのため）。
@@ -86,7 +92,11 @@ python build.py rom
   セーブはスクリプトの `#!mksave` 行から作る）、録音を少しの時間のずれを許して区間ごとに比べる `wavcmp.py`、
   2 つの ROM が読むデータ（アセット・文字列・フォント・敵の能力・SPC・BGM を流す順）を比べる `romdata.py`、
   2 つの data/gen の絵をアセットごとに比べ、変わったスプライトのポーズを描いて並べる `gfxdiff.py`（`-o` で PNG）、
-  置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド）、ラグの計測 `lag.py`、
+  置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド。4MB と 8MB）、ラグの計測 `lag.py`、
+  ROM のヘッダー・バンク $00 の写し・チェックサムと、snes9x・bsnes / ares・FXPak Pro・Mesen2 がどの形と読むかの検査
+  `romcheck.py`（build.py もできた ROM に同じ検査をする）、エミュレーターやフラッシュカートが ExLoROM / ExHiROM の
+  6MB・8MB を読めるかを画面の色（緑 = 読める、赤 = 読めない）で見る試験 ROM `probe/mkprobe.py`（`build/probe/` に作る）と
+  それを libretro コアで動かす `probe/runprobe.py`、
   走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`、
   セーブ v2 のテスト `savetest.py`（v1 からの移行・スロットの交代・こわれたスロットからの戻り）。
   `runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl` で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。

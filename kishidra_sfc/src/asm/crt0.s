@@ -123,6 +123,10 @@ BG1MAP_VRAM = $7000
 BG2MAP_VRAM = $7400
 BG3MAP_VRAM = $7800
 
+; STARTUP (reset, NMI / IRQ / BRK entries) runs in bank $00, where the CPU takes the vectors: in the
+; 4 MB LoROM that is a mirror of bank $80, in ExLoROM (build.py ROM_MB=6 / 8) a copy of bank $80 at file
+; 4 MB.  So it may only jump to bank $80 (jml) or use long addresses / I/O registers: never read other
+; ROM banks through bank $00-$7D addresses (they are other data in ExLoROM).
 .segment "STARTUP"
 reset:
   sei

@@ -8,7 +8,9 @@ usage: budget.py [MAP]      (default build/kishidra.map; exit status 1 when a ga
   code banks   CODEn + ENGn of each bank $81-$9F with code (gate: <= 30 KB each; + the data in the
                rest of the bank: BANKxx + PLxx, placed by tools/romplace.py)
   low WRAM     CODE + STUBS + LOWBSS in $0200-$1FFF (gate: >= 0.5 KB free)
-  WRAM $7E     RODATA + DATA + BSS in $7E:2000-$F6FF (the C data; reported)"""
+  WRAM $7E     RODATA + DATA + BSS in $7E:2000-$F6FF (the C data; reported)
+  slow banks   ROM_MB=6 / 8 (ExLoROM): the placed data in $01-$7D (PL01..PL7D: DMA-read art and the BGM
+               stream only; reported)"""
 import os
 import re
 import sys
@@ -56,6 +58,10 @@ def main():
         fails.append('low WRAM')
     print('WRAM $7E: RODATA %d + DATA %d + BSS %d = %d of %d, free %d' %
           (g('RODATA', 0), g('DATA', 0), g('BSS', 0), cram, CRAM_SIZE, CRAM_SIZE - cram))
+    slow = [(b, g('PL%02X' % b, 0)) for b in range(0x01, 0x7e) if g('PL%02X' % b, 0)]
+    if slow:
+        print('slow banks $01-$7D: %d B (%.1f KB) placed in %d banks ($%02X-$%02X)' % (
+            sum(n for b, n in slow), sum(n for b, n in slow) / KB, len(slow), slow[0][0], slow[-1][0]))
     if fails:
         print('GATE FAILED: ' + ', '.join(fails))
         sys.exit(1)

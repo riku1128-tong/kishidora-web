@@ -25,7 +25,8 @@ They write their bytes to files under data/gen/ and a manifest data/gen/place/<n
                   left lo, left hi, blocks 0, 1, 2] for the start and the same for the loop (blocks 0 =
                   played once); "left" = units left in that segment.
   speed "fast"    CPU-read data (fonts, strings, LZSS / tile runs): FastROM banks only.
-        "any"     DMA-read data: FastROM first, the slow banks (ExLoROM $01-$7D) when FastROM is full.
+        "any"     DMA-read data: FastROM first, the slow banks (ExLoROM $01-$7D, build.py ROM_MB=6 / 8)
+                  when FastROM is full.
         "slow"    the stream: slow banks first, then what is left anywhere (placed last).
   long  true      the code reads it with 24-bit absolute addresses (lda f:label,x): never in the code
                   banks $81-$9F (their memory areas start at $8000, so the address there has bank 0 and
@@ -37,9 +38,10 @@ context needs the '<'), never ^label.  Every ROM memory area carries its bank at
 is right everywhere (build.py linker_cfg).
 
 Placement (place()):
-  1. whole blobs, biggest first (ties by label), best fit (the bank with the least free space that
-     still holds it) over the FastROM banks (for long ones only the banks that allow long reads);
-     'any' blobs fall back to the slow banks.
+  1. whole blobs: the 'fast' ones first, then the 'any' ones (so an 'any' blob never takes FastROM
+     room a 'fast' one needs), each group biggest first (ties by label), best fit (the bank with the
+     least free space that still holds it) over the FastROM banks (for long ones only the banks that
+     allow long reads); an 'any' blob goes to the slow banks only when no FastROM bank holds it.
   2. streams last: slow banks first, then every tail that is left in bank order; tails under `min`
      units are skipped (except for the last chunk); more than 255 segments is an error.
 In every memory area the placed segment PLxx is the last one, so nothing linked before it moves
@@ -148,9 +150,10 @@ def stub(entries):
 
 def place(entries, banks):
     """banks: [{bank (CPU bank byte), base (16-bit address of the area start), used (bytes of the fixed
-    segments, from the pass 1 map), speed ('fast' / 'slow'), long (may hold long blobs)}].
+    segments, from the pass 1 map), speed ('fast' / 'slow'), long (may hold long blobs), size (bytes of
+    the area, default $8000; $81 / $01 end at $FFB0 where build.py keeps 80 zero bytes)}].
     Returns (asm text of pass 2, report lines, {label: (bank, 16-bit address, size, entry)})."""
-    free = {b['bank']: BANK - b['used'] for b in banks}
+    free = {b['bank']: b.get('size', BANK) - b['used'] for b in banks}
     at = {b['bank']: b['base'] + b['used'] for b in banks}
     fast = [b['bank'] for b in banks if b['speed'] == 'fast']
     slow = [b['bank'] for b in banks if b['speed'] == 'slow']
@@ -171,8 +174,10 @@ def place(entries, banks):
                 best = b
         return best
 
-    # 1. whole blobs: biggest first, ties by label (the result does not depend on the manifest order)
-    for e in sorted([e for e in entries if e['kind'] == 'whole'], key=lambda e: (-e['size'], e['label'])):
+    # 1. whole blobs: 'fast' before 'any', biggest first, ties by label (the result does not depend on
+    #    the manifest order)
+    for e in sorted([e for e in entries if e['kind'] == 'whole'],
+                    key=lambda e: (e['speed'] != 'fast', -e['size'], e['label'])):
         ok = [b for b in fast if b in longok] if e['long'] else fast
         b = best_fit(ok, e['size'])
         if b is None and e['speed'] != 'fast':
@@ -218,8 +223,18 @@ def place(entries, banks):
     for label, (b, addr, size, e) in where.items():
         tot[e['_from']] = tot.get(e['_from'], 0) + size
     rep = ['placed: ' + ', '.join('%s %.1fK' % (k, v / 1024) for k, v in sorted(tot.items()))]
-    rep.append('ROM free after placing: %.1f KB (%s)' % (sum(free.values()) / 1024, ', '.join(
-        '$%02X:%d' % (b, free[b]) for b in sorted(free) if free[b] >= 1024)))
+    sizes = {b['bank']: b.get('size', BANK) for b in banks}
+    runs = []                       # banks with >= 1 KB free; runs of empty banks as $A-$B:size
+    for b in sorted(free):
+        if free[b] < 1024:
+            continue
+        if runs and runs[-1][1] == b - 1 and free[b] == sizes[b] and runs[-1][2] == free[b] and runs[-1][3]:
+            runs[-1][1] = b
+        else:
+            runs.append([b, b, free[b], free[b] == sizes[b]])
+    rep.append('ROM free after placing: %.1f KB (FastROM %.1f KB, slow %.1f KB: %s)' % (
+        sum(free.values()) / 1024, sum(free[b] for b in fast) / 1024, sum(free[b] for b in slow) / 1024,
+        ', '.join(('$%02X-$%02X:%d' % (a, z, n)) if z > a else ('$%02X:%d' % (a, n)) for a, z, n, e in runs)))
     for e in entries:
         if e['kind'] == 'stream':
             rep.append('%s: %d segments' % (e['label'], len(segs_of[e['label']])))
