@@ -53,7 +53,7 @@ python build.py rom
 `data/gen/` に変換済みのデータが入っているので、ROM を作るだけならこれだけで足ります。
 
 ROM の大きさは環境変数 `ROM_MB` で選べます（既定は 4）。`ROM_MB=8 python build.py rom` で ExLoROM 8MB
-（`ROM_MB=6` で 6MB）。先頭 4MB は 4MB の ROM と同じ並びで、その先（バンク $01〜$7D、SlowROM）には BGM と
+（`ROM_MB=6` で 6MB）。先頭 4MB は 4MB の ROM と同じ並びで、その先（8MB はバンク $01〜$7D、6MB は $01〜$3F。SlowROM）には BGM と
 DMA で読む絵だけを置きます。ExLoROM が動くのは snes9x 1.54 以降（RetroArch の snes9x コアを含む）、bsnes v115 / ares、
 FXPak Pro / SD2SNES（ファームウェア 1.8.0 以降）、MiSTer。Mesen2、Super EverDrive、snes9x 1.50〜1.53（6MB なら可）、
 Wii・ゲームキューブ版 snes9x（6MB まで）、bsnes-mercury では動きません。セーブ（SRAM）の形はどの大きさでも同じです。
