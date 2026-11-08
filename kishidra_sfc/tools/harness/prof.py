@@ -17,6 +17,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hrun  # noqa: E402
+
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
 CORE = os.environ.get('CORE', '/usr/lib/x86_64-linux-gnu/libretro/snes9x_libretro.so')
 
@@ -151,6 +154,7 @@ def prof(script, frames, top, td):
         lines += ['wait 30', 'wram %s/w%d.bin' % (td, i + 1)]
     sc = os.path.join(td, 's.txt')
     open(sc, 'w').write('\n'.join(lines) + '\n')
+    hrun.ensure_runrom()                          # runrom is not in git: built here when missing / old
     subprocess.run([os.path.join(ROOT, 'tools', 'harness', 'runrom'), CORE, os.path.join(ROOT, 'build', 'kishidra.sfc'), sc],
                    check=True, capture_output=True)
     table = symbols()

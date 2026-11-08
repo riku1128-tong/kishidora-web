@@ -78,8 +78,9 @@ python build.py rom
   2 つの ROM で同じ操作をして画面・音・メモリを比べる `abtest.py`（`t/reg1.txt` が画面、`t/reg2.txt` が音の一巡り。
   セーブはスクリプトの `#!mksave` 行から作る）、ラグの計測 `lag.py`、走査線ごとのスプライト数 `oamlines.py`、
   バンク・WRAM の予算 `budget.py`。`runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl`
-  で作る（これらの道具は runrom.c が新しければ作り直す）。`XDEFS="TEST_HOOKS …" python build.py rom` で
-  テストだけの定義を入れた ROM を作る（TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない）
+  で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
+  `XDEFS="TEST_HOOKS …" python build.py rom` でテストだけの定義を入れた ROM を作る
+  （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない）
 - NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる
   （残りは次のフレーム）。勇者・雑魚のポーズとスキルのアイコンの絵は、それを描く OAM と同じ NMI で送る
   （絵と並びがずれたフレームが出ない）。戦闘のメッセージ・コンボ・カードの文字は BG3 マップと同じ NMI で送る

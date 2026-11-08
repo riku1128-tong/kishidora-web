@@ -7,14 +7,15 @@ usage: abtest.py [-o OUTDIR] [-j N] [--check KINDS] [--wav-tol PCT] ROM_A ROM_B 
   SCRIPT_OR_DIR  runrom scripts (a folder: every *.txt in it).  Each runs from power-on on both ROMs;
                  its output files go to OUTDIR/<script>/a and /b as NNN_name (NNN = script line),
                  '#!mksave' lines make their saves first (hrun.py), relative 'loadsram' paths are
-                 relative to the script.  Symbols in poke / peek / waitfor are looked up in each
-                 ROM's own .lbl / .map (so they follow code that moved).  A script with a line
-                 '#!needs SYMBOL ...' is skipped when a ROM lacks one of them (e.g. '#!needs
-                 dbg_cmd' for XDEFS=TEST_HOOKS ROMs).
+                 relative to the script (else to the current directory).  Symbols in poke / peek /
+                 waitfor are looked up in each ROM's own .lbl / .map (so they follow code that
+                 moved).  A script with a line '#!needs SYMBOL ...' is skipped when a ROM lacks
+                 one of them (e.g. '#!needs dbg_cmd' for XDEFS=TEST_HOOKS ROMs).
   --check KINDS  what must be identical: shot, wav, peek (the values runrom's peek lines print),
                  dump (wram / sram / vram files); default shot,wav,peek.  Dumps are always
-                 compared and listed.  A script runrom fails on (bad poke, waitfor timeout) is
-                 an error.  runrom's output is kept in <side>/_stdout.txt.
+                 compared and listed.  A script runrom fails on (an unknown command, a bad
+                 poke, a missing save, a waitfor timeout) is an error.  runrom's output is kept
+                 in <side>/_stdout.txt.
   --wav-tol PCT  a wav that differs still passes when its RMS is within PCT % of the other's
                  (default: byte-identical).
   -o OUTDIR      default: a new folder under $TMPDIR.  Differing screenshots get a side-by-side

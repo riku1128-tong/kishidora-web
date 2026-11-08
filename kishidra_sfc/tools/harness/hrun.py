@@ -7,7 +7,8 @@ Script conventions on top of runrom's commands (runrom itself reads these lines 
                               'loadsram NAME.srm' loads it (so no .srm file has to be kept)
   #!needs SYMBOL ...          abtest.py skips the script on a ROM without these symbols (dbg_cmd:
                               an XDEFS=TEST_HOOKS ROM)
-Relative paths in 'loadsram' and 'map' are relative to the script's folder.
+Relative paths in 'loadsram' and 'map' are relative to the script's folder (or, when the file is not
+there, to the current directory, as runrom alone reads them); runrom stops on a file it cannot read.
 
     python3 hrun.py SCRIPT DIR    write DIR/<script> with the saves made and the paths resolved (for
                                   tools that take a plain runrom script: textcheck.py, prof.py)"""
@@ -100,7 +101,10 @@ def prepare(script, workdir, outdir=None, text=None):
             continue
         if p[0] in ('loadsram', 'map') and len(p) > 1:
             f = saves.get(p[1]) or (p[1] if os.path.isabs(p[1]) else os.path.join(sdir, p[1]))
-            out.append('%s %s' % (p[0], f))
+            if p[1] not in saves and not os.path.isabs(p[1]) and not os.path.exists(f) \
+                    and os.path.exists(os.path.abspath(p[1])):
+                f = os.path.abspath(p[1])     # as runrom alone would read it (scripts run from their group folder)
+            out.append('%s %s' % (p[0], f))   # a file that is in neither place: runrom stops (exit 2)
         elif p[0] in OUTPUTS and len(p) > 1:
             f = p[1][4:] if p[1].startswith('OUT/') else p[1]
             if outdir:
@@ -118,14 +122,17 @@ _build_lock = threading.Lock()
 
 
 def ensure_runrom():
-    """runrom is built locally (.gitignore): (re)build it when runrom.c is newer"""
+    """runrom is built locally (.gitignore): (re)build it when it is missing or runrom.c is newer
+    (abtest / lag / oamlines through run(); textcheck.py, prof.py, peek.py call this too)"""
     src = os.path.join(HERE, 'runrom.c')
     if RUNROM != os.path.join(HERE, 'runrom') or not os.path.exists(src):
         return
     with _build_lock:
         if not os.path.exists(RUNROM) or os.path.getmtime(RUNROM) < os.path.getmtime(src):
-            subprocess.run(['gcc', '-O2', '-I/usr/include/libretro-common', '-o', RUNROM, src, '-ldl'],
-                           check=True, capture_output=True)
+            r = subprocess.run(['gcc', '-O2', '-I/usr/include/libretro-common', '-o', RUNROM, src, '-ldl'],
+                               capture_output=True, text=True)
+            if r.returncode:
+                sys.exit('building runrom failed:\n' + r.stdout + r.stderr)
 
 
 def run(rom, text, workdir, timeout=1800):

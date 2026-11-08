@@ -24,8 +24,11 @@
  * ADDR: a symbol of the link (C names with or without the leading _: sv, _sv, dbg_cmd), optionally
  *   +N / -N (decimal or $hex / 0xhex), or a hex address ($7e2000, 0x7f0000, 7e2000; $0000-$1fff and
  *   its mirrors are low WRAM).  A symbol below $10000 at $2000 or above is in bank $7E (the C data).
+ *   Use data symbols: the bank-switched C code also links at $8000-$FFFF (16-bit values), so a
+ *   function name is not caught and reads / writes the C data at that offset.
  * V: decimal, or hex with $ / 0x; negative values are stored as two's complement.
- * Exit status: 0 ok, 1 cannot start, 2 bad command / address (the script stops), 3 waitfor timeout.
+ * Exit status: 0 ok, 1 cannot start, 2 bad command / address (the script stops: an unknown command,
+ *   button or frame count, a missing argument, a loadsram file that cannot be read), 3 waitfor timeout.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,6 +51,7 @@ static unsigned fmt = RETRO_PIXEL_FORMAT_0RGB1555;
 static uint8_t frame[1024*1024*4]; static unsigned fw, fh; static size_t fpitch;
 static uint16_t joy;
 static FILE *wavf; static uint32_t wavbytes;
+static void die(const char *f, ...);   /* a bad script line: message, exit status 2 */
 
 static void lg(enum retro_log_level l, const char *f, ...) { va_list a; va_start(a,f); if(l>=RETRO_LOG_WARN) vfprintf(stderr,f,a); va_end(a); }
 static bool env(unsigned cmd, void *data) {
@@ -72,7 +76,7 @@ static int16_t state(unsigned port, unsigned dev, unsigned idx, unsigned id) {
   return (joy >> id) & 1;
 }
 static void shot(const char *fn) {
-  FILE *f = fopen(fn, "wb"); if (!f) return;
+  FILE *f = fopen(fn, "wb"); if (!f) die("cannot write %s", fn);
   fprintf(f, "P6\n%u %u\n255\n", fw, fh);
   for (unsigned y = 0; y < fh; y++) for (unsigned x = 0; x < fw; x++) {
     uint8_t rgb[3];
@@ -97,12 +101,13 @@ static uint16_t btn(const char *s) {
     else if (!strcmp(t,"START")) m |= 1<<RETRO_DEVICE_ID_JOYPAD_START; else if (!strcmp(t,"SELECT")) m |= 1<<RETRO_DEVICE_ID_JOYPAD_SELECT;
     else if (!strcmp(t,"UP")) m |= 1<<RETRO_DEVICE_ID_JOYPAD_UP; else if (!strcmp(t,"DOWN")) m |= 1<<RETRO_DEVICE_ID_JOYPAD_DOWN;
     else if (!strcmp(t,"LEFT")) m |= 1<<RETRO_DEVICE_ID_JOYPAD_LEFT; else if (!strcmp(t,"RIGHT")) m |= 1<<RETRO_DEVICE_ID_JOYPAD_RIGHT;
-    else fprintf(stderr, "bad button %s\n", t);
+    else die("bad button %s", t);
   }
+  if (!m) die("no button");
   return m;
 }
 static void dump(unsigned id, const char *fn) {
-  FILE *f = fopen(fn, "wb"); if (!f) return; void *p = p_mem(id); size_t n = p_memsize(id);
+  FILE *f = fopen(fn, "wb"); if (!f) die("cannot write %s", fn); void *p = p_mem(id); size_t n = p_memsize(id);
   if (p && n) fwrite(p, 1, n, f); fclose(f);
 }
 static unsigned long frames;
@@ -195,6 +200,19 @@ static uint8_t *wram(long a, long n) {
   if (!m || (size_t)(a + n) > sz) die("WRAM %05lx+%ld not available", a, n);
   return m + a;
 }
+static int known(const char *c) {
+  static const char *const k[] = { "wait", "press", "hold", "shot", "wav", "wavend", "wram", "sram", "vram",
+                                   "loadsram", "map", "poke", "pokew", "pokel", "peek", "waitfor" };
+  size_t i;
+  for (i = 0; i < sizeof k / sizeof *k; i++) if (!strcmp(c, k[i])) return 1;
+  return 0;
+}
+/* a frame count (decimal) */
+static int count(const char *t) {
+  long v;
+  if (!number(t, 0, &v) || v < 0 || v > 1000000) die("bad frame count %s", t);
+  return (int)v;
+}
 static long value(const char *t, int bytes) {
   long v;
   if (!number(t, 0, &v)) die("bad value %s", t);
@@ -228,22 +246,32 @@ int main(int argc, char **argv) {
     for (char *t = strtok(line, " \t\r\n"); t && nt < 64; t = strtok(NULL, " \t\r\n")) tok[nt++] = t;
     if (!nt || tok[0][0] == '#') continue;
     const char *cmd = tok[0], *a1 = nt > 1 ? tok[1] : "";
-    int n = nt > 2 ? atoi(tok[2]) : -1;
-    if (!strcmp(cmd, "wait")) { run(atoi(a1)); }
+    int n = -1;
+    if (!known(cmd)) die("unknown command %s", cmd);
+    if (nt < 2 && strcmp(cmd, "wavend")) die("%s: argument missing", cmd);
+    if (nt > 2 && (!strcmp(cmd, "press") || !strcmp(cmd, "hold"))) n = count(tok[2]);
+    if (!strcmp(cmd, "wait")) { run(count(a1)); }
     else if (!strcmp(cmd, "press")) { joy = btn(a1); run(n > 0 ? n : 2); joy = 0; run(1); }
     else if (!strcmp(cmd, "hold")) { joy = btn(a1); run(n > 0 ? n : 1); joy = 0; }
     else if (!strcmp(cmd, "shot")) { shot(a1); }
-    else if (!strcmp(cmd, "wav")) { wavf = fopen(a1, "wb+"); wavbytes = 0; uint8_t z[44] = {0}; fwrite(z, 44, 1, wavf); }
+    else if (!strcmp(cmd, "wav")) { if (wavf) { wavhdr(wavf, wavbytes); fclose(wavf); } wavf = fopen(a1, "wb+"); if (!wavf) die("cannot write %s", a1); wavbytes = 0; uint8_t z[44] = {0}; fwrite(z, 44, 1, wavf); }
     else if (!strcmp(cmd, "wavend")) { if (wavf) { wavhdr(wavf, wavbytes); fclose(wavf); wavf = NULL; } }
     else if (!strcmp(cmd, "wram") && nt >= 4) {
       long a = wram_addr(tok[2]), len; FILE *f;
       if (!number(tok[3], 0, &len) || len <= 0) die("bad length %s", tok[3]);
-      f = fopen(a1, "wb"); if (f) { fwrite(wram(a, len), 1, len, f); fclose(f); }
+      uint8_t *m = wram(a, len);
+      f = fopen(a1, "wb"); if (!f) die("cannot write %s", a1);
+      fwrite(m, 1, len, f); fclose(f);
     }
+    else if (!strcmp(cmd, "wram") && nt == 3) die("wram FILE [ADDR LEN]");
     else if (!strcmp(cmd, "wram")) dump(RETRO_MEMORY_SYSTEM_RAM, a1);
     else if (!strcmp(cmd, "sram")) dump(RETRO_MEMORY_SAVE_RAM, a1);
     else if (!strcmp(cmd, "vram")) dump(RETRO_MEMORY_VIDEO_RAM, a1);
-    else if (!strcmp(cmd, "loadsram")) { FILE *f = fopen(a1, "rb"); if (f) { if (fread(p_mem(RETRO_MEMORY_SAVE_RAM), 1, p_memsize(RETRO_MEMORY_SAVE_RAM), f)) {} fclose(f); } }
+    else if (!strcmp(cmd, "loadsram")) {
+      FILE *f = fopen(a1, "rb"); if (!f) die("cannot read %s", a1);
+      if (fread(p_mem(RETRO_MEMORY_SAVE_RAM), 1, p_memsize(RETRO_MEMORY_SAVE_RAM), f)) {}
+      fclose(f);
+    }
     else if (!strcmp(cmd, "map")) { if (nt < 2) die("map FILE"); map_path = strdup(a1); syms_loaded = 0; nsym = 0; }
     else if (!strcmp(cmd, "poke") || !strcmp(cmd, "pokew") || !strcmp(cmd, "pokel")) {
       int w = cmd[4] == 'w' ? 2 : cmd[4] == 'l' ? 4 : 1, k;
@@ -269,7 +297,7 @@ int main(int argc, char **argv) {
       for (k = 0; k < max && *m != (uint8_t)v; k++) run(1);
       if (*m != (uint8_t)v) { fprintf(stderr, "runrom: line %d: waitfor %s %s: timeout after %ld frames (byte is %02x)\n", lineno, a1, tok[2], max, *m); status = 3; }
     }
-    else fprintf(stderr, "unknown cmd %s\n", cmd);
+    else die("unknown command %s", cmd);
   }
   if (wavf) { wavhdr(wavf, wavbytes); fclose(wavf); }
   printf("frames %lu\n", frames);

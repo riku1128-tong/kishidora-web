@@ -2,6 +2,8 @@
 """Run the ROM N frames (optionally with a script) and print WRAM symbols from the ld65 map.
 usage: peek.py frames sym[:len] ...   (sym may be a hex address like 7e2000)"""
 import os, re, subprocess, sys, tempfile
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hrun  # noqa: E402
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
 CORE = os.environ.get('CORE', '/usr/lib/x86_64-linux-gnu/libretro/snes9x_libretro.so')
 def syms():
@@ -17,6 +19,7 @@ def main():
     w = os.path.join(td, 'w.bin')
     pre = os.environ.get('SCRIPT', '')
     open(sc, 'w').write((open(pre).read() if pre else '') + 'wait %s\nwram %s\n' % (frames, w))
+    hrun.ensure_runrom()                          # runrom is not in git: built here when missing / old
     subprocess.run([os.path.join(ROOT, 'tools', 'harness', 'runrom'), CORE, os.path.join(ROOT, 'build', 'kishidra.sfc'), sc], check=True, capture_output=True)
     d = open(w, 'rb').read()
     s = syms()
