@@ -1,0 +1,65 @@
+# S6: the menu kit's optional helpers through test commands (story.c has a copy of both), on the
+# forge root.  mk_confirm3 (DC_CONFIRM3, 28 x 10 window, やめる left / はじめから right, the cursor on
+# the right): 3 lines + A = yes (res0 1); 2 lines + B = no (0); 1 line + LEFT, A = やめる (0).
+# mk_num_spr (DC_NUMSPR): +123 at (100, 50) pal 4, -45 at (8, 200) pal 5, 0 at (-3, 7) pal 6 and
+# -32768: count in res0, the OAM bytes (x, y, tile, attr) in dbg_buf; tiles 12-21 '0'-'9', 22 '+',
+# 23 '-'; attr = pal << 1 | prio 3 << 4.  kitcheck.py checks the peeks.  XDEFS=TEST_HOOKS ROMs.
+#!needs dbg_buf
+#!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3 --items 5:1,2 40:3
+loadsram s1.srm
+wait 200
+press A
+wait 120
+press Y
+wait 60
+press DOWN
+wait 6
+press DOWN
+wait 6
+press A
+wait 90
+pokew dbg_arg 3
+poke dbg_cmd 6
+wait 40
+shot OUT/confirm3.ppm
+press A
+waitfor dbg_seq 1 120
+peek dbg_res 2
+wait 20
+shot OUT/confirm3_closed.ppm
+pokew dbg_arg 2
+poke dbg_cmd 6
+wait 40
+shot OUT/confirm2.ppm
+press B
+waitfor dbg_seq 2 120
+peek dbg_res 2
+pokew dbg_arg 1
+poke dbg_cmd 6
+wait 40
+press LEFT
+wait 10
+shot OUT/confirm1_no.ppm
+press A
+waitfor dbg_seq 3 120
+peek dbg_res 2
+pokew dbg_arg 100 50 123 4
+poke dbg_cmd 7
+waitfor dbg_seq 4 60
+peek dbg_res 2
+peek dbg_buf 16
+pokew dbg_arg 8 200 -45 5
+poke dbg_cmd 7
+waitfor dbg_seq 5 60
+peek dbg_res 2
+peek dbg_buf 12
+pokew dbg_arg -3 7 0 6
+poke dbg_cmd 7
+waitfor dbg_seq 6 60
+peek dbg_res 2
+peek dbg_buf 8
+pokew dbg_arg 40 60 -32768 4
+poke dbg_cmd 7
+waitfor dbg_seq 7 60
+peek dbg_res 2
+peek dbg_buf 24

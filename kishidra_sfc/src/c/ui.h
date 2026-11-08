@@ -27,11 +27,13 @@
 #define PAL_W_RED PAL_RED
 
 extern u8 tb[12 * 8];
-extern u32 targ_num, targ_num2;
+extern u32 targ_num, targ_num2, targ_num3;   /* {n} {m} {k} */
 extern u16 targ_str;
 extern u16 text_wrap;          /* > 0: lines break before this x (say_wrap) */
 extern u16 text_small;         /* msg_width measures in the 8-dot font */
-extern u16 hero_name[8];
+extern u16 text_lh;            /* > 0: line step of '\n' in the 12-dot font instead of 14 (16: lines of
+                                * different colours, each on its own tile rows); set it around the say, back to 0 */
+extern u16 hero_name[9];       /* {name}: up to 8 glyph codes + 0 (a set name for a moment; name_sync restores) */
 
 void tb_open(u8 box);
 #ifdef PROFILE
@@ -68,7 +70,10 @@ void box_pal(u8 id, u8 tx, u8 ty, u8 tw, u8 th, u8 pal);
 void box_hide(u8 id);
 void win_base(void);          /* snapshot BG1 (call after loading the screen picture) */
 void win_open(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal);
-void win_close(u8 id);
+void win_close(u8 id);         /* any order (a window closed under later ones: ui.c) */
+#ifdef TEST_HOOKS
+u16 dbg_wins(u8 k, u8 over);   /* sys.c DC_WINS: k rounds of an out-of-order close -> growth of the save stack */
+#endif
 
 /* menu cursor (sprite) */
 void cursor_at(s16 x, s16 y);

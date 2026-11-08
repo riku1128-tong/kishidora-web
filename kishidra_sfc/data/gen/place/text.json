@@ -9945,6 +9945,14 @@
 "speed": "fast"
 },
 {
+"label": "tx_1243",
+"file": "text/strings.bin",
+"off": 27032,
+"size": 80,
+"kind": "whole",
+"speed": "fast"
+},
+{
 "label": "font_glyphs",
 "file": "font.bin",
 "size": 16920,

@@ -99,11 +99,16 @@ void set_bg3_palettes(void) {
 
 void sys_init(void) {
   vram_clear();
-  set_vram_layout();
+  set_vram_layout();     /* (also the windows and the colour window off: crt0.s) */
   bgmode = 0x09;         /* mode 1, BG3 priority */
   tm_main = 0x17;
   tm_sub = 0;
+  /* every screen starts without colour math, mosaic or the effect HDMA channels 4 / 5 (a battle
+   * flash or a menu dim never carries over; mk_screen comes here too) */
   cgwsel = 0; cgadsub = 0;
+  coldata[0] = coldata[1] = coldata[2] = 0;
+  mosaic = 0;
+  hdma_on &= ~0x30;
   memset(scroll, 0, sizeof(scroll));
   clear_maps();
   set_bg3_palettes();
@@ -181,18 +186,39 @@ u16 prof_marks[16];
 #endif
 
 #ifdef TEST_HOOKS
+#include "ui.h"
+#include "story.h"
 /* test command mailbox (XDEFS=TEST_HOOKS builds only; tools/harness/runrom poke / pokew / waitfor).
  * The harness writes the arguments to dbg_arg[], then the command to dbg_cmd; the next frame_wait
- * runs it, writes dbg_res[], sets dbg_ack = the command (DC_UNKNOWN if no one knows it),
- * ++dbg_seq and clears dbg_cmd.  New commands: a case below, numbered in sys.h; a command of one
+ * clears dbg_cmd, runs the command (one that runs frames of its own, DC_NAME / DC_CONFIRM3, returns
+ * frames later), writes dbg_res[], sets dbg_ack = the command (DC_UNKNOWN if no one knows it) and
+ * ++dbg_seq.  New commands: a case below, numbered in sys.h; a command of one
  * screen checks dbg_scr (the screen sets it with DBG_SCREEN) and calls that screen's handler
  * (a non-static function: a direct call works across banks, a function pointer does not) */
 u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
 u16 dbg_arg[4], dbg_res[4];
+u16 dbg_buf[32];
+
+static void dbg_text(void) {
+  u8 f = (u8)dbg_arg[0];
+  if (f & 4) { win_close(9); return; }
+  targ_num = dbg_arg[1]; targ_num2 = dbg_arg[2];
+  targ_num3 = dbg_arg[3] | ((u32)(dbg_arg[0] >> 8) << 16);
+  if (!(f & 8)) win_open(9, 1, 9, 30, 8, 784, PAL_W);
+  if (f & 1) tb[9 * 8 + 7] |= BOX_SMALL;
+  else tb[9 * 8 + 7] &= ~BOX_SMALL;
+  if (f & 2) text_lh = 16;
+  ea[0] = 8; ea[1] = dbg_buf[31] ? dbg_buf[31] : 8; ea[2] = (u16)dbg_buf;
+  tb_codes(9);
+  text_lh = 0;
+  tb_flush(9);
+}
 
 static void dbg_poll(void) {
   u8 c = dbg_cmd;
+  u16 a0 = dbg_arg[0], a1 = dbg_arg[1], a2 = dbg_arg[2], a3 = dbg_arg[3];
   dbg_res[0] = dbg_res[1] = dbg_res[2] = dbg_res[3] = 0;
+  dbg_cmd = 0;                  /* (the commands below that wait for frames see no command again) */
   switch (c) {
   case DC_PING:                 /* is the mailbox there?  ~arg0, the frame, the screen */
     dbg_res[0] = ~dbg_arg[0];
@@ -204,12 +230,31 @@ static void dbg_poll(void) {
     se_play((u8)dbg_arg[0]);
     dbg_res[0] = dbg_arg[0];
     break;
+  case DC_TEXT:
+    dbg_text();
+    break;
+  case DC_WINS:
+    dbg_res[0] = dbg_wins((u8)a0, (u8)a1);
+    break;
+  case DC_NAME:                 /* (runs its own frames; the result is written when it returns, */
+    a0 = name_input(dbg_buf, (u8)a0, T_NAME_TITLE, (u8)a1);   /* and the screen below does not */
+    dbg_res[0] = a0;                                          /* see the keys it took) */
+    dbg_res[1] = hero_name[0];
+    pad_new = pad_rep = 0;
+    break;
+  case DC_CONFIRM3:
+    a0 = dbg_confirm3(T_NEW_ASK, a0 > 1 ? T_NEW_ASK2 : 0, a0 > 2 ? T_DBG_NOUNDO : 0, T_NEWGAME);
+    dbg_res[0] = a0;
+    pad_new = pad_rep = 0;
+    break;
+  case DC_NUMSPR:
+    dbg_res[0] = dbg_numspr((s16)a0, (s16)a1, (s16)a2, (u8)a3, (u8 *)dbg_buf);
+    break;
   default:
     c = DC_UNKNOWN;
   }
   dbg_ack = c;
   ++dbg_seq;
-  dbg_cmd = 0;
 }
 #endif
 

@@ -1408,6 +1408,8 @@
 #define T_DBG_CANCEL             1404
 #define T_DBG_NEED_SKILL         1405
 #define T_DBG_SK_NONE            1406
-#define N_TEXT 1407
+#define T_BTN_CANCEL             1407
+#define T_NAME_KEYS2             1408
+#define N_TEXT 1409
 #define N_GLYPH 705
 #endif

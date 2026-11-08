@@ -1080,7 +1080,7 @@ CFUNC force_blank
   plp
   rtl
 
-; void set_vram_layout(void): BG base registers (called once)
+; void set_vram_layout(void): BG base registers, windows off (sys_init: every screen, display blanked)
 CFUNC set_vram_layout
   php
   A8
@@ -1099,6 +1099,16 @@ CFUNC set_vram_layout
   ; OBJ: 8x8 / 32x32, name base $4000 (word), second table at $5000
   lda #$22
   sta f:OBSEL
+  ; windows off: no BG / OBJ / colour window, no window masks on the main or sub screen
+  ; (sys_init on every screen; nothing keeps shadows of these yet, the display is blanked here)
+  lda #0
+  sta f:W12SEL
+  sta f:W34SEL
+  sta f:WOBJSEL
+  sta f:WBGLOG
+  sta f:WOBJLOG
+  sta f:TMW
+  sta f:TSW
   A16
   lda #$6000
   sta f:_bg3_vram

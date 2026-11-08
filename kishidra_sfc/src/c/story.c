@@ -1,4 +1,8 @@
 /* story scenes: king talks, difficulty choice, name entry, orb / opened notices, ending */
+#ifdef TEST_HOOKS
+#define MK_WANT_CONFIRM3       /* (the test commands below run the kit's optional helpers) */
+#define MK_WANT_NUMSPR
+#endif
 #include "menukit.h"
 #include "save.h"
 #include "story.h"
@@ -10,11 +14,12 @@
 
 static u8 king_on;
 
+/* {name} = the hero's name again (after a set name was shown in it, or a name entry) */
 void name_sync(void) {
   u8 i;
   const u16 *src = sv.name[0] ? (const u16 *)sv.name : default_name;
   for (i = 0; i < 7; ++i) hero_name[i] = src[i];
-  hero_name[7] = 0;
+  hero_name[7] = hero_name[8] = 0;
 }
 
 static void king_sprites(void) {
@@ -116,14 +121,17 @@ u8 difficulty_select(u8 cur, u8 cancel) {
 #define NAME_X 96        /* screen pixels of the name */
 #define NAME_Y 26
 
-static u16 nbuf[NAME_MAX + 1];
+#define NI_LEN_MAX 8     /* set names (EquipSet.name) */
+
+static u16 nbuf[NI_LEN_MAX + 1];
 static u8 nlen, npage;
 
+/* the name so far, through {name} (hero_name holds up to 8 glyphs) */
 static void name_draw(void) {
   u8 i;
   tb_clear(BX_NAME);
-  for (i = 0; i < 7; ++i) hero_name[i] = nbuf[i];
-  hero_name[7] = 0;
+  for (i = 0; i < NI_LEN_MAX; ++i) hero_name[i] = nbuf[i];
+  hero_name[NI_LEN_MAX] = 0;
   say(BX_NAME, 0, 2, TXT_NAME);
   tb_flush(BX_NAME);
 }
@@ -158,22 +166,35 @@ static u8 name_rows(void) {
   return 1;
 }
 
-void name_entry(void) {
-  u8 cx = 0, cy = 0, i;
+/* The name entry screen (hero name, set names).  buf: max glyph codes (0-terminated when shorter;
+ * nothing is written at buf[max]), shown and edited from what it holds.  title: a text id ({n} =
+ * targ_num, e.g. the set number).  flags: NI_CANCEL = SELECT leaves without a change (returns 0)
+ * and the key bar says so (8-dot font); NI_NONEMPTY = START on an empty name plays SE_CANCEL and
+ * stays.  START decides: buf takes the name, returns 1.  On the way out {name} is the hero's name
+ * again (name_sync) and the screen fades out.  max <= 8. */
+u8 name_input(u16 *buf, u8 max, u16 title, u8 flags) {
+  u8 cx = 0, cy = 0, i, ok;
   u16 g;
   mk_screen();
   memset(nbuf, 0, sizeof(nbuf));
-  for (nlen = 0; nlen < NAME_MAX && sv.name[nlen]; ++nlen) nbuf[nlen] = sv.name[nlen];
+  if (max > NI_LEN_MAX) max = NI_LEN_MAX;
+  for (nlen = 0; nlen < max && buf[nlen]; ++nlen) nbuf[nlen] = buf[nlen];
   npage = 0;
   /* title window (rows 0-5) with the name in a box of its own inside, the grid (rows 6-24),
-   * the key help on a bar at the bottom */
+   * the key help on a bar at the bottom.  The name box is 96 px for the hero's 6 glyphs,
+   * 112 px for 8 (each up to 12 px, and the cursor dot after the 7th). */
   win_open(BX_NTITLE, 2, 0, 28, 6, 1, PAL_W);
-  say_center(BX_NTITLE, TOP_Y, T_NAME_TITLE);
+  say_center(BX_NTITLE, TOP_Y, title);
   tb_flush(BX_NTITLE);
-  box(BX_NAME, NAME_X / 8, NAME_Y / 8, 12, 2, 170, PAL_W, BOX_OPAQUE);
+  box(BX_NAME, NAME_X / 8, NAME_Y / 8, max > NAME_MAX ? 14 : 12, 2, 170, PAL_W, BOX_OPAQUE);
   win_open(BX_GRID, 2, 6, 28, 19, 200, PAL_W);
-  box(BX_NKEYS, 0, 26, 32, 2, 740, PAL_W, BOX_OPAQUE);
-  say_center(BX_NKEYS, 2, T_NAME_KEYS);
+  if (flags & NI_CANCEL) {
+    box(BX_NKEYS, 0, 26, 32, 2, 740, PAL_W, BOX_OPAQUE | BOX_SMALL);
+    say_center(BX_NKEYS, 4, T_NAME_KEYS2);
+  } else {
+    box(BX_NKEYS, 0, 26, 32, 2, 740, PAL_W, BOX_OPAQUE);
+    say_center(BX_NKEYS, 2, T_NAME_KEYS);
+  }
   tb_flush(BX_NKEYS);
   name_draw();
   grid_draw();
@@ -181,7 +202,7 @@ void name_entry(void) {
   for (;;) {
     oam_next = 0;
     mk_cursor(GRID_X + 8 + cx * CELL_W + (cx >= 5 ? 6 : 0) - 9, GRID_Y + TOP_Y + cy * CELL_H + 2);
-    if (nlen < NAME_MAX && ((frame >> 4) & 1)) spr_add(NAME_X + msg_width(TXT_NAME), NAME_Y + 2 + 10, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 3), 0);
+    if (nlen < max && ((frame >> 4) & 1)) spr_add(NAME_X + msg_width(TXT_NAME), NAME_Y + 2 + 10, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 3), 0);
     oam_finish();
     frame_wait();
     if (pad_rep & BTN_LEFT) { cx = cx ? cx - 1 : NAME_GRID_W - 1; se_play(SE_CURSOR); }
@@ -196,17 +217,27 @@ void name_entry(void) {
     }
     if (pad_new & BTN_A) {
       g = name_grid[npage][cy * NAME_GRID_W + cx];
-      if (g && nlen < NAME_MAX) { nbuf[nlen++] = g; se_play(SE_OK); name_draw(); }
+      if (g && nlen < max) { nbuf[nlen++] = g; se_play(SE_OK); name_draw(); }
     }
     if ((pad_new & BTN_B) && nlen) { nbuf[--nlen] = 0; se_play(SE_CANCEL); name_draw(); }
     if (pad_new & BTN_START) {
+      if (!nlen && (flags & NI_NONEMPTY)) { se_play(SE_CANCEL); continue; }   /* (web: けってい off) */
       se_play(SE_OK);
+      ok = 1;
       break;
     }
+    if ((pad_new & BTN_SELECT) && (flags & NI_CANCEL)) { se_play(SE_CANCEL); ok = 0; break; }
   }
-  for (i = 0; i <= NAME_MAX; ++i) sv.name[i] = i < nlen ? nbuf[i] : 0;
+  if (ok) for (i = 0; i < max; ++i) buf[i] = i < nlen ? nbuf[i] : 0;
   name_sync();
   fade_out();
+  return ok;
+}
+
+/* new game: the hero's name (empty = the default name, ゆうしゃ) */
+void name_entry(void) {
+  sv.name[NAME_MAX] = 0;
+  name_input(sv.name, NAME_MAX, T_NAME_TITLE, 0);
 }
 
 /* ---------------------------------------------------------------- notices */
@@ -261,3 +292,18 @@ void ending(void) {
   save_write();
   fade_out();
 }
+
+#ifdef TEST_HOOKS
+/* test commands (sys.c) for the kit's optional helpers: this file has a copy of them */
+u8 dbg_confirm3(u16 l1, u16 l2, u16 l3, u16 yes) { return mk_confirm3(l1, l2, l3, yes); }
+
+/* the sprites mk_num_spr adds from OAM slot 0: their count, and their 4 OAM bytes each in out */
+u8 dbg_numspr(s16 x, s16 y, s16 v, u8 pal, u8 *out) {
+  u8 n;
+  oam_next = 0;
+  mk_num_spr(x, y, v, pal);
+  n = oam_next;
+  memcpy(out, oam, (u16)n * 4);
+  return n;
+}
+#endif

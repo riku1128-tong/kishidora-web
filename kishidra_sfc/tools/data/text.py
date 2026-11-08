@@ -24,7 +24,10 @@ FULL = 'shnmk12.pcf.gz'
 HALF = 'shnm6x12a.pcf.gz'
 GLYPH0 = 16
 NO_LINE_START = set('、。，．・！？）」』】〕…‥ー～〜!?),.:;ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ')
-CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12, '{purple}': 13, '{gold}': 14}
+CTRL = {'\n': 1, '{name}': 2, '{n}': 3, '{s}': 4, '{m}': 11, '{c0}': 5, '{yellow}': 6, '{red}': 7, '{gray}': 8, '{blue}': 9, '{green}': 10, '{n3}': 12, '{purple}': 13, '{gold}': 14, '{k}': 15}
+# Codes 1-15 are all taken ({k} = targ_num3, the third number).  A further control code needs an escape
+# (a code followed by a sub-code word, decoded in text.s draw_run), never 16 or more: glyphs start at
+# GLYPH0 = 16 and sv.name / the set names keep glyph codes in SRAM, so the glyph numbering must not move.
 
 # characters the source text uses that the 12-dot fonts lack
 SUBST = {'～': '〜', '〜': '〜', '－': 'ー', '−': '－', '♡': '♥', '–': '-', '—': 'ー', '‥': '…', '･': '・', '　': ' ', '❤': '♥', '♪': '♪',

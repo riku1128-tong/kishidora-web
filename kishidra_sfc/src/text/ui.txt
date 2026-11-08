@@ -1,5 +1,7 @@
-# UI text (id<TAB>text). \n = new line, {name} = hero name, {n} = number, {s} = text argument
-# colours: {yellow} {red} {gray} {blue} {green} {c0}(normal)
+# UI text (id<TAB>text). \n = new line, {name} = hero name, {n} {m} {k} = numbers (targ_num / 2 / 3),
+# {n3} = {n} with 3 digits, {s} = text argument
+# colours: {yellow} {red} {gray} {blue} {green} {purple} {gold} {c0}(normal)
+# This file is read first, then src/text/ui_<lane>.txt of each lane (tools/make_data.py build_ui_text).
 T_NEWGAME	はじめから
 T_CONTINUE	つづきから
 T_COPYRIGHT	© LPP GAME LAB, 2026
@@ -476,3 +478,8 @@ T_DBG_TAKE	もらう
 T_DBG_CANCEL	やめる
 T_DBG_NEED_SKILL	スキルを 1 つは選んで
 T_DBG_SK_NONE	{gray}なし（欄を空ける）
+
+# text / UI kit (S6): shared by the lanes (each lane adds its own src/text/ui_<lane>.txt; an id is
+# defined once in all of them)
+T_BTN_CANCEL	やめる
+T_NAME_KEYS2	{gray}A:入力 B:けす L/R:文字 START:けってい SELECT:やめる

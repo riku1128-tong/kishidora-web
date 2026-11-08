@@ -1,0 +1,66 @@
+# S6: name_input (story.c) through the DC_NAME test command (sys.c), from the forge root.
+#  1. rename mode (NI_CANCEL | NI_NONEMPTY, 6 glyphs) on ドラゴ: B x3 empties it, START does nothing
+#     (dbg_seq stays 0), A types あ (grid 0,0 = 438), START decides: res0 1, dbg_buf = あ 0 0 0 0 0,
+#     dbg_buf[6] untouched (9), res1 = hero_name[0] = the hero's name again (default ゆ = 545).
+#  2. NI_CANCEL with 8 glyphs (set names) on ドラゴンたいじ + あ (A): the name box shows 8 glyphs, the
+#     8-dot key bar says SELECT:やめる; SELECT leaves: res0 0, dbg_buf unchanged.
+#  3. new-game mode (flags 0): START on an empty name is accepted: res0 1, dbg_buf 0.
+# kitcheck.py checks the peeks; textcheck.py the screens.  XDEFS=TEST_HOOKS ROMs.
+#!needs dbg_buf
+#!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3 --items 5:1,2 40:3
+loadsram s1.srm
+wait 200
+press A
+wait 120
+press Y
+wait 60
+press DOWN
+wait 6
+press DOWN
+wait 6
+press A
+wait 90
+pokew dbg_buf 44 34 109 0 0 0 9 9 9
+pokew dbg_arg 6 3
+poke dbg_cmd 5
+wait 60
+shot OUT/rename.ppm
+press B
+wait 10
+press B
+wait 10
+press B
+wait 10
+press START
+wait 30
+shot OUT/rename_empty.ppm
+peek dbg_seq
+press A
+wait 10
+shot OUT/rename_a.ppm
+press START
+waitfor dbg_seq 1 120
+peek dbg_res 4
+peek dbg_buf 18
+pokew dbg_buf 44 34 109 30 124 137 247 0 0
+pokew dbg_arg 8 1
+poke dbg_cmd 5
+wait 60
+press A
+wait 30
+shot OUT/set8.ppm
+press A
+wait 10
+press SELECT
+waitfor dbg_seq 2 120
+peek dbg_res 4
+peek dbg_buf 18
+pokew dbg_buf 0 0 0 0 0 0 0
+pokew dbg_arg 6 0
+poke dbg_cmd 5
+wait 60
+shot OUT/newgame.ppm
+press START
+waitfor dbg_seq 3 120
+peek dbg_res 4
+peek dbg_buf 14

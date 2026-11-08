@@ -3,8 +3,8 @@
 out boxes.
 
 usage: textwidth.py REGEX [REGEX ...]   text id names to show (e.g. 'T_DIFF_.*' 'SPN_\\d+')
-Each line: name, widest line in pixels, number of lines, the text.  {n} counts as N_DIGITS digits,
-{s} (an inserted text) as the widest text of S_WIDTH pixels (env), shown with a '+s'."""
+Each line: name, widest line in pixels, number of lines, the text.  {n} (and {n3}, {m}, {k}) counts as
+N_DIGITS digits, {s} (an inserted text) as the widest text of S_WIDTH pixels (env), shown with a '+s'."""
 import json
 import os
 import re
@@ -41,13 +41,13 @@ def measure(codes, wid, chars):
     for c in codes:
         if c == 1:
             lines.append(w); w = 0; txt += '\\n'
-        elif c in (3, 12, 11):
+        elif c in (3, 12, 11, 15):         # {n} {n3} {m} {k}
             w += 6 * N_DIGITS; txt += '{n}'
         elif c == 4:
             w += S_WIDTH; s = True; txt += '{s}'
         elif c == 2:
             w += 48; txt += '{name}'
-        elif 5 <= c <= 10:
+        elif 5 <= c <= 10 or c in (13, 14):   # colours ({purple} {gold} too): a run starts on a tile
             w = (w + 7) & ~7 if w & 7 else w; txt += '{c%d}' % (c - 5)
         elif c >= 16:
             w += wid[c - 16] & 0x7f; txt += chars[c - 16] if c - 16 < len(chars) else '?'

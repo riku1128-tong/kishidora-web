@@ -4,7 +4,7 @@
 .import text_table, font_glyphs, font_width, font_glyphs_s, font_width_s, vq_push
 .importzp FONT_DIGIT0
 .import _ea, _bg3map, _bgmap_dirty
-.export _targ_num, _targ_num2, _targ_str, _hero_name, _tb, _text_wrap, _text_small
+.export _targ_num, _targ_num2, _targ_num3, _targ_str, _hero_name, _tb, _text_wrap, _text_small, _text_lh
 .import _bg3_vram
 
 CANVAS_BANK = $7f
@@ -25,8 +25,10 @@ t_minw:   .res 2          ; minimum digits ({n3}: 3, zero padded)
 _tb:        .res NBOX*8      ; x, y, w, h, tile lo, tile hi, pal, flags (bit0 opaque, bit1 frame)
 _targ_num:  .res 4           ; {n}
 _targ_num2: .res 4           ; {m}
+_targ_num3: .res 4           ; {k}
+_text_lh:   .res 2           ; > 0: line step of the 12-dot font instead of 14 (C sets it; 16 = lines of other colours)
 _targ_str:  .res 2           ; {s} (text id)
-_hero_name: .res 16          ; {name}: up to 7 glyph codes + 0
+_hero_name: .res 18          ; {name}: up to 8 glyph codes + 0 (the hero's 6, or a set name: name_sync restores)
 
 .segment "ENGZP": zeropage
 t_box:    .res 2
@@ -96,7 +98,7 @@ box_load:
   lda _tb+7,x
   and #$00ff
   sta t_flags
-set_font:              ; t_gh / t_lh from t_flags bit 3 (BOX_SMALL: the 8-dot font)
+set_font:              ; t_gh / t_lh from t_flags bit 3 (BOX_SMALL: the 8-dot font); text_lh > 0: 12-dot line step
   lda t_flags
   and #8
   bne :+
@@ -104,6 +106,10 @@ set_font:              ; t_gh / t_lh from t_flags bit 3 (BOX_SMALL: the 8-dot fo
   sta t_gh
   lda #14
   sta t_lh
+  lda _text_lh
+  beq @lh_ok           ; (a named label: an anonymous one here would take the ':' of the 8-dot branch)
+  sta t_lh
+@lh_ok:
   rts
 :
   lda #7
@@ -1013,6 +1019,17 @@ draw_run:
 @not_str:
   cmp #16
   bcs @glyph
+  cmp #15              ; {k}: the third number (tested after the glyphs: they do not pay for it)
+  bne @colour
+  jsr push_src
+  lda _targ_num3
+  sta t_tmp
+  lda _targ_num3+2
+  sta t_tmp2
+  stz t_minw
+  jsr num_codes2
+  jmp @loop
+@colour:
   ; colour code 5..10, 13, 14 -> palette (the same palettes in every box); {c0} = the box's own colour
   cmp #13
   bne :+

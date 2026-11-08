@@ -1,0 +1,116 @@
+# S6: {k} (code 15, targ_num3) and text_lh drawn by the DC_TEXT test command (sys.c) in a window on the
+# forge root (box 9, tiles 784-1023: canvas $7F:3100-$7F:3FFF).  Each pair of canvas dumps must be
+# identical (kitcheck.py): codes with {n}/{m}/{k} vs the same digits as glyphs; '\n' with text_lh 16 vs
+# the two lines drawn 16 px apart; '\n' with text_lh 0 vs 14 px apart; the 8-dot font with text_lh 16
+# vs 9 px apart (text_lh changes only the 12-dot font).  Glyph codes (font.bin.chars is append-only):
+# '0'-'9' 16-25, '/' 525, 個 585; control codes 1 = \n, 3 = {n}, 11 = {m}, 15 = {k}.
+# XDEFS=TEST_HOOKS ROMs.
+#!needs dbg_buf
+#!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3 --items 5:1,2 40:3
+loadsram s1.srm
+wait 200
+press A
+wait 120
+press Y
+wait 60
+press DOWN
+wait 6
+press DOWN
+wait 6
+press A
+wait 90
+pokew dbg_buf 3 525 11 525 15 585 0
+pokew dbg_buf+62 0
+pokew dbg_arg 256 7 4321 57920
+poke dbg_cmd 3
+waitfor dbg_seq 1 120
+wait 4
+shot OUT/k_codes.ppm
+wram OUT/k_codes.bin $7f3100 3840
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 2 120
+pokew dbg_buf 23 525 20 19 18 17 525 17 18 19 20 21 22 585 0
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 3 120
+wait 4
+shot OUT/k_glyphs.ppm
+wram OUT/k_glyphs.bin $7f3100 3840
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 4 120
+pokew dbg_buf 17 1 18 0
+pokew dbg_arg 2 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 5 120
+wait 4
+shot OUT/lh16.ppm
+wram OUT/lh16.bin $7f3100 3840
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 6 120
+pokew dbg_buf 17 0
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 7 120
+pokew dbg_buf 18 0
+pokew dbg_buf+62 24
+pokew dbg_arg 8 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 8 120
+wait 4
+wram OUT/lh16_ref.bin $7f3100 3840
+pokew dbg_buf+62 0
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 9 120
+pokew dbg_buf 17 1 18 0
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 10 120
+wait 4
+wram OUT/lh14.bin $7f3100 3840
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 11 120
+pokew dbg_buf 17 0
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 12 120
+pokew dbg_buf 18 0
+pokew dbg_buf+62 22
+pokew dbg_arg 8 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 13 120
+wait 4
+wram OUT/lh14_ref.bin $7f3100 3840
+pokew dbg_buf+62 0
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 14 120
+pokew dbg_buf 17 1 18 0
+pokew dbg_arg 3 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 15 120
+wait 4
+wram OUT/small16.bin $7f3100 3840
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 16 120
+pokew dbg_buf 17 0
+pokew dbg_arg 1 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 17 120
+pokew dbg_buf 18 0
+pokew dbg_buf+62 17
+pokew dbg_arg 9 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 18 120
+wait 4
+wram OUT/small16_ref.bin $7f3100 3840
+pokew dbg_buf+62 0
+pokew dbg_arg 4 0 0 0
+poke dbg_cmd 3
+waitfor dbg_seq 19 120
+peek dbg_seq

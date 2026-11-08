@@ -13,6 +13,7 @@ Output (data/gen):
               the ROM blobs above, placed by tools/romplace.py when build.py links
   gfx*.s      graphics (tools/make_gfx.py)
 """
+import glob
 import json
 import os
 import re
@@ -746,16 +747,21 @@ class Gen:
         self.tx.encode('0123456789')
 
     def build_ui_text(self):
-        path = os.path.join(ROOT, 'src', 'text', 'ui.txt')
-        seen = set()
-        for line in open(path, encoding='utf-8'):
-            line = line.rstrip('\n')
-            if not line or line.startswith('#'):
-                continue
-            k, _, v = line.partition('\t')
-            assert k.strip() not in seen, 'ui.txt: %s is defined twice' % k.strip()
-            seen.add(k.strip())
-            self.text(k.strip(), v.replace('\\n', '\n'))
+        # src/text/ui.txt (shared) first, then one ui_<lane>.txt per lane of the plan (ui_battle,
+        # ui_menus, ui_inventory, ...): 'ui.txt' sorts before 'ui_*.txt', so the ids of the shared
+        # texts do not move when a lane adds a file.  An id may be defined once in all of them.
+        seen = {}
+        for path in sorted(glob.glob(os.path.join(ROOT, 'src', 'text', 'ui*.txt'))):
+            name = os.path.basename(path)
+            for line in open(path, encoding='utf-8'):
+                line = line.rstrip('\n')
+                if not line or line.startswith('#'):
+                    continue
+                k, _, v = line.partition('\t')
+                k = k.strip()
+                assert k not in seen, '%s: %s is defined twice (also in %s)' % (name, k, seen.get(k))
+                seen[k] = name
+                self.text(k, v.replace('\\n', '\n'))
 
     def write_text(self):
         tx = self.tx

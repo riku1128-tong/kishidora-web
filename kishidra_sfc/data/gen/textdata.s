@@ -1245,6 +1245,7 @@ FONT_DIGIT0 = 16
 .import tx_1240
 .import tx_1241
 .import tx_1242
+.import tx_1243
 .segment "TABLES"
 text_table:
   .word .loword(tx_0)
@@ -4061,3 +4062,7 @@ text_table:
   .byte <.bank(tx_1241)
   .word .loword(tx_1242)
   .byte <.bank(tx_1242)
+  .word .loword(tx_1240)
+  .byte <.bank(tx_1240)
+  .word .loword(tx_1243)
+  .byte <.bank(tx_1243)

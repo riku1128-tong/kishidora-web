@@ -26,7 +26,8 @@
 #define LINE_C 16
 #define TOP_Y 8
 
-/* screen in the menu VRAM layout with the menu sprites loaded */
+/* screen in the menu VRAM layout with the menu sprites loaded (sys_init: no colour math, mosaic,
+ * windows or HDMA 4 / 5 left over from the screen before) */
 static void mk_screen(void) {
   screen_off();
   sys_init();
@@ -163,6 +164,62 @@ static u8 mk_confirm(u16 q, u16 q2) {
   win_close(MK_BOX_DLG);
   return sel == 0;
 }
+
+#ifdef MK_WANT_CONFIRM3
+/* (#define MK_WANT_CONFIRM3 before including menukit.h: only the screens that use it get a copy)
+ * A question of up to three lines (l2 / l3 may be 0; 16 px apart, so each line may have its own
+ * colour) and two buttons as the web's confirm: やめる on the left, `yes` (a text id: 売る, 上書き,
+ * 消す, ...) on the right.  28 x 10 window at (2, 8), tiles MK_DLG_TILE(28, 10) = 744-1023; fewer
+ * lines sit lower, centred.  The cursor starts on `yes`; ←→ moves, A decides, B = やめる.
+ * Returns 1 = yes. */
+#define MK_C3_W 28
+#define MK_C3_H 10
+static u8 mk_confirm3(u16 l1, u16 l2, u16 l3, u16 yes) {
+  u8 sel = 1, n = l3 ? 3 : (l2 ? 2 : 1), y;
+  u16 bx[2];
+  win_open(MK_BOX_DLG, 2, 8, MK_C3_W, MK_C3_H, MK_DLG_TILE(MK_C3_W, MK_C3_H), PAL_W);
+  y = TOP_Y + (3 - n) * 8;                 /* rows 8 / 24 / 40 for three lines */
+  say_center(MK_BOX_DLG, y, l1);
+  if (l2) say_center(MK_BOX_DLG, y + LINE_C, l2);
+  if (l3) say_center(MK_BOX_DLG, y + 2 * LINE_C, l3);
+  bx[0] = (MK_C3_W * 4 - msg_width(T_BTN_CANCEL)) / 2;           /* centred in each half */
+  bx[1] = MK_C3_W * 4 + (MK_C3_W * 4 - msg_width(yes)) / 2;
+  say(MK_BOX_DLG, bx[0], 56, T_BTN_CANCEL);                       /* tile rows 7-8 */
+  say(MK_BOX_DLG, bx[1], 56, yes);
+  tb_flush(MK_BOX_DLG);
+  for (;;) {
+    oam_next = 0;
+    mk_cursor(16 + bx[sel] - 11, 64 + 56 + 2);
+    if (mk_sprites) mk_sprites();
+    oam_finish();
+    frame_wait();
+    if (pad_new & (BTN_LEFT | BTN_RIGHT)) { sel ^= 1; se_play(SE_CURSOR); }
+    if (pad_new & BTN_A) { se_play(SE_OK); break; }
+    if (pad_new & BTN_B) { se_play(SE_CANCEL); sel = 0; break; }
+  }
+  win_close(MK_BOX_DLG);
+  return sel;
+}
+#endif
+
+#ifdef MK_WANT_NUMSPR
+/* (#define MK_WANT_NUMSPR before including menukit.h)  A signed number in sprites: '+' or '-',
+ * then the digits, 5 px apart (the 8-dot glyphs may overlap), from (x, y), OBJ palette pal.
+ * 0 is "+0".  Tiles 12-21 '0'-'9', 22 '+', 23 '-' of the menu OBJ set (make_gfx menu_obj: the
+ * inventory lane adds them with the compare palettes 4-6).  Up to 6 sprites. */
+#define MK_T_DIG0 12
+#define MK_T_PLUS 22
+#define MK_T_MINUS 23
+#define MK_NUM_DX 5
+static void mk_num_spr(s16 x, s16 y, s16 v, u8 pal) {
+  u8 d[5], n = 0;
+  u16 a = MK_ATTR(0, pal, 3);
+  spr_add(x, y, a | (v < 0 ? MK_T_MINUS : MK_T_PLUS), 0);
+  pa[0] = v < 0 ? (u16)-v : (u16)v; pa[1] = 0;
+  do { d[n++] = div10_now(); } while (pa[0]);                   /* hardware divider (math.s) */
+  while (n) { x += MK_NUM_DX; spr_add(x, y, a | (MK_T_DIG0 + d[--n]), 0); }
+}
+#endif
 
 /* item name with "+N" (enhanced slots).  The yellow "+N" starts on its own tile; in lists with
  * rows 14 px apart (two rows share a tile row) it goes to a column of its own (fixed = 1),

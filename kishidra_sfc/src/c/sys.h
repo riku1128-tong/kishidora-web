@@ -59,10 +59,24 @@ u16 prof_line(void);
 #ifdef TEST_HOOKS
 #define DC_PING 1                 /* dbg_res = ~dbg_arg[0], frame, dbg_scr */
 #define DC_SE 2                   /* play sound effect dbg_arg[0] (SE_*); dbg_arg[1] != 0: stop the BGM first */
+/* text / UI kit (S6; tools/harness/t/s6_*.txt, kitcheck.py).  dbg_buf: codes / a name / OAM bytes */
+#define DC_TEXT 3                 /* window (box 9, 1,9 30x8, tiles 784-1023, canvas $7F:3100-3FFF) with the
+                                   * codes in dbg_buf at (8, dbg_buf[31] or 8); arg0 bit0 8-dot font, bit1
+                                   * text_lh 16, bit2 only close the window, bit3 draw into the open one,
+                                   * bits 8-15 {k} high byte; arg1 {n}, arg2 {m}, arg3 {k} low word */
+#define DC_WINS 4                 /* arg0 rounds of an out-of-order window close (ui.c dbg_wins); arg1 0 side by
+                                   * side, 1 overlapping, 2 under a full-screen window (the fallback) -> res0
+                                   * how much the save stack grew (0 = no leak) */
+#define DC_NAME 5                 /* name_input(dbg_buf, arg0, T_NAME_TITLE, arg1 = NI_*) -> res0 its result,
+                                   * res1 hero_name[0] after (the screen is left faded out) */
+#define DC_CONFIRM3 6             /* mk_confirm3 on the screen with arg0 lines (1-3: T_NEW_ASK, T_NEW_ASK2,
+                                   * T_DBG_NOUNDO), yes = T_NEWGAME -> res0 */
+#define DC_NUMSPR 7               /* mk_num_spr(arg0, arg1, arg2, arg3) from OAM 0 -> res0 sprites, OAM in dbg_buf */
 #define DC_UNKNOWN 0xff          /* dbg_ack of a command no one knows */
 #define DS_NONE 0                 /* dbg_scr: screens that take commands set their DS_ id */
 extern u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
 extern u16 dbg_arg[4], dbg_res[4];
+extern u16 dbg_buf[32];
 #define DBG_SCREEN(s) (dbg_scr = (s))
 #else
 #define DBG_SCREEN(s)

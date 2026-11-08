@@ -75,6 +75,8 @@ python build.py rom
 - `src/c/` ゲーム本体（cc65）。`battle_core.c` / `battle_hit.c` が Safari 版 battle_core.gd の移植、`battle_view.c` が戦闘画面、
   `map.c` `menu.c` `gacha.c` `forge.c` `story.c` `rewards.c` が冒険部分、`save.c` `adventure.c` がセーブとルール
 - `tools/make_data.py` `tools/make_gfx.py` `tools/make_audio.py` 変換スクリプト、`tools/audio/` SPC700 ドライバとアセンブラ・BRR 変換
+- `src/text/ui.txt` 画面の文章（id と文）。make_data.py は `ui.txt` を読んでから `ui_*.txt` を名前の順に読む
+  （画面の組ごとに 1 つずつ足せる。同じ id はどのファイルでも 1 回だけ）。数は `{n}` `{m}` `{k}`
 - `tools/romplace.py` ROM のデータの置き場所。変換スクリプトはバンクを決めず、`data/gen` のファイルと
   `data/gen/place/*.json`（ラベル・大きさ・種類）を書く。`build.py` は 2 回リンクする（1 回目はデータなしで
   コードと固定の領域の大きさを測り、残りの場所にデータを置いて 2 回目）。置いた場所は `build/kishidra.place.txt`。
@@ -98,7 +100,9 @@ python build.py rom
   6MB・8MB を読めるかを画面の色（緑 = 読める、赤 = 読めない）で見る試験 ROM `probe/mkprobe.py`（`build/probe/` に作る）と
   それを libretro コアで動かす `probe/runprobe.py`、
   走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`、
-  セーブ v2 のテスト `savetest.py`（v1 からの移行・スロットの交代・こわれたスロットからの戻り）。
+  セーブ v2 のテスト `savetest.py`（v1 からの移行・スロットの交代・こわれたスロットからの戻り）、
+  文字と窓の道具のテスト `kitcheck.py`（TEST_HOOKS の ROM で `t/s6_*.txt` を動かす: `{k}`、行の間隔 `text_lh`、
+  あとから開いた窓の下で閉じる窓、名前の入力 `name_input`、3 行の確認 `mk_confirm3`、数字のスプライト `mk_num_spr`）。
   `runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl` で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
   `XDEFS="TEST_HOOKS …" python build.py rom` でテストだけの定義を入れた ROM を作る
   （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない。`t/se_all.txt` は BGM を止めて

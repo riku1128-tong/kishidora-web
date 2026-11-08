@@ -245,45 +245,133 @@ static void bg1_rect(u8 x, u8 y, u8 w, u8 h, u8 clear) {
   bgmap_dirty |= 1;
 }
 
-static void bg3_rect(u8 x, u8 y, u8 w, u8 h, u16 at, u8 restore) {
-  u8 j;
-  u16 k;
-  for (j = 0; j < h; ++j) {
-    if (at + w > WIN_SAVE) break;
-    k = ((u16)(y + j) << 5) + x;
-    if (restore) { ea[0] = (u16)&bg3_save[at]; ea[1] = (u16)&bg3map[k]; }
-    else { ea[0] = (u16)&bg3map[k]; ea[1] = (u16)&bg3_save[at]; }
-    ea[2] = (u16)w * 2;
+/* rows of window rect win <-> buf (room cells there; rows that do not fit are left out) */
+static void win_rows(const u8 *win, u16 *buf, u16 room, u8 to_screen) {
+  u8 r, w = win[3];
+  u16 k = ((u16)win[2] << 5) + win[1], n = (u16)w * 2;
+  for (r = win[4]; r && room >= w; --r, k += 32, buf += w, room -= w) {
+    if (to_screen) { ea[0] = (u16)buf; ea[1] = (u16)&bg3map[k]; }
+    else { ea[0] = (u16)&bg3map[k]; ea[1] = (u16)buf; }
+    ea[2] = n;
     mem_copy();
-    at += w;
   }
   bgmap_dirty |= 4;
 }
 
+/* the BG3 cells under window j <-> its place in the save stack */
+static void win_save(u8 j, u8 to_screen) {
+  u16 at = wins_at[j];
+  win_rows(wins[j], &bg3_save[at], at < WIN_SAVE ? WIN_SAVE - at : 0, to_screen);
+}
+
 void win_open(u8 id, u8 x, u8 y, u8 w, u8 h, u16 tile, u8 pal) {
-  u8 i;
+  u8 i, *p;
   for (i = 0; i < nwins && wins[i][0] != id; ++i) {}
+  p = wins[i];
   if (i == nwins) {
     if (nwins == 12) return;
     ++nwins;
+    p[1] = x; p[2] = y; p[3] = w; p[4] = h;
     wins_at[i] = save_top;
-    bg3_rect(x, y, w, h, save_top, 0);
+    win_save(i, 0);
     save_top += (u16)w * h;
   }
-  wins[i][0] = id; wins[i][1] = x; wins[i][2] = y; wins[i][3] = w; wins[i][4] = h;
+  p[0] = id; p[1] = x; p[2] = y; p[3] = w; p[4] = h;
   bg1_rect(x, y, w, h, 1);
   box(id, x, y, w, h, tile, pal, BOX_WINDOW | BOX_LOW);
   tb_fresh |= 1 << id;
 }
 
+/* Window i closes under later windows: they come off, top first (their cells kept in hold_cells,
+ * their saves back on the screen), window i's save goes back, and they go on again, bottom first,
+ * with new saves from wins_at[i] on.  The same as closing them all in order and opening them again,
+ * so the stack does not leak (forge spec §0.4: otherwise the saves pass WIN_SAVE after a few rounds
+ * and later windows leave text behind) and window i's cells do not come back when a window that
+ * covered them closes.  0: the later windows hold more cells than hold_cells (a screen). */
+static u16 un_off;
+static void win_unone(u8 j, u8 on) {
+  u8 *w = wins[j];
+  u16 n = (u16)w[3] * w[4];
+  if (on) { win_save(j, 0); win_rows(w, &hold_cells[un_off], n, 1); un_off += n; }
+  else { un_off -= n; win_rows(w, &hold_cells[un_off], n, 0); win_save(j, 1); }
+}
+
+static u8 win_unstack(u8 i) {
+  u8 j;
+  u16 at;
+  for (un_off = 0, j = i + 1; j < nwins; ++j) un_off += (u16)wins[j][3] * wins[j][4];
+  if (un_off > 32 * 28) return 0;
+  for (j = nwins - 1; j > i; --j) win_unone(j, 0);
+  win_save(i, 1);
+  for (at = wins_at[i], j = i + 1; j < nwins; ++j) {
+    wins_at[j] = at;
+    at += (u16)wins[j][3] * wins[j][4];
+    win_unone(j, 1);
+  }
+  save_top = at;
+  return 1;
+}
+
+/* windows may close in any order; the saves are contiguous in opening order (window i's is
+ * wins_at[i] .. wins_at[i + 1]) */
 void win_close(u8 id) {
-  u8 i, j;
+  u8 i, j, *w;
+  u16 at, n, end;
   for (i = 0; i < nwins && wins[i][0] != id; ++i) {}
   if (i == nwins) { box_hide(id); return; }
-  bg3_rect(wins[i][1], wins[i][2], wins[i][3], wins[i][4], wins_at[i], 1);
-  bg1_rect(wins[i][1], wins[i][2], wins[i][3], wins[i][4], 0);
-  if (i == nwins - 1) save_top = wins_at[i];
+  w = wins[i];
+  at = wins_at[i];
+  if (i == nwins - 1) {
+    win_save(i, 1);
+    save_top = at;
+  } else if (!win_unstack(i)) {
+    /* (more than a screen of windows over it: its cells come back where they covered it, but its
+     * save leaves the stack: the saves above it move down) */
+    win_save(i, 1);
+    n = wins_at[i + 1] - at;
+    end = save_top < WIN_SAVE ? save_top : WIN_SAVE;
+    if (at + n < end) {
+      ea[0] = (u16)&bg3_save[at + n]; ea[1] = (u16)&bg3_save[at]; ea[2] = (end - at - n) * 2;
+      mem_copy();               /* MVN upwards: safe for an overlapping move down */
+    }
+    for (j = i + 1; j < nwins; ++j) wins_at[j] -= n;
+    save_top -= n;
+  }
+  bg1_rect(w[1], w[2], w[3], w[4], 0);
   for (j = i; j + 1 < nwins; ++j) { memcpy(wins[j], wins[j + 1], 5); wins_at[j] = wins_at[j + 1]; }
   --nwins;
   for (i = 0; i < nwins; ++i) bg1_rect(wins[i][1], wins[i][2], wins[i][3], wins[i][4], 1);
 }
+
+#ifdef TEST_HOOKS
+/* sys.c DC_WINS: k rounds of the forge guide's window order (forge spec §0.4) on the current screen:
+ * a card (box 9), a menu (box 10), the card closed first (out of order), a page (box 8) opened and
+ * closed, the menu closed.  over 0: the card (0,2 32x6) and the menu (4,8 24x6) do not overlap, as in
+ * the guide; over 1: the card at (0,4) overlaps the menu's top 2 rows.  BG3 tiles 576-1023 (free on the
+ * forge root).  over 2: a full-screen window (box 7) between the card and the menu: more than a screen
+ * of windows over the card, the fallback (its canvas takes tiles 128-1023: only the save stack counts
+ * then).  Returns how much the save stack grew: 0 when nothing leaked (without win_unstack it grows
+ * by the card's 192 cells a round; from round 11 on the saves pass WIN_SAVE and the menu's cells stay
+ * on the screen after it closes; with over 1 the menu's save gave the card's cells back). */
+u16 dbg_wins(u8 k, u8 over) {
+  const u16 msg = T_NAME_TITLE;          /* (84 px: inside every window here) */
+  u16 t0 = save_top;
+  for (; k; --k) {
+    win_open(9, 0, over == 1 ? 4 : 2, 32, 6, 832, PAL_W);
+    say(9, 8, 8, msg);
+    tb_flush(9);
+    if (over == 2) win_open(7, 0, 0, 32, 28, 128, PAL_W);
+    win_open(10, 4, 8, 24, 6, 688, PAL_W);
+    say(10, 8, 8, msg);
+    tb_flush(10);
+    win_close(9);
+    win_open(8, 2, 2, 28, 4, 576, PAL_W);
+    say(8, 8, 8, msg);
+    tb_flush(8);
+    win_close(8);
+    win_close(10);
+    if (over == 2) win_close(7);
+  }
+  return save_top - t0;
+}
+#endif

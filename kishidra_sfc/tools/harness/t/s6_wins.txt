@@ -1,0 +1,49 @@
+# S6: the window save stack when a window closes under a later one (forge spec §0.4: the guide pages
+# close the item card while the menu below it stays).  On the forge root: BG maps dumped, DC_WINS runs
+# 12 rounds of card (box 9) / menu (box 10) / card closed first / a page (box 8) opened and closed /
+# menu closed (ui.c dbg_wins), the maps dumped again; first with the card and the menu side by side
+# (the guide's case), then with the card over the menu's top rows.  kitcheck.py: the save stack did
+# not grow and the BG1 / BG3 maps are as before.  Last, 4 rounds with a full-screen window between
+# the card and the menu (the fallback for more than a screen of windows: only the stack is checked).  Before the ui.c fix it grew by 2304 cells (12 x the
+# card's 192), from round 11 on the menu's cells stayed on the screen, and with the overlap the card's
+# cells came back when the menu closed.  XDEFS=TEST_HOOKS ROMs.
+#!needs dbg_buf
+#!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3 --items 5:1,2 40:3
+loadsram s1.srm
+wait 200
+press A
+wait 120
+press Y
+wait 60
+press DOWN
+wait 6
+press DOWN
+wait 6
+press A
+wait 90
+shot OUT/forge_before.ppm
+wram OUT/bg1_before.bin bg1map 2048
+wram OUT/bg3_before.bin bg3map 2048
+pokew dbg_arg 12 0
+poke dbg_cmd 4
+waitfor dbg_seq 1 900
+peek dbg_ack
+peek dbg_res 2
+wait 30
+shot OUT/forge_after.ppm
+wram OUT/bg1_after.bin bg1map 2048
+wram OUT/bg3_after.bin bg3map 2048
+pokew dbg_arg 12 1
+poke dbg_cmd 4
+waitfor dbg_seq 2 900
+peek dbg_ack
+peek dbg_res 2
+wait 30
+shot OUT/forge_after_over.ppm
+wram OUT/bg1_after_over.bin bg1map 2048
+wram OUT/bg3_after_over.bin bg3map 2048
+pokew dbg_arg 4 2
+poke dbg_cmd 4
+waitfor dbg_seq 3 900
+peek dbg_ack
+peek dbg_res 2
