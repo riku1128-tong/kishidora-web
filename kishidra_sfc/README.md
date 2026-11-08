@@ -76,7 +76,7 @@ python build.py rom
   （8 ビットは `#<.bank(x)` / `.byte <.bank(x)`。`^label` はコードのバンク $81〜$9F で 0 になる）。
   `lda f:label` で読むデータは `TABLES` か固定の領域に置くか、manifest で `"long": true`（$A0 以降に置かれる）。
   ビルドのときに `f:` と `^` の使い方を調べる。同じ中身のアセット・文字列は 1 つだけ置く
-- `tools/harness/` テスト用（libretro コアで ROM を動かしてスクリーンショット・メモリ・音を保存する `runrom`、セーブ作成 `mksave.py`、
+- `tools/harness/` テスト用（libretro コアで ROM を動かしてスクリーンショット・メモリ・音を保存する `runrom`、セーブ作成 `mksave.py`（セーブの形 v2。`--v1` で前の形）、
   処理時間の内訳 `prof.py`、文字のはみ出し・枠かぶり・色の混ざり・重なりの検査 `textcheck.py`
   〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要。計測用 ROM は NMI の転送が終わった走査線も
   $7F:DBFA（最大）と $7F:DA00〜（直近 32 フレーム）に残す〉、文字列の幅 `textwidth.py` など）
@@ -86,8 +86,9 @@ python build.py rom
   セーブはスクリプトの `#!mksave` 行から作る）、録音を少しの時間のずれを許して区間ごとに比べる `wavcmp.py`、
   2 つの ROM が読むデータ（アセット・文字列・フォント・敵の能力・SPC・BGM を流す順）を比べる `romdata.py`、
   置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド）、ラグの計測 `lag.py`、
-  走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`。`runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl`
-  で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
+  走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`、
+  セーブ v2 のテスト `savetest.py`（v1 からの移行・スロットの交代・こわれたスロットからの戻り）。
+  `runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl` で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
   `XDEFS="TEST_HOOKS …" python build.py rom` でテストだけの定義を入れた ROM を作る
   （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない）
 - NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる

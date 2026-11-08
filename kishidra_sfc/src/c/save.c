@@ -1,13 +1,19 @@
 /* save data: WRAM copy + two alternating SRAM slots with sequence number and byte sum */
 #include "save.h"
 #include "text.h"
+#include "adventure.h"
+#include <stddef.h>
 
 Save sv;
 
-#define SAVE_VER 1
+#define SAVE_VER 2
 #define SLOT_A 0x0000
 #define SLOT_B 0x4000
+#define SLOT_SNAP 0x3E00    /* slot + $3E00..$3FFF: the tower snapshot record (outside Save) */
 #define HDR 12              /* magic..ver are not summed */
+
+/* compile-time guard: Save must end before the snapshot record (array size 0 = an error) */
+extern char save_fits_slot[SLOT_SNAP / sizeof(Save)];
 
 void sram_write(void);      /* asm: ea0 wram, ea1 sram offset, ea2 len -> ea3 sum */
 void sram_read(void);
@@ -153,11 +159,14 @@ void save_new(void) {
 /* ---------------------------------------------------------------- SRAM */
 static u16 body_len(void) { return sizeof(Save) - HDR - (INV_SLOTS - sv.ninv) * sizeof(Inv); }
 
+/* the header of a slot: 2 = this layout, 1 = a v1 save (load_slot migrates it), 0 = none */
 static u8 read_slot(u16 off, Save *hdr_only) {
-  /* header first */
   ea[0] = (u16)hdr_only; ea[1] = off; ea[2] = HDR;
   sram_read();
-  return memcmp(hdr_only->magic, magic, 4) == 0 && hdr_only->ver == SAVE_VER && hdr_only->size == sizeof(Save);
+  if (memcmp(hdr_only->magic, magic, 4) != 0) return 0;
+  if (hdr_only->ver == SAVE_VER && hdr_only->size == sizeof(Save)) return 2;
+  if (hdr_only->ver == 1 && hdr_only->size == SAVE_V1_SIZE) return 1;
+  return 0;
 }
 
 u8 save_exists(void) {
@@ -167,11 +176,38 @@ u8 save_exists(void) {
   return read_slot(SLOT_A, h) || read_slot(SLOT_B, h);
 }
 
+#define V2_BLOCK (offsetof(Save, ninv) - SAVE_V1_NINV)   /* 598 B */
+
+/* the v2 fields of a migrated v1 save that are not 0 (web adventure.gd _seen_init) */
+static void v1_init(void) {
+  u8 a;
+  for (a = 0; a <= sv.area_open && a < AR_MIRAGE; ++a)
+    if (area_has_shop(a)) sv.shops_seen |= (u16)1 << a;     /* no NEW flood after the update */
+  if (sv.area_open >= AR_PLAIN) sv.guides |= GDB_NAV_FORGE;
+}
+
 static u8 load_slot(u16 off) {
-  u16 len;
-  if (!read_slot(off, &sv)) return 0;
-  ea[0] = (u16)&sv + HDR; ea[1] = off + HDR; ea[2] = sizeof(Save) - HDR;
+  u16 len, n;
+  u8 v = read_slot(off, &sv);
+  if (!v) return 0;
+  ea[0] = (u16)&sv + HDR; ea[1] = off + HDR;
+  ea[2] = (v == 2 ? sizeof(Save) : SAVE_V1_SIZE) - HDR;
   sram_read();
+  if (v == 1) {
+    /* v1: ninv at 628, the bag at 630; its sum covers the ninv items only */
+    n = *(u16 *)((u8 *)&sv + SAVE_V1_NINV);
+    if (n > INV_SLOTS) return 0;
+    ea[0] = (u16)&sv + HDR; ea[2] = SAVE_V1_SIZE - HDR - (INV_SLOTS - n) * sizeof(Inv);
+    wram_sum();
+    if (ea[3] != sv.sum) return 0;
+    /* the bag moves up by the v2 block, the block starts at 0 */
+    memmove(&sv.ninv, (u8 *)&sv + SAVE_V1_NINV, 2 + n * sizeof(Inv));
+    memset((u8 *)&sv + SAVE_V1_NINV, 0, V2_BLOCK);
+    sv.ver = SAVE_VER;
+    sv.size = sizeof(Save);
+    v1_init();
+    return 1;     /* the v1 slot stays as the fallback until the second v2 write */
+  }
   if (sv.ninv > INV_SLOTS) return 0;
   len = body_len();
   ea[0] = (u16)&sv + HDR; ea[2] = len;

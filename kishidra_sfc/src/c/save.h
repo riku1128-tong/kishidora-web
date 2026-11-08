@@ -16,15 +16,51 @@
 typedef struct {
   u8 id;          /* item index */
   u8 sk[3];       /* skills (255 = none) */
-  u8 slots;       /* bits 0-3 enhancement slots, bit 7 favourite */
+  u8 slots;       /* bits 0-3 enhancement slots, bit 6 INV_SOLO, bit 7 favourite */
   u8 enh[3];      /* 9 slots x 2 bits (0 empty, 1 success, 2 great, 3 miracle) */
 } Inv;
+#define INV_SOLO 0x40   /* Inv.slots: this weapon alone can make a special (valid while sv.story & ST_SOLO) */
 
 /* story flags */
 #define ST_OPENING 1
 #define ST_DEBUG_OPEN 4      /* debug: every area and STAGE open (L x3 on the map) */
 #define ST_MIRAGE_RULES 2
+#define ST_SOLO 8            /* inventory: the INV_SOLO bits of the bag are up to date */
 
+/* one-time tips and "seen" marks (web save.guides), sv.guides */
+#define GDB_LUCKY 1          /* lucky_tip: the first lucky-character tip was shown */
+#define GDB_ENH 2            /* enhance: the forge enhance guide was shown */
+#define GDB_EVO 4            /* evolve: the forge evolve guide was shown */
+#define GDB_GIFT 8           /* enhance_gift: the free material of the guide was given */
+#define GDB_NAV_FORGE 16     /* nav_enhance: the forge NEW mark was seen */
+
+/* 討伐記録 (web boss_records): the loadout as it was at the kill */
+typedef struct {
+  u8 valid, difficulty;
+  u16 turns, boss_turns, nth;
+  Inv w[3];            /* MAIN, SUB, THIRD; id 255 = empty slot */
+  Inv shield;
+} BossRec;             /* 40 B */
+
+/* セット装備 (web equip_sets) */
+#define EQUIP_SETS 15
+#define SET_NAME_MAX 8
+#define SET_GONE 0xfffe      /* the item of this slot was sold or used up */
+typedef struct {
+  u16 slot[4];               /* inventory index per EQ_* slot, NO_ITEM = empty, SET_GONE = gone */
+  u16 name[SET_NAME_MAX];    /* glyph codes, 0-terminated when shorter; name[0] == 0: unregistered */
+} EquipSet;                  /* 24 B */
+
+/* SAVE_VER 1 (8702 B: ninv at 628, inv at 630) is read and migrated by save.c */
+#define SAVE_V1_SIZE 8702
+#define SAVE_V1_NINV 628
+#ifndef SAVE_SPARE
+#define SAVE_SPARE 64        /* zero bytes for later fields: a field there needs no new SAVE_VER when 0
+                                is its right value for an older save (XDEFS=SAVE_SPARE=n only to test
+                                the slot-size guard in save.c) */
+#endif
+
+/* SAVE_VER 2 (9300 B).  The v1 fields keep their offsets 0..627; docs/plan/PLAN.md §2 */
 typedef struct {
   u8 magic[4];
   u16 seq, sum, size, ver;
@@ -40,9 +76,21 @@ typedef struct {
   u8 got[N_ITEM];
   u8 mirage_best, mirage_clear;
   u16 mirage_turns;
-  u16 ninv;
-  Inv inv[INV_SLOTS];
-} Save;
+  /* ---- v2 block (628..1225): zero in a migrated v1 save except where save.c v1_init sets it ---- */
+  u8 guides;                   /*  628 GDB_* */
+  u8 solo_tickets;             /*  629 必殺10連武器チケット 0..99 */
+  u8 mirage_run;               /*  630 1 = a tower run is going / suspended (record at slot + $3E00) */
+  u8 mirage_cards[3];          /*  631 bit w = the card of WAVE w+1 (18 bits) */
+  u16 mirage_run_id;           /*  634 ++ per run; the snapshot record must match */
+  u16 shops_seen;              /*  636 bit = area index of a shop town seen (NEW marks) */
+  u16 boss_wins[2];            /*  638 0 魔王, 1 裏ボス: wins counted since v2 */
+  BossRec rec[4];              /*  642 魔王 first / latest, 裏ボス first / latest */
+  EquipSet sets[EQUIP_SETS];   /*  802 */
+  u8 spare[SAVE_SPARE];        /* 1162 */
+  /* ---- the bag last: save.c writes only ninv items ---- */
+  u16 ninv;                    /* 1226 */
+  Inv inv[INV_SLOTS];          /* 1228 */
+} Save;                        /* 9300 */
 
 extern Save sv;
 
