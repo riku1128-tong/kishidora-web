@@ -55,6 +55,18 @@ u16 prof_line(void);
 #define PROF_LINE(i)
 #endif
 
+/* test builds (XDEFS=TEST_HOOKS): the harness's command mailbox, run by frame_wait (sys.c) */
+#ifdef TEST_HOOKS
+#define DC_PING 1                 /* dbg_res = ~dbg_arg[0], frame, dbg_scr */
+#define DC_UNKNOWN 0xff           /* dbg_ack of a command no one knows */
+#define DS_NONE 0                 /* dbg_scr: screens that take commands set their DS_ id */
+extern u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
+extern u16 dbg_arg[4], dbg_res[4];
+#define DBG_SCREEN(s) (dbg_scr = (s))
+#else
+#define DBG_SCREEN(s)
+#endif
+
 /* random */
 void rnd_seed(u16 s);
 u16  rnd(void);

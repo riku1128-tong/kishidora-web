@@ -1,0 +1,12 @@
+# prefix: into 蜃気楼の斜塔 WAVE 1 and 700 frames of its fight (wings_mirage t/mir_pre).
+#!mksave castle.srm --open 14 --clear-all
+loadsram castle.srm
+wait 200
+press A
+wait 150
+press RIGHT
+wait 30
+press A
+wait 60
+press A
+wait 700

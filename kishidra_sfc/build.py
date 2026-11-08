@@ -9,7 +9,14 @@
 必要なもの: Python 3.9+、cc65 (cc65 / ca65 / ld65)。データの作り直しには Pillow と
 zstandard（pip install pillow zstandard）、BGM の変換には ffmpeg も使う。
 
-出力: build/kishidra.sfc（LoROM / FastROM / 4MB / SRAM 32KB）
+出力: build/kishidra.sfc（LoROM / FastROM / 4MB / SRAM 32KB）、build/kishidra.map と
+build/kishidra.lbl（リンクの記号。tools/harness の runrom などが読む）
+
+テスト用の ROM（環境変数）:
+    PROFILE=1                計測用（tools/harness の prof.py / textcheck.py）
+    XDEFS="TEST_HOOKS FORCE_WAVE=0,0,6"
+                             テストだけの定義（空白で区切る。cc65 には全部、ca65 には値が数か
+                             値のないものだけ = 1 で渡す）。TEST_HOOKS: sys.c のテスト用の命令箱
 """
 import glob
 import os
@@ -86,8 +93,25 @@ def c_functions(path):
     return names
 
 
+def xdefs():
+    """XDEFS="A B=1 C=0,0,6": test-only defines -> (cc65 args, ca65 args).  ca65 takes only
+    numbers (and its -D without a value is 0, so a bare name gets 1 there, as in cc65)."""
+    cdefs, adefs = [], []
+    for x in os.environ.get('XDEFS', '').split():
+        name, eq, val = x.partition('=')
+        if not re.match(r'^[A-Za-z_]\w*$', name):
+            sys.exit('XDEFS: %s は名前=値 にして' % x)
+        cdefs += ['-D', x]
+        if not eq:
+            adefs += ['-D', name + '=1']
+        elif re.match(r'^-?(\d+|\$[0-9A-Fa-f]+|0x[0-9A-Fa-f]+)$', val):
+            adefs += ['-D', x]
+    return cdefs, adefs
+
+
 def build_rom():
     os.makedirs(OBJ, exist_ok=True)
+    xc, xa = xdefs()
     cfiles = sorted(glob.glob(os.path.join(SRC, 'c', '*.c'))) + sorted(glob.glob(os.path.join(GEN, '*.c')))
     sfiles = sorted(glob.glob(os.path.join(SRC, 'asm', '*.s'))) + sorted(glob.glob(os.path.join(GEN, '*.s')))
     banks = {}
@@ -107,25 +131,27 @@ def build_rom():
     if dup:
         sys.exit('同じ名前の関数がある: %s' % ', '.join(sorted(dup)))
     objs = []
+    compiled = set()          # functions cc65 really defined (a definition may sit in an #ifdef)
     inc = ['-I', os.path.join(SRC, 'c'), '-I', GEN]
     for c in cfiles:
         b = banks[c]
         base = os.path.splitext(os.path.basename(c))[0]
         s = os.path.join(OBJ, base + '.s')
         o = os.path.join(OBJ, base + '.o')
-        defs = ['-D', 'PROFILE=1'] if os.environ.get('PROFILE') else []
+        defs = (['-D', 'PROFILE=1'] if os.environ.get('PROFILE') else []) + xc
         for f in bank_funcs[b]:
             if f != 'main':
                 defs += ['-D', '%s=%s__b' % (f, f)]
         run([tool('cc65'), '-O', '-Oirs', '-Cl', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b] + DBG + CDBG + [
              '--rodata-name', 'RODATA', '--bss-name', 'BSS', '--data-name', 'DATA', '-o', s] + inc + defs + [c])
+        compiled.update(re.findall(r'^\s*\.export\s+_(\w+)__b\s*$', open(s).read(), re.M))
         run([tool('ca65'), '--cpu', '65816'] + DBG + ['-o', o, s])
         objs.append(o)
     # trampolines: _f (low WRAM) -> jsl f__t (bank) -> jsr _f__b -> rtl
     tr = ['.p816', '.smart -']
     for b in sorted(bank_funcs):
         for f in bank_funcs[b]:
-            if f == 'main':
+            if f == 'main' or f not in compiled:
                 continue
             tr += ['.import _%s__b' % f, '.export _%s' % f,
                    '.segment "STUBS"', '_%s:' % f, '  .byte $22', '  .word .loword(%s__t)' % f, '  .byte $%02x' % (0x80 + b), '  rts',
@@ -136,6 +162,7 @@ def build_rom():
     asm_inc = ['-I', os.path.join(SRC, 'asm'), '-I', GEN, '--bin-include-dir', GEN]
     if os.environ.get('PROFILE'):
         asm_inc += ['-D', 'PROFILE=1']   # PC sampler (tools/harness/prof.py)
+    asm_inc += xa
     for s in sfiles:
         o = os.path.join(OBJ, 'a_' + os.path.splitext(os.path.basename(s))[0] + '.o')
         run([tool('ca65'), '--cpu', '65816'] + DBG + asm_inc + ['-o', o, s])
@@ -143,10 +170,12 @@ def build_rom():
     cfg = os.path.join(OBJ, 'kishidra.cfg')
     open(cfg, 'w').write(linker_cfg(sorted(set(banks.values()))))
     mp = os.path.join(ROOT, 'build', 'kishidra.map')
-    run([tool('ld65'), '-C', cfg, '-o', OUT, '-m', mp, '--dbgfile', os.path.join(ROOT, 'build', 'kishidra.dbg')] + objs + [none_lib()])
+    run([tool('ld65'), '-C', cfg, '-o', OUT, '-m', mp, '--dbgfile', os.path.join(ROOT, 'build', 'kishidra.dbg'),
+         '-Ln', os.path.join(ROOT, 'build', 'kishidra.lbl')] + objs + [none_lib()])
     fix_checksum(OUT)
     usage(mp)
-    print('OK', OUT, os.path.getsize(OUT), 'bytes')
+    tags = (['PROFILE'] if os.environ.get('PROFILE') else []) + os.environ.get('XDEFS', '').split()
+    print('OK', OUT, os.path.getsize(OUT), 'bytes' + (' (test ROM: %s)' % ' '.join(tags) if tags else ''))
 
 
 def linker_cfg(cbanks):

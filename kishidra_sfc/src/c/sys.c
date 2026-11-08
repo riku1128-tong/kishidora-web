@@ -180,6 +180,34 @@ u32 mul_pct(u32 v, u16 p) {
 u16 prof_marks[16];
 #endif
 
+#ifdef TEST_HOOKS
+/* test command mailbox (XDEFS=TEST_HOOKS builds only; tools/harness/runrom poke / pokew / waitfor).
+ * The harness writes the arguments to dbg_arg[], then the command to dbg_cmd; the next frame_wait
+ * runs it, writes dbg_res[], sets dbg_ack = the command (DC_UNKNOWN if no one knows it),
+ * ++dbg_seq and clears dbg_cmd.  New commands: a case below, numbered in sys.h; a command of one
+ * screen checks dbg_scr (the screen sets it with DBG_SCREEN) and calls that screen's handler
+ * (a non-static function: a direct call works across banks, a function pointer does not) */
+u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
+u16 dbg_arg[4], dbg_res[4];
+
+static void dbg_poll(void) {
+  u8 c = dbg_cmd;
+  dbg_res[0] = dbg_res[1] = dbg_res[2] = dbg_res[3] = 0;
+  switch (c) {
+  case DC_PING:                 /* is the mailbox there?  ~arg0, the frame, the screen */
+    dbg_res[0] = ~dbg_arg[0];
+    dbg_res[1] = frame;
+    dbg_res[2] = dbg_scr;
+    break;
+  default:
+    c = DC_UNKNOWN;
+  }
+  dbg_ack = c;
+  ++dbg_seq;
+  dbg_cmd = 0;
+}
+#endif
+
 void frame_wait(void) {
   PROF_LINE(4);
   sound_service();
@@ -193,4 +221,7 @@ void frame_wait(void) {
 #endif
   pad_rep = rep_lat; rep_lat = 0;
   rnd();
+#ifdef TEST_HOOKS
+  if (dbg_cmd) dbg_poll();
+#endif
 }

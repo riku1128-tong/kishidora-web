@@ -1,0 +1,15 @@
+# S1: an XDEFS=TEST_HOOKS ROM answers DC_PING through the sys.c mailbox (dbg_res[0] = ~dbg_arg[0]),
+# and DC_UNKNOWN (ack $ff) for a command no one knows.  (A ROM without TEST_HOOKS has no dbg_* symbols:
+# runrom stops with exit status 2 at the first poke; abtest.py skips the script there.)
+#!needs dbg_cmd
+wait 300
+pokew dbg_arg $1234
+poke dbg_cmd 1
+waitfor dbg_seq 1 10
+peek dbg_ack
+peek dbg_res 6
+wram OUT/ping.bin dbg_cmd 20
+poke dbg_cmd $42
+waitfor dbg_seq 2 10
+peek dbg_ack
+wram OUT/unknown.bin dbg_cmd 20

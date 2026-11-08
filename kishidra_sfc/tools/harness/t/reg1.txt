@@ -1,0 +1,55 @@
+# Regression tour of the screens (shared_infra t/reg1, + the sortie window): title, map, menu, equip,
+# equip list, dex list, dex card, stage list, sortie window, battle 魔王の城10.  No audio here: the
+# title's first 3.3 s race the SE upload against the stream (see reg2).
+# The save is made from the #!mksave line by hrun.py (abtest.py, lag.py, oamlines.py, hrun.py SCRIPT DIR).
+#!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3
+loadsram s1.srm
+wait 200
+shot OUT/title.ppm
+press A
+wait 120
+shot OUT/map.ppm
+press Y
+wait 60
+shot OUT/menu.ppm
+press A
+wait 60
+shot OUT/equip.ppm
+press A
+wait 60
+shot OUT/equip_list.ppm
+press B
+wait 30
+press B
+wait 30
+press DOWN
+wait 4
+press DOWN
+wait 4
+press DOWN
+wait 4
+press DOWN
+wait 4
+press A
+wait 90
+shot OUT/dex.ppm
+press A
+wait 120
+shot OUT/dex_card.ppm
+press B
+wait 40
+press B
+wait 40
+press B
+wait 60
+press A
+wait 60
+shot OUT/stage.ppm
+press A
+wait 60
+shot OUT/sortie.ppm
+press A
+wait 240
+shot OUT/battle1.ppm
+wait 300
+shot OUT/battle2.ppm

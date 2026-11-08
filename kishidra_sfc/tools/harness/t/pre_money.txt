@@ -1,0 +1,15 @@
+# prefix: into the castle money stage (魔王城の地下) and 500 frames of its fight (wings_mirage t/money_pre).
+# For lag.py / oamlines.py: they measure from the end of this script.
+#!mksave castle.srm --open 14 --clear-all
+loadsram castle.srm
+wait 200
+press A
+wait 150
+press A
+wait 40
+press DOWN
+wait 20
+press A
+wait 40
+press A
+wait 500

@@ -73,6 +73,13 @@ python build.py rom
   処理時間の内訳 `prof.py`、文字のはみ出し・枠かぶり・色の混ざり・重なりの検査 `textcheck.py`
   〈どちらも `PROFILE=1 python build.py rom` で作る計測用 ROM が必要。計測用 ROM は NMI の転送が終わった走査線も
   $7F:DBFA（最大）と $7F:DA00〜（直近 32 フレーム）に残す〉、文字列の幅 `textwidth.py` など）
+- テストの道具（`tools/harness/`）: `runrom` のスクリプトで WRAM を書く・読む `poke` / `pokew` / `pokel` / `peek` /
+  `waitfor`（アドレスはリンクの記号で `sv+16` のように書ける。記号は build.py が書く `build/kishidra.lbl` から）、
+  2 つの ROM で同じ操作をして画面・音・メモリを比べる `abtest.py`（`t/reg1.txt` が画面、`t/reg2.txt` が音の一巡り。
+  セーブはスクリプトの `#!mksave` 行から作る）、ラグの計測 `lag.py`、走査線ごとのスプライト数 `oamlines.py`、
+  バンク・WRAM の予算 `budget.py`。`runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl`
+  で作る（これらの道具は runrom.c が新しければ作り直す）。`XDEFS="TEST_HOOKS …" python build.py rom` で
+  テストだけの定義を入れた ROM を作る（TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない）
 - NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる
   （残りは次のフレーム）。勇者・雑魚のポーズとスキルのアイコンの絵は、それを描く OAM と同じ NMI で送る
   （絵と並びがずれたフレームが出ない）。戦闘のメッセージ・コンボ・カードの文字は BG3 マップと同じ NMI で送る

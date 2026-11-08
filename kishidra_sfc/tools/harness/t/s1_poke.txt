@@ -1,0 +1,19 @@
+# S1: runrom poke on the map: the coins written into sv.coins (offset 16 of Save, u32) show in the menu.
+#!mksave s1.srm --open 14 --clear-all --coins 123456 --tickets 3 --mats 20 --dex 3
+loadsram s1.srm
+wait 200
+press A
+wait 120
+shot OUT/map.ppm
+peek sv+16 4
+pokel sv+16 9876543
+peek sv+16 4
+press Y
+wait 60
+shot OUT/menu.ppm
+pokew sv+16 4321 0
+press B
+wait 60
+press Y
+wait 60
+shot OUT/menu2.ppm
