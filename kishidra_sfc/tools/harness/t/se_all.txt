@@ -1,0 +1,150 @@
+# Every sound effect alone (XDEFS=TEST_HOOKS ROMs, sys.c DC_SE): the BGM is stopped, then SE 1..23 (sound.h
+# order) play one at a time, each recorded for 1 s into its own wav.  Nothing else plays, so two ROMs with the
+# same SE samples write identical files (abtest.py ROM_A ROM_B tools/harness/t/se_all.txt).  The SE samples
+# upload during the first ~3 s of the title, hence the wait.
+#!needs dbg_cmd
+wait 400
+pokew dbg_arg 0 1
+poke dbg_cmd 2
+waitfor dbg_seq 1 10
+wait 60
+wav OUT/se01_cursor.wav
+pokew dbg_arg 1 0
+poke dbg_cmd 2
+waitfor dbg_seq 2 10
+wait 60
+wavend
+wav OUT/se02_ok.wav
+pokew dbg_arg 2 0
+poke dbg_cmd 2
+waitfor dbg_seq 3 10
+wait 60
+wavend
+wav OUT/se03_cancel.wav
+pokew dbg_arg 3 0
+poke dbg_cmd 2
+waitfor dbg_seq 4 10
+wait 60
+wavend
+wav OUT/se04_slash.wav
+pokew dbg_arg 4 0
+poke dbg_cmd 2
+waitfor dbg_seq 5 10
+wait 60
+wavend
+wav OUT/se05_spear.wav
+pokew dbg_arg 5 0
+poke dbg_cmd 2
+waitfor dbg_seq 6 10
+wait 60
+wavend
+wav OUT/se06_hammer.wav
+pokew dbg_arg 6 0
+poke dbg_cmd 2
+waitfor dbg_seq 7 10
+wait 60
+wavend
+wav OUT/se07_kick.wav
+pokew dbg_arg 7 0
+poke dbg_cmd 2
+waitfor dbg_seq 8 10
+wait 60
+wavend
+wav OUT/se08_shout.wav
+pokew dbg_arg 8 0
+poke dbg_cmd 2
+waitfor dbg_seq 9 10
+wait 60
+wavend
+wav OUT/se09_damage.wav
+pokew dbg_arg 9 0
+poke dbg_cmd 2
+waitfor dbg_seq 10 10
+wait 60
+wavend
+wav OUT/se10_guard.wav
+pokew dbg_arg 10 0
+poke dbg_cmd 2
+waitfor dbg_seq 11 10
+wait 60
+wavend
+wav OUT/se11_just.wav
+pokew dbg_arg 11 0
+poke dbg_cmd 2
+waitfor dbg_seq 12 10
+wait 60
+wavend
+wav OUT/se12_miracle.wav
+pokew dbg_arg 12 0
+poke dbg_cmd 2
+waitfor dbg_seq 13 10
+wait 60
+wavend
+wav OUT/se13_eat.wav
+pokew dbg_arg 13 0
+poke dbg_cmd 2
+waitfor dbg_seq 14 10
+wait 60
+wavend
+wav OUT/se14_charge.wav
+pokew dbg_arg 14 0
+poke dbg_cmd 2
+waitfor dbg_seq 15 10
+wait 60
+wavend
+wav OUT/se15_stun.wav
+pokew dbg_arg 15 0
+poke dbg_cmd 2
+waitfor dbg_seq 16 10
+wait 60
+wavend
+wav OUT/se16_lucky.wav
+pokew dbg_arg 16 0
+poke dbg_cmd 2
+waitfor dbg_seq 17 10
+wait 60
+wavend
+wav OUT/se17_warning.wav
+pokew dbg_arg 17 0
+poke dbg_cmd 2
+waitfor dbg_seq 18 10
+wait 60
+wavend
+wav OUT/se18_breath.wav
+pokew dbg_arg 18 0
+poke dbg_cmd 2
+waitfor dbg_seq 19 10
+wait 60
+wavend
+wav OUT/se19_transform.wav
+pokew dbg_arg 19 0
+poke dbg_cmd 2
+waitfor dbg_seq 20 10
+wait 60
+wavend
+wav OUT/se20_coin.wav
+pokew dbg_arg 20 0
+poke dbg_cmd 2
+waitfor dbg_seq 21 10
+wait 60
+wavend
+wav OUT/se21_drop.wav
+pokew dbg_arg 21 0
+poke dbg_cmd 2
+waitfor dbg_seq 22 10
+wait 60
+wavend
+wav OUT/se22_defeat.wav
+pokew dbg_arg 22 0
+poke dbg_cmd 2
+waitfor dbg_seq 23 10
+wait 60
+wavend
+wav OUT/se23_special.wav
+pokew dbg_arg 23 0
+poke dbg_cmd 2
+waitfor dbg_seq 24 10
+wait 60
+wavend
+peek dbg_ack
+peek dbg_res 2

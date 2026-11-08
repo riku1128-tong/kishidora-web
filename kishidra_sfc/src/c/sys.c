@@ -199,6 +199,11 @@ static void dbg_poll(void) {
     dbg_res[1] = frame;
     dbg_res[2] = dbg_scr;
     break;
+  case DC_SE:                   /* a sound effect alone (tools/harness/t/se_all.txt) */
+    if (dbg_arg[1]) bgm_stop();
+    se_play((u8)dbg_arg[0]);
+    dbg_res[0] = dbg_arg[0];
+    break;
   default:
     c = DC_UNKNOWN;
   }

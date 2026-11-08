@@ -1432,37 +1432,37 @@ gfx_table:
   .word 80
   .word .loword(gfx_boss_007_normal_t)
   .byte <.bank(gfx_boss_007_normal_t), 1
-  .word 4149
+  .word 4150
   .word .loword(gfx_boss_007_normal_m)
   .byte <.bank(gfx_boss_007_normal_m), 1
   .word 326
   .word .loword(gfx_boss_007_idle2_t)
   .byte <.bank(gfx_boss_007_idle2_t), 1
-  .word 4110
+  .word 4119
   .word .loword(gfx_boss_007_idle2_m)
   .byte <.bank(gfx_boss_007_idle2_m), 1
   .word 328
   .word .loword(gfx_boss_007_attack_t)
   .byte <.bank(gfx_boss_007_attack_t), 1
-  .word 4303
+  .word 4317
   .word .loword(gfx_boss_007_attack_m)
   .byte <.bank(gfx_boss_007_attack_m), 1
   .word 385
   .word .loword(gfx_boss_007_hurt_t)
   .byte <.bank(gfx_boss_007_hurt_t), 1
-  .word 4310
+  .word 4324
   .word .loword(gfx_boss_007_hurt_m)
   .byte <.bank(gfx_boss_007_hurt_m), 1
   .word 358
   .word .loword(gfx_boss_007_defeat_t)
   .byte <.bank(gfx_boss_007_defeat_t), 1
-  .word 4512
+  .word 4505
   .word .loword(gfx_boss_007_defeat_m)
   .byte <.bank(gfx_boss_007_defeat_m), 0
   .word 360
   .word .loword(gfx_boss_007_special_t)
   .byte <.bank(gfx_boss_007_special_t), 1
-  .word 4386
+  .word 4369
   .word .loword(gfx_boss_007_special_m)
   .byte <.bank(gfx_boss_007_special_m), 1
   .word 372
@@ -1474,31 +1474,31 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_008_normal_t)
   .byte <.bank(gfx_boss_008_normal_t), 1
-  .word 4200
+  .word 4194
   .word .loword(gfx_boss_008_normal_m)
   .byte <.bank(gfx_boss_008_normal_m), 1
   .word 334
   .word .loword(gfx_boss_008_attack_t)
   .byte <.bank(gfx_boss_008_attack_t), 1
-  .word 4308
+  .word 4299
   .word .loword(gfx_boss_008_attack_m)
   .byte <.bank(gfx_boss_008_attack_m), 1
   .word 384
   .word .loword(gfx_boss_008_hurt_t)
   .byte <.bank(gfx_boss_008_hurt_t), 1
-  .word 4319
+  .word 4323
   .word .loword(gfx_boss_008_hurt_m)
   .byte <.bank(gfx_boss_008_hurt_m), 1
   .word 359
   .word .loword(gfx_boss_008_defeat_t)
   .byte <.bank(gfx_boss_008_defeat_t), 1
-  .word 4024
+  .word 4021
   .word .loword(gfx_boss_008_defeat_m)
   .byte <.bank(gfx_boss_008_defeat_m), 1
   .word 329
   .word .loword(gfx_boss_008_special_t)
   .byte <.bank(gfx_boss_008_special_t), 1
-  .word 4373
+  .word 4371
   .word .loword(gfx_boss_008_special_m)
   .byte <.bank(gfx_boss_008_special_m), 1
   .word 379
@@ -1552,31 +1552,31 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_010_normal_t)
   .byte <.bank(gfx_boss_010_normal_t), 1
-  .word 4248
+  .word 4242
   .word .loword(gfx_boss_010_normal_m)
   .byte <.bank(gfx_boss_010_normal_m), 1
   .word 336
   .word .loword(gfx_boss_010_attack_t)
   .byte <.bank(gfx_boss_010_attack_t), 1
-  .word 4778
+  .word 4770
   .word .loword(gfx_boss_010_attack_m)
   .byte <.bank(gfx_boss_010_attack_m), 1
   .word 380
   .word .loword(gfx_boss_010_hurt_t)
   .byte <.bank(gfx_boss_010_hurt_t), 1
-  .word 4326
+  .word 4323
   .word .loword(gfx_boss_010_hurt_m)
   .byte <.bank(gfx_boss_010_hurt_m), 1
   .word 357
   .word .loword(gfx_boss_010_defeat_t)
   .byte <.bank(gfx_boss_010_defeat_t), 1
-  .word 3737
+  .word 3744
   .word .loword(gfx_boss_010_defeat_m)
   .byte <.bank(gfx_boss_010_defeat_m), 1
   .word 318
   .word .loword(gfx_boss_010_special_t)
   .byte <.bank(gfx_boss_010_special_t), 1
-  .word 5076
+  .word 5095
   .word .loword(gfx_boss_010_special_m)
   .byte <.bank(gfx_boss_010_special_m), 1
   .word 412
@@ -1630,37 +1630,37 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_012_normal_t)
   .byte <.bank(gfx_boss_012_normal_t), 1
-  .word 4178
+  .word 4234
   .word .loword(gfx_boss_012_normal_m)
   .byte <.bank(gfx_boss_012_normal_m), 1
   .word 333
   .word .loword(gfx_boss_012_idle2_t)
   .byte <.bank(gfx_boss_012_idle2_t), 1
-  .word 4153
+  .word 4199
   .word .loword(gfx_boss_012_idle2_m)
   .byte <.bank(gfx_boss_012_idle2_m), 1
   .word 335
   .word .loword(gfx_boss_012_attack_t)
   .byte <.bank(gfx_boss_012_attack_t), 1
-  .word 3994
+  .word 4045
   .word .loword(gfx_boss_012_attack_m)
   .byte <.bank(gfx_boss_012_attack_m), 1
   .word 336
   .word .loword(gfx_boss_012_hurt_t)
   .byte <.bank(gfx_boss_012_hurt_t), 1
-  .word 4374
+  .word 4364
   .word .loword(gfx_boss_012_hurt_m)
   .byte <.bank(gfx_boss_012_hurt_m), 1
   .word 357
   .word .loword(gfx_boss_012_defeat_t)
   .byte <.bank(gfx_boss_012_defeat_t), 1
-  .word 4368
+  .word 4397
   .word .loword(gfx_boss_012_defeat_m)
   .byte <.bank(gfx_boss_012_defeat_m), 1
-  .word 368
+  .word 370
   .word .loword(gfx_boss_012_special_t)
   .byte <.bank(gfx_boss_012_special_t), 1
-  .word 4365
+  .word 4347
   .word .loword(gfx_boss_012_special_m)
   .byte <.bank(gfx_boss_012_special_m), 1
   .word 374
@@ -1672,37 +1672,37 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_013_normal_t)
   .byte <.bank(gfx_boss_013_normal_t), 1
-  .word 5104
+  .word 5082
   .word .loword(gfx_boss_013_normal_m)
   .byte <.bank(gfx_boss_013_normal_m), 1
   .word 409
   .word .loword(gfx_boss_013_idle2_t)
   .byte <.bank(gfx_boss_013_idle2_t), 1
-  .word 5051
+  .word 5047
   .word .loword(gfx_boss_013_idle2_m)
   .byte <.bank(gfx_boss_013_idle2_m), 1
   .word 409
   .word .loword(gfx_boss_013_attack_t)
   .byte <.bank(gfx_boss_013_attack_t), 1
-  .word 5303
+  .word 5288
   .word .loword(gfx_boss_013_attack_m)
   .byte <.bank(gfx_boss_013_attack_m), 1
   .word 422
   .word .loword(gfx_boss_013_hurt_t)
   .byte <.bank(gfx_boss_013_hurt_t), 1
-  .word 4885
+  .word 4857
   .word .loword(gfx_boss_013_hurt_m)
   .byte <.bank(gfx_boss_013_hurt_m), 1
   .word 390
   .word .loword(gfx_boss_013_defeat_t)
   .byte <.bank(gfx_boss_013_defeat_t), 1
-  .word 5095
+  .word 5075
   .word .loword(gfx_boss_013_defeat_m)
   .byte <.bank(gfx_boss_013_defeat_m), 1
   .word 408
   .word .loword(gfx_boss_013_special_t)
   .byte <.bank(gfx_boss_013_special_t), 1
-  .word 5086
+  .word 5056
   .word .loword(gfx_boss_013_special_m)
   .byte <.bank(gfx_boss_013_special_m), 1
   .word 409
@@ -1714,37 +1714,37 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_014_normal_t)
   .byte <.bank(gfx_boss_014_normal_t), 1
-  .word 4571
+  .word 4522
   .word .loword(gfx_boss_014_normal_m)
   .byte <.bank(gfx_boss_014_normal_m), 1
   .word 375
   .word .loword(gfx_boss_014_idle2_t)
   .byte <.bank(gfx_boss_014_idle2_t), 1
-  .word 4529
+  .word 4484
   .word .loword(gfx_boss_014_idle2_m)
   .byte <.bank(gfx_boss_014_idle2_m), 1
   .word 375
   .word .loword(gfx_boss_014_attack_t)
   .byte <.bank(gfx_boss_014_attack_t), 1
-  .word 3576
+  .word 3548
   .word .loword(gfx_boss_014_attack_m)
   .byte <.bank(gfx_boss_014_attack_m), 1
   .word 305
   .word .loword(gfx_boss_014_hurt_t)
   .byte <.bank(gfx_boss_014_hurt_t), 1
-  .word 4427
+  .word 4412
   .word .loword(gfx_boss_014_hurt_m)
   .byte <.bank(gfx_boss_014_hurt_m), 1
   .word 365
   .word .loword(gfx_boss_014_defeat_t)
   .byte <.bank(gfx_boss_014_defeat_t), 1
-  .word 4117
+  .word 4105
   .word .loword(gfx_boss_014_defeat_m)
   .byte <.bank(gfx_boss_014_defeat_m), 1
   .word 350
   .word .loword(gfx_boss_014_special_t)
   .byte <.bank(gfx_boss_014_special_t), 1
-  .word 3826
+  .word 3810
   .word .loword(gfx_boss_014_special_m)
   .byte <.bank(gfx_boss_014_special_m), 1
   .word 328
@@ -1828,13 +1828,13 @@ gfx_table:
   .word 56
   .word .loword(gfx_boss_017_normal_t)
   .byte <.bank(gfx_boss_017_normal_t), 1
-  .word 3679
+  .word 3669
   .word .loword(gfx_boss_017_normal_m)
   .byte <.bank(gfx_boss_017_normal_m), 1
   .word 294
   .word .loword(gfx_boss_017_attack_t)
   .byte <.bank(gfx_boss_017_attack_t), 1
-  .word 4126
+  .word 4131
   .word .loword(gfx_boss_017_attack_m)
   .byte <.bank(gfx_boss_017_attack_m), 0
   .word 336
@@ -1846,13 +1846,13 @@ gfx_table:
   .word 331
   .word .loword(gfx_boss_017_defeat_t)
   .byte <.bank(gfx_boss_017_defeat_t), 1
-  .word 4575
+  .word 4577
   .word .loword(gfx_boss_017_defeat_m)
   .byte <.bank(gfx_boss_017_defeat_m), 1
   .word 361
   .word .loword(gfx_boss_017_special_t)
   .byte <.bank(gfx_boss_017_special_t), 1
-  .word 4427
+  .word 4442
   .word .loword(gfx_boss_017_special_m)
   .byte <.bank(gfx_boss_017_special_m), 1
   .word 362
@@ -1864,34 +1864,34 @@ gfx_table:
   .word 56
   .word .loword(gfx_boss_018_normal_t)
   .byte <.bank(gfx_boss_018_normal_t), 1
-  .word 3934
+  .word 3946
   .word .loword(gfx_boss_018_normal_m)
   .byte <.bank(gfx_boss_018_normal_m), 1
   .word 304
   .word .loword(gfx_boss_018_attack_t)
   .byte <.bank(gfx_boss_018_attack_t), 1
-  .word 4380
+  .word 4372
   .word .loword(gfx_boss_018_attack_m)
   .byte <.bank(gfx_boss_018_attack_m), 0
   .word 360
   .word .loword(gfx_boss_018_hurt_t)
   .byte <.bank(gfx_boss_018_hurt_t), 1
-  .word 5773
+  .word 5768
   .word .loword(gfx_boss_018_hurt_m)
   .byte <.bank(gfx_boss_018_hurt_m), 1
-  .word 458
+  .word 460
   .word .loword(gfx_boss_018_defeat_t)
   .byte <.bank(gfx_boss_018_defeat_t), 1
-  .word 4190
+  .word 4200
   .word .loword(gfx_boss_018_defeat_m)
   .byte <.bank(gfx_boss_018_defeat_m), 1
-  .word 348
+  .word 346
   .word .loword(gfx_boss_018_special_t)
   .byte <.bank(gfx_boss_018_special_t), 1
-  .word 4745
+  .word 4735
   .word .loword(gfx_boss_018_special_m)
   .byte <.bank(gfx_boss_018_special_m), 1
-  .word 372
+  .word 369
   .word .loword(gfx_boss_018_pal)
   .byte <.bank(gfx_boss_018_pal), 0
   .word 64
@@ -3301,37 +3301,37 @@ gfx_table:
   .word 86
   .word .loword(gfx_boss_085_normal_t)
   .byte <.bank(gfx_boss_085_normal_t), 1
-  .word 2718
+  .word 2705
   .word .loword(gfx_boss_085_normal_m)
   .byte <.bank(gfx_boss_085_normal_m), 0
   .word 216
   .word .loword(gfx_boss_085_idle2_t)
   .byte <.bank(gfx_boss_085_idle2_t), 1
-  .word 2710
+  .word 2709
   .word .loword(gfx_boss_085_idle2_m)
   .byte <.bank(gfx_boss_085_idle2_m), 0
   .word 216
   .word .loword(gfx_boss_085_attack_t)
   .byte <.bank(gfx_boss_085_attack_t), 1
-  .word 2357
+  .word 2332
   .word .loword(gfx_boss_085_attack_m)
   .byte <.bank(gfx_boss_085_attack_m), 1
   .word 207
   .word .loword(gfx_boss_085_hurt_t)
   .byte <.bank(gfx_boss_085_hurt_t), 1
-  .word 2924
+  .word 2909
   .word .loword(gfx_boss_085_hurt_m)
   .byte <.bank(gfx_boss_085_hurt_m), 1
   .word 258
   .word .loword(gfx_boss_085_defeat_t)
   .byte <.bank(gfx_boss_085_defeat_t), 1
-  .word 2341
+  .word 2346
   .word .loword(gfx_boss_085_defeat_m)
   .byte <.bank(gfx_boss_085_defeat_m), 1
   .word 196
   .word .loword(gfx_boss_085_special_t)
   .byte <.bank(gfx_boss_085_special_t), 1
-  .word 4222
+  .word 4234
   .word .loword(gfx_boss_085_special_m)
   .byte <.bank(gfx_boss_085_special_m), 1
   .word 368
@@ -3343,31 +3343,31 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_086_normal_t)
   .byte <.bank(gfx_boss_086_normal_t), 1
-  .word 5483
+  .word 5482
   .word .loword(gfx_boss_086_normal_m)
   .byte <.bank(gfx_boss_086_normal_m), 1
-  .word 446
+  .word 444
   .word .loword(gfx_boss_086_attack_t)
   .byte <.bank(gfx_boss_086_attack_t), 1
-  .word 5547
+  .word 5518
   .word .loword(gfx_boss_086_attack_m)
   .byte <.bank(gfx_boss_086_attack_m), 1
   .word 461
   .word .loword(gfx_boss_086_hurt_t)
   .byte <.bank(gfx_boss_086_hurt_t), 1
-  .word 5493
+  .word 5512
   .word .loword(gfx_boss_086_hurt_m)
   .byte <.bank(gfx_boss_086_hurt_m), 1
   .word 441
   .word .loword(gfx_boss_086_defeat_t)
   .byte <.bank(gfx_boss_086_defeat_t), 1
-  .word 5463
+  .word 5475
   .word .loword(gfx_boss_086_defeat_m)
   .byte <.bank(gfx_boss_086_defeat_m), 1
   .word 447
   .word .loword(gfx_boss_086_special_t)
   .byte <.bank(gfx_boss_086_special_t), 1
-  .word 5449
+  .word 5471
   .word .loword(gfx_boss_086_special_m)
   .byte <.bank(gfx_boss_086_special_m), 1
   .word 438
@@ -3442,40 +3442,40 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_089_normal_t)
   .byte <.bank(gfx_boss_089_normal_t), 1
-  .word 2207
+  .word 2223
   .word .loword(gfx_boss_089_normal_m)
   .byte <.bank(gfx_boss_089_normal_m), 0
   .word 198
   .word .loword(gfx_boss_089_idle2_t)
   .byte <.bank(gfx_boss_089_idle2_t), 1
-  .word 2169
+  .word 2199
   .word .loword(gfx_boss_089_idle2_m)
   .byte <.bank(gfx_boss_089_idle2_m), 0
   .word 198
   .word .loword(gfx_boss_089_attack_t)
   .byte <.bank(gfx_boss_089_attack_t), 1
-  .word 2442
+  .word 2428
   .word .loword(gfx_boss_089_attack_m)
   .byte <.bank(gfx_boss_089_attack_m), 0
   .word 198
   .word .loword(gfx_boss_089_hurt_t)
   .byte <.bank(gfx_boss_089_hurt_t), 1
-  .word 2388
+  .word 2381
   .word .loword(gfx_boss_089_hurt_m)
   .byte <.bank(gfx_boss_089_hurt_m), 1
   .word 202
   .word .loword(gfx_boss_089_defeat_t)
   .byte <.bank(gfx_boss_089_defeat_t), 1
-  .word 2447
+  .word 2473
   .word .loword(gfx_boss_089_defeat_m)
   .byte <.bank(gfx_boss_089_defeat_m), 1
   .word 223
   .word .loword(gfx_boss_089_special_t)
   .byte <.bank(gfx_boss_089_special_t), 1
-  .word 3116
+  .word 3141
   .word .loword(gfx_boss_089_special_m)
   .byte <.bank(gfx_boss_089_special_m), 1
-  .word 281
+  .word 288
   .word .loword(gfx_boss_089_pal)
   .byte <.bank(gfx_boss_089_pal), 0
   .word 64
@@ -3484,46 +3484,46 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_090_normal_t)
   .byte <.bank(gfx_boss_090_normal_t), 1
-  .word 2049
+  .word 1992
   .word .loword(gfx_boss_090_normal_m)
   .byte <.bank(gfx_boss_090_normal_m), 1
   .word 164
   .word .loword(gfx_boss_090_idle2_t)
   .byte <.bank(gfx_boss_090_idle2_t), 1
-  .word 2026
+  .word 1989
   .word .loword(gfx_boss_090_idle2_m)
   .byte <.bank(gfx_boss_090_idle2_m), 1
-  .word 166
+  .word 164
   .word .loword(gfx_boss_090_attack_t)
   .byte <.bank(gfx_boss_090_attack_t), 1
-  .word 1940
+  .word 1911
   .word .loword(gfx_boss_090_attack_m)
   .byte <.bank(gfx_boss_090_attack_m), 1
-  .word 167
+  .word 170
   .word .loword(gfx_boss_090_hurt_t)
   .byte <.bank(gfx_boss_090_hurt_t), 1
-  .word 2514
+  .word 2498
   .word .loword(gfx_boss_090_hurt_m)
   .byte <.bank(gfx_boss_090_hurt_m), 1
   .word 225
   .word .loword(gfx_boss_090_defeat_t)
   .byte <.bank(gfx_boss_090_defeat_t), 1
-  .word 2102
+  .word 2099
   .word .loword(gfx_boss_090_defeat_m)
   .byte <.bank(gfx_boss_090_defeat_m), 1
-  .word 180
+  .word 181
   .word .loword(gfx_boss_090_special_t)
   .byte <.bank(gfx_boss_090_special_t), 1
-  .word 2437
+  .word 2429
   .word .loword(gfx_boss_090_special_m)
   .byte <.bank(gfx_boss_090_special_m), 1
   .word 211
   .word .loword(gfx_boss_090_guard_t)
   .byte <.bank(gfx_boss_090_guard_t), 1
-  .word 2439
+  .word 2398
   .word .loword(gfx_boss_090_guard_m)
   .byte <.bank(gfx_boss_090_guard_m), 1
-  .word 206
+  .word 209
   .word .loword(gfx_boss_090_pal)
   .byte <.bank(gfx_boss_090_pal), 0
   .word 64
@@ -3537,20 +3537,20 @@ gfx_table:
   .byte <.bank(gfx_boss_091_normal_m), 0
   .word 240
   .word .loword(gfx_boss_091_idle2_t)
-  .byte <.bank(gfx_boss_091_idle2_t), 0
-  .word 3456
+  .byte <.bank(gfx_boss_091_idle2_t), 1
+  .word 3448
   .word .loword(gfx_boss_091_idle2_m)
   .byte <.bank(gfx_boss_091_idle2_m), 0
   .word 240
   .word .loword(gfx_boss_091_attack_t)
   .byte <.bank(gfx_boss_091_attack_t), 1
-  .word 3897
+  .word 3901
   .word .loword(gfx_boss_091_attack_m)
   .byte <.bank(gfx_boss_091_attack_m), 1
   .word 294
   .word .loword(gfx_boss_091_hurt_t)
   .byte <.bank(gfx_boss_091_hurt_t), 1
-  .word 3592
+  .word 3590
   .word .loword(gfx_boss_091_hurt_m)
   .byte <.bank(gfx_boss_091_hurt_m), 1
   .word 285
@@ -3562,10 +3562,10 @@ gfx_table:
   .word 240
   .word .loword(gfx_boss_091_special_t)
   .byte <.bank(gfx_boss_091_special_t), 1
-  .word 4358
+  .word 4391
   .word .loword(gfx_boss_091_special_m)
   .byte <.bank(gfx_boss_091_special_m), 1
-  .word 353
+  .word 355
   .word .loword(gfx_boss_091_pal)
   .byte <.bank(gfx_boss_091_pal), 0
   .word 64
@@ -3574,31 +3574,31 @@ gfx_table:
   .word 67
   .word .loword(gfx_boss_092_normal_t)
   .byte <.bank(gfx_boss_092_normal_t), 1
-  .word 3583
+  .word 3553
   .word .loword(gfx_boss_092_normal_m)
   .byte <.bank(gfx_boss_092_normal_m), 1
   .word 289
   .word .loword(gfx_boss_092_attack_t)
   .byte <.bank(gfx_boss_092_attack_t), 1
-  .word 3347
+  .word 3311
   .word .loword(gfx_boss_092_attack_m)
   .byte <.bank(gfx_boss_092_attack_m), 1
   .word 269
   .word .loword(gfx_boss_092_hurt_t)
   .byte <.bank(gfx_boss_092_hurt_t), 1
-  .word 4897
+  .word 4931
   .word .loword(gfx_boss_092_hurt_m)
   .byte <.bank(gfx_boss_092_hurt_m), 1
   .word 390
   .word .loword(gfx_boss_092_defeat_t)
   .byte <.bank(gfx_boss_092_defeat_t), 1
-  .word 3705
+  .word 3709
   .word .loword(gfx_boss_092_defeat_m)
   .byte <.bank(gfx_boss_092_defeat_m), 1
   .word 286
   .word .loword(gfx_boss_092_special_t)
   .byte <.bank(gfx_boss_092_special_t), 1
-  .word 4660
+  .word 4678
   .word .loword(gfx_boss_092_special_m)
   .byte <.bank(gfx_boss_092_special_m), 0
   .word 336
@@ -4024,7 +4024,7 @@ gfx_table:
   .word 1990
   .word .loword(gfx_icons16)
   .byte <.bank(gfx_icons16), 1
-  .word 21920
+  .word 21921
   .word .loword(gfx_icons16_pal)
   .byte <.bank(gfx_icons16_pal), 0
   .word 128

@@ -1,0 +1,37 @@
+# The shield イージスアイギス (SH_303, item 238; S3: its web art lost 3 outline pixels on 2026-11-07 17:41):
+# its icon in the equip screen and the shield list, the panel icon and the battle shield sprite in a fight
+# (平原の村 STAGE 1).  Equipped with a poke of sv.equip[3] (save.h offset 116) = bag index 2.
+#!mksave aegis.srm --open 1 --items 238
+loadsram aegis.srm
+wait 200
+press A
+wait 120
+pokew sv+116 2
+press Y
+wait 60
+press A
+wait 60
+shot OUT/equip.ppm
+press DOWN
+wait 4
+press DOWN
+wait 4
+press DOWN
+wait 4
+press A
+wait 60
+shot OUT/shield_list.ppm
+press B
+wait 30
+press B
+wait 30
+press B
+wait 60
+press A
+wait 60
+press A
+wait 60
+shot OUT/sortie.ppm
+press A
+wait 240
+shot OUT/battle.ppm

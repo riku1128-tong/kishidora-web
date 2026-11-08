@@ -85,12 +85,14 @@ python build.py rom
   2 つの ROM で同じ操作をして画面・音・メモリを比べる `abtest.py`（`t/reg1.txt` が画面、`t/reg2.txt` が音の一巡り。
   セーブはスクリプトの `#!mksave` 行から作る）、録音を少しの時間のずれを許して区間ごとに比べる `wavcmp.py`、
   2 つの ROM が読むデータ（アセット・文字列・フォント・敵の能力・SPC・BGM を流す順）を比べる `romdata.py`、
+  2 つの data/gen の絵をアセットごとに比べ、変わったスプライトのポーズを描いて並べる `gfxdiff.py`（`-o` で PNG）、
   置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド）、ラグの計測 `lag.py`、
   走査線ごとのスプライト数 `oamlines.py`、バンク・WRAM の予算 `budget.py`、
   セーブ v2 のテスト `savetest.py`（v1 からの移行・スロットの交代・こわれたスロットからの戻り）。
   `runrom` は `gcc -O2 -I/usr/include/libretro-common -o runrom runrom.c -ldl` で作る（tools/harness の道具は runrom がないときと runrom.c のほうが新しいときに作り直す）。
   `XDEFS="TEST_HOOKS …" python build.py rom` でテストだけの定義を入れた ROM を作る
-  （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない）
+  （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない。`t/se_all.txt` は BGM を止めて
+  効果音を 1 つずつ鳴らして録音する）
 - NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる
   （残りは次のフレーム）。勇者・雑魚のポーズとスキルのアイコンの絵は、それを描く OAM と同じ NMI で送る
   （絵と並びがずれたフレームが出ない）。戦闘のメッセージ・コンボ・カードの文字は BG3 マップと同じ NMI で送る

@@ -801,7 +801,7 @@
 {
 "label": "gfx_boss_007_normal_t",
 "file": "gfx/boss_007_normal_t.bin",
-"size": 4149,
+"size": 4150,
 "kind": "whole",
 "speed": "fast"
 },
@@ -815,7 +815,7 @@
 {
 "label": "gfx_boss_007_idle2_t",
 "file": "gfx/boss_007_idle2_t.bin",
-"size": 4110,
+"size": 4119,
 "kind": "whole",
 "speed": "fast"
 },
@@ -829,7 +829,7 @@
 {
 "label": "gfx_boss_007_attack_t",
 "file": "gfx/boss_007_attack_t.bin",
-"size": 4303,
+"size": 4317,
 "kind": "whole",
 "speed": "fast"
 },
@@ -843,7 +843,7 @@
 {
 "label": "gfx_boss_007_hurt_t",
 "file": "gfx/boss_007_hurt_t.bin",
-"size": 4310,
+"size": 4324,
 "kind": "whole",
 "speed": "fast"
 },
@@ -857,7 +857,7 @@
 {
 "label": "gfx_boss_007_defeat_t",
 "file": "gfx/boss_007_defeat_t.bin",
-"size": 4512,
+"size": 4505,
 "kind": "whole",
 "speed": "fast"
 },
@@ -871,7 +871,7 @@
 {
 "label": "gfx_boss_007_special_t",
 "file": "gfx/boss_007_special_t.bin",
-"size": 4386,
+"size": 4369,
 "kind": "whole",
 "speed": "fast"
 },
@@ -899,7 +899,7 @@
 {
 "label": "gfx_boss_008_normal_t",
 "file": "gfx/boss_008_normal_t.bin",
-"size": 4200,
+"size": 4194,
 "kind": "whole",
 "speed": "fast"
 },
@@ -913,7 +913,7 @@
 {
 "label": "gfx_boss_008_attack_t",
 "file": "gfx/boss_008_attack_t.bin",
-"size": 4308,
+"size": 4299,
 "kind": "whole",
 "speed": "fast"
 },
@@ -927,7 +927,7 @@
 {
 "label": "gfx_boss_008_hurt_t",
 "file": "gfx/boss_008_hurt_t.bin",
-"size": 4319,
+"size": 4323,
 "kind": "whole",
 "speed": "fast"
 },
@@ -941,7 +941,7 @@
 {
 "label": "gfx_boss_008_defeat_t",
 "file": "gfx/boss_008_defeat_t.bin",
-"size": 4024,
+"size": 4021,
 "kind": "whole",
 "speed": "fast"
 },
@@ -955,7 +955,7 @@
 {
 "label": "gfx_boss_008_special_t",
 "file": "gfx/boss_008_special_t.bin",
-"size": 4373,
+"size": 4371,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1081,7 +1081,7 @@
 {
 "label": "gfx_boss_010_normal_t",
 "file": "gfx/boss_010_normal_t.bin",
-"size": 4248,
+"size": 4242,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1095,7 +1095,7 @@
 {
 "label": "gfx_boss_010_attack_t",
 "file": "gfx/boss_010_attack_t.bin",
-"size": 4778,
+"size": 4770,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1109,7 +1109,7 @@
 {
 "label": "gfx_boss_010_hurt_t",
 "file": "gfx/boss_010_hurt_t.bin",
-"size": 4326,
+"size": 4323,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1123,7 +1123,7 @@
 {
 "label": "gfx_boss_010_defeat_t",
 "file": "gfx/boss_010_defeat_t.bin",
-"size": 3737,
+"size": 3744,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1137,7 +1137,7 @@
 {
 "label": "gfx_boss_010_special_t",
 "file": "gfx/boss_010_special_t.bin",
-"size": 5076,
+"size": 5095,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1263,7 +1263,7 @@
 {
 "label": "gfx_boss_012_normal_t",
 "file": "gfx/boss_012_normal_t.bin",
-"size": 4178,
+"size": 4234,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1277,7 +1277,7 @@
 {
 "label": "gfx_boss_012_idle2_t",
 "file": "gfx/boss_012_idle2_t.bin",
-"size": 4153,
+"size": 4199,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1291,7 +1291,7 @@
 {
 "label": "gfx_boss_012_attack_t",
 "file": "gfx/boss_012_attack_t.bin",
-"size": 3994,
+"size": 4045,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1305,7 +1305,7 @@
 {
 "label": "gfx_boss_012_hurt_t",
 "file": "gfx/boss_012_hurt_t.bin",
-"size": 4374,
+"size": 4364,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1319,21 +1319,21 @@
 {
 "label": "gfx_boss_012_defeat_t",
 "file": "gfx/boss_012_defeat_t.bin",
-"size": 4368,
+"size": 4397,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_012_defeat_m",
 "file": "gfx/boss_012_defeat_m.bin",
-"size": 368,
+"size": 370,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_012_special_t",
 "file": "gfx/boss_012_special_t.bin",
-"size": 4365,
+"size": 4347,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1361,7 +1361,7 @@
 {
 "label": "gfx_boss_013_normal_t",
 "file": "gfx/boss_013_normal_t.bin",
-"size": 5104,
+"size": 5082,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1375,7 +1375,7 @@
 {
 "label": "gfx_boss_013_idle2_t",
 "file": "gfx/boss_013_idle2_t.bin",
-"size": 5051,
+"size": 5047,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1389,7 +1389,7 @@
 {
 "label": "gfx_boss_013_attack_t",
 "file": "gfx/boss_013_attack_t.bin",
-"size": 5303,
+"size": 5288,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1403,7 +1403,7 @@
 {
 "label": "gfx_boss_013_hurt_t",
 "file": "gfx/boss_013_hurt_t.bin",
-"size": 4885,
+"size": 4857,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1417,7 +1417,7 @@
 {
 "label": "gfx_boss_013_defeat_t",
 "file": "gfx/boss_013_defeat_t.bin",
-"size": 5095,
+"size": 5075,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1431,7 +1431,7 @@
 {
 "label": "gfx_boss_013_special_t",
 "file": "gfx/boss_013_special_t.bin",
-"size": 5086,
+"size": 5056,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1459,7 +1459,7 @@
 {
 "label": "gfx_boss_014_normal_t",
 "file": "gfx/boss_014_normal_t.bin",
-"size": 4571,
+"size": 4522,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1473,7 +1473,7 @@
 {
 "label": "gfx_boss_014_idle2_t",
 "file": "gfx/boss_014_idle2_t.bin",
-"size": 4529,
+"size": 4484,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1487,7 +1487,7 @@
 {
 "label": "gfx_boss_014_attack_t",
 "file": "gfx/boss_014_attack_t.bin",
-"size": 3576,
+"size": 3548,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1501,7 +1501,7 @@
 {
 "label": "gfx_boss_014_hurt_t",
 "file": "gfx/boss_014_hurt_t.bin",
-"size": 4427,
+"size": 4412,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1515,7 +1515,7 @@
 {
 "label": "gfx_boss_014_defeat_t",
 "file": "gfx/boss_014_defeat_t.bin",
-"size": 4117,
+"size": 4105,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1529,7 +1529,7 @@
 {
 "label": "gfx_boss_014_special_t",
 "file": "gfx/boss_014_special_t.bin",
-"size": 3826,
+"size": 3810,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1725,7 +1725,7 @@
 {
 "label": "gfx_boss_017_normal_t",
 "file": "gfx/boss_017_normal_t.bin",
-"size": 3679,
+"size": 3669,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1739,7 +1739,7 @@
 {
 "label": "gfx_boss_017_attack_t",
 "file": "gfx/boss_017_attack_t.bin",
-"size": 4126,
+"size": 4131,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1767,7 +1767,7 @@
 {
 "label": "gfx_boss_017_defeat_t",
 "file": "gfx/boss_017_defeat_t.bin",
-"size": 4575,
+"size": 4577,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1781,7 +1781,7 @@
 {
 "label": "gfx_boss_017_special_t",
 "file": "gfx/boss_017_special_t.bin",
-"size": 4427,
+"size": 4442,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1809,7 +1809,7 @@
 {
 "label": "gfx_boss_018_normal_t",
 "file": "gfx/boss_018_normal_t.bin",
-"size": 3934,
+"size": 3946,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1823,7 +1823,7 @@
 {
 "label": "gfx_boss_018_attack_t",
 "file": "gfx/boss_018_attack_t.bin",
-"size": 4380,
+"size": 4372,
 "kind": "whole",
 "speed": "fast"
 },
@@ -1837,42 +1837,42 @@
 {
 "label": "gfx_boss_018_hurt_t",
 "file": "gfx/boss_018_hurt_t.bin",
-"size": 5773,
+"size": 5768,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_018_hurt_m",
 "file": "gfx/boss_018_hurt_m.bin",
-"size": 458,
+"size": 460,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_018_defeat_t",
 "file": "gfx/boss_018_defeat_t.bin",
-"size": 4190,
+"size": 4200,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_018_defeat_m",
 "file": "gfx/boss_018_defeat_m.bin",
-"size": 348,
+"size": 346,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_018_special_t",
 "file": "gfx/boss_018_special_t.bin",
-"size": 4745,
+"size": 4735,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_018_special_m",
 "file": "gfx/boss_018_special_m.bin",
-"size": 372,
+"size": 369,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5162,7 +5162,7 @@
 {
 "label": "gfx_boss_085_normal_t",
 "file": "gfx/boss_085_normal_t.bin",
-"size": 2718,
+"size": 2705,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5176,7 +5176,7 @@
 {
 "label": "gfx_boss_085_idle2_t",
 "file": "gfx/boss_085_idle2_t.bin",
-"size": 2710,
+"size": 2709,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5190,7 +5190,7 @@
 {
 "label": "gfx_boss_085_attack_t",
 "file": "gfx/boss_085_attack_t.bin",
-"size": 2357,
+"size": 2332,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5204,7 +5204,7 @@
 {
 "label": "gfx_boss_085_hurt_t",
 "file": "gfx/boss_085_hurt_t.bin",
-"size": 2924,
+"size": 2909,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5218,7 +5218,7 @@
 {
 "label": "gfx_boss_085_defeat_t",
 "file": "gfx/boss_085_defeat_t.bin",
-"size": 2341,
+"size": 2346,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5232,7 +5232,7 @@
 {
 "label": "gfx_boss_085_special_t",
 "file": "gfx/boss_085_special_t.bin",
-"size": 4222,
+"size": 4234,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5260,21 +5260,21 @@
 {
 "label": "gfx_boss_086_normal_t",
 "file": "gfx/boss_086_normal_t.bin",
-"size": 5483,
+"size": 5482,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_086_normal_m",
 "file": "gfx/boss_086_normal_m.bin",
-"size": 446,
+"size": 444,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_086_attack_t",
 "file": "gfx/boss_086_attack_t.bin",
-"size": 5547,
+"size": 5518,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5288,7 +5288,7 @@
 {
 "label": "gfx_boss_086_hurt_t",
 "file": "gfx/boss_086_hurt_t.bin",
-"size": 5493,
+"size": 5512,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5302,7 +5302,7 @@
 {
 "label": "gfx_boss_086_defeat_t",
 "file": "gfx/boss_086_defeat_t.bin",
-"size": 5463,
+"size": 5475,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5316,7 +5316,7 @@
 {
 "label": "gfx_boss_086_special_t",
 "file": "gfx/boss_086_special_t.bin",
-"size": 5449,
+"size": 5471,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5491,7 +5491,7 @@
 {
 "label": "gfx_boss_089_normal_t",
 "file": "gfx/boss_089_normal_t.bin",
-"size": 2207,
+"size": 2223,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5505,7 +5505,7 @@
 {
 "label": "gfx_boss_089_idle2_t",
 "file": "gfx/boss_089_idle2_t.bin",
-"size": 2169,
+"size": 2199,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5519,7 +5519,7 @@
 {
 "label": "gfx_boss_089_attack_t",
 "file": "gfx/boss_089_attack_t.bin",
-"size": 2442,
+"size": 2428,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5533,7 +5533,7 @@
 {
 "label": "gfx_boss_089_hurt_t",
 "file": "gfx/boss_089_hurt_t.bin",
-"size": 2388,
+"size": 2381,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5547,7 +5547,7 @@
 {
 "label": "gfx_boss_089_defeat_t",
 "file": "gfx/boss_089_defeat_t.bin",
-"size": 2447,
+"size": 2473,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5561,14 +5561,14 @@
 {
 "label": "gfx_boss_089_special_t",
 "file": "gfx/boss_089_special_t.bin",
-"size": 3116,
+"size": 3141,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_089_special_m",
 "file": "gfx/boss_089_special_m.bin",
-"size": 281,
+"size": 288,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5589,7 +5589,7 @@
 {
 "label": "gfx_boss_090_normal_t",
 "file": "gfx/boss_090_normal_t.bin",
-"size": 2049,
+"size": 1992,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5603,35 +5603,35 @@
 {
 "label": "gfx_boss_090_idle2_t",
 "file": "gfx/boss_090_idle2_t.bin",
-"size": 2026,
+"size": 1989,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_idle2_m",
 "file": "gfx/boss_090_idle2_m.bin",
-"size": 166,
+"size": 164,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_attack_t",
 "file": "gfx/boss_090_attack_t.bin",
-"size": 1940,
+"size": 1911,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_attack_m",
 "file": "gfx/boss_090_attack_m.bin",
-"size": 167,
+"size": 170,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_hurt_t",
 "file": "gfx/boss_090_hurt_t.bin",
-"size": 2514,
+"size": 2498,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5645,21 +5645,21 @@
 {
 "label": "gfx_boss_090_defeat_t",
 "file": "gfx/boss_090_defeat_t.bin",
-"size": 2102,
+"size": 2099,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_defeat_m",
 "file": "gfx/boss_090_defeat_m.bin",
-"size": 180,
+"size": 181,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_special_t",
 "file": "gfx/boss_090_special_t.bin",
-"size": 2437,
+"size": 2429,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5673,14 +5673,14 @@
 {
 "label": "gfx_boss_090_guard_t",
 "file": "gfx/boss_090_guard_t.bin",
-"size": 2439,
+"size": 2398,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_090_guard_m",
 "file": "gfx/boss_090_guard_m.bin",
-"size": 206,
+"size": 209,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5715,9 +5715,9 @@
 {
 "label": "gfx_boss_091_idle2_t",
 "file": "gfx/boss_091_idle2_t.bin",
-"size": 3456,
+"size": 3448,
 "kind": "whole",
-"speed": "any"
+"speed": "fast"
 },
 {
 "label": "gfx_boss_091_idle2_m",
@@ -5729,7 +5729,7 @@
 {
 "label": "gfx_boss_091_attack_t",
 "file": "gfx/boss_091_attack_t.bin",
-"size": 3897,
+"size": 3901,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5743,7 +5743,7 @@
 {
 "label": "gfx_boss_091_hurt_t",
 "file": "gfx/boss_091_hurt_t.bin",
-"size": 3592,
+"size": 3590,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5771,14 +5771,14 @@
 {
 "label": "gfx_boss_091_special_t",
 "file": "gfx/boss_091_special_t.bin",
-"size": 4358,
+"size": 4391,
 "kind": "whole",
 "speed": "fast"
 },
 {
 "label": "gfx_boss_091_special_m",
 "file": "gfx/boss_091_special_m.bin",
-"size": 353,
+"size": 355,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5799,7 +5799,7 @@
 {
 "label": "gfx_boss_092_normal_t",
 "file": "gfx/boss_092_normal_t.bin",
-"size": 3583,
+"size": 3553,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5813,7 +5813,7 @@
 {
 "label": "gfx_boss_092_attack_t",
 "file": "gfx/boss_092_attack_t.bin",
-"size": 3347,
+"size": 3311,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5827,7 +5827,7 @@
 {
 "label": "gfx_boss_092_hurt_t",
 "file": "gfx/boss_092_hurt_t.bin",
-"size": 4897,
+"size": 4931,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5841,7 +5841,7 @@
 {
 "label": "gfx_boss_092_defeat_t",
 "file": "gfx/boss_092_defeat_t.bin",
-"size": 3705,
+"size": 3709,
 "kind": "whole",
 "speed": "fast"
 },
@@ -5855,7 +5855,7 @@
 {
 "label": "gfx_boss_092_special_t",
 "file": "gfx/boss_092_special_t.bin",
-"size": 4660,
+"size": 4678,
 "kind": "whole",
 "speed": "fast"
 },
@@ -6842,7 +6842,7 @@
 {
 "label": "gfx_icons16",
 "file": "gfx/icons16.bin",
-"size": 21920,
+"size": 21921,
 "kind": "whole",
 "speed": "fast"
 },

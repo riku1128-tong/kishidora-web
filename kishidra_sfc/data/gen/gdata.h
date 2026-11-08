@@ -984,6 +984,7 @@
 #define T_SECRET_COINS               100000L
 #define T_SECRET_STUN_PCT            300
 #define T_PEKO_HP                    111130L
+#define T_SPIN_FRAMES                30
 #define T_PEKO_UPDOWN_0              50
 #define T_PEKO_UPDOWN_1              0
 #define T_PEKO_UPDOWN_2              50
@@ -1025,10 +1026,13 @@
 #define T_MONEY_ATK_PCT              70
 #define T_MONEY_COIN_PCT             160
 #define T_MONEY_SHIELD_PCT           5
+#define T_MONEY_MAT_SKYOUKA_PCT      15
+#define T_MONEY_MAT_COMMON_PCT       60
 #define T_UNDER_MONEY_HP_PCT         40
 #define T_UNDER_MONEY_ATK_PCT        40
 #define T_UNDER_MONEY_COINS          300000L
 #define T_SEA_MONEY_COINS            600000L
+#define T_SKY_MONEY_COINS            1200000L
 #define T_DEX_GLOW_0                 10
 #define T_DEX_GLOW_1                 30
 #define T_DEX_GLOW_2                 50
@@ -1087,6 +1091,8 @@
 #define T_HOLD_BREAK_FRAMES          45
 #define T_HOLD_LEN_DEF_0             120
 #define T_HOLD_LEN_DEF_1             180
+#define T_HOLD_TWO_LEN_PCT           70
+#define T_HOLD_TWO_MIN_FRAMES        36
 #define T_HOLD_CUE_FRAMES            40
 #define T_SEA_REVEAL_FRAMES          60
 #define T_SEA_INK_SHOW_FRAMES        40
@@ -1140,7 +1146,7 @@
 #define T_SKY_MID_BGM                69
 #define T_STUT_LEAK_OK               50
 #define T_ECHO_DELAY_FRAMES          6
-#define N_BOSSFX                     23
+#define N_BOSSFX                     24
 #define BFX_BREATH                   0
 #define BFX_AQUA                     1
 #define BFX_GLOOM                    2
@@ -1162,8 +1168,9 @@
 #define BFX_SCYTHE                   18
 #define BFX_CHOMP                    19
 #define BFX_SHINE                    20
-#define BFX_DARKRAY                  21
-#define BFX_GIGA                     22
+#define BFX_CHAMPAGNE                21
+#define BFX_DARKRAY                  22
+#define BFX_GIGA                     23
 #define N_LUCKY                      2
 #define N_SKILL_LOT0                 100
 #define N_SKILL_LOT1                 100
