@@ -265,7 +265,7 @@ static void specials_scene(void) {
   l.lh = 2 * LINE_C;
   mk_draw = sp_row; mk_moved = 0; mk_header = 0; mk_sprites = 0;
   win_open(BX_LIST, 0, 2, 32, 26, T_LIST, PAL_W);
-  do { s = (u8)(list_run(&l, 0) & BTN_B); } while (!s);
+  while (!(list_run(&l, 0) & BTN_B)) {}
   fade_out();
 }
 
