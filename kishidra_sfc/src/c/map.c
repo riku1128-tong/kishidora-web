@@ -381,7 +381,12 @@ static u8 area_window(u8 focus, u8 flags) {
       mk_moved = 0;
       mk_header = win_header;
       win_open(BX_WIN, 1, 3, 30, 20, T_WIN, PAL_W);
-      if (full) { full = 0; list_fix(&l); list_draw(&l); bag_full(); }
+      if (full) {              /* the list, then as A on the row (so a bag_full that redraws the map works here too) */
+        full = 0;
+        list_fix(&l);
+        list_draw(&l);
+        if (bag_full()) continue;
+      }
       k = list_run(&l, aw_keys());
       mk_header = 0;
       if (k & BTN_B) { win_close(BX_WIN); return MA_NONE; }
@@ -539,6 +544,7 @@ u8 map_scene(u8 mode) {
     if (dbg_map_go) {            /* DC_AREA */
       dbg_map_go = 0;
       if (goto_area((u8)dbg_arg[0], (u8)dbg_arg[1], (u8)dbg_arg[2]) == MA_BATTLE) break;
+      continue;                  /* the keys of the window's last frame are not the map's (A on もどる) */
     }
 #endif
     if (pad_rep & (BTN_LEFT | BTN_UP | BTN_RIGHT | BTN_DOWN)) {

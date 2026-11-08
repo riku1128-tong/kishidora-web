@@ -2,7 +2,8 @@
 # From the map on the secret island: DC_AREA to 孤島 STAGE 3 (cursor there, nothing else: shot), B; to an area
 # not open (nothing); to 孤島 宝の部屋 with AW_GO (its sortie, straight; B -> the list on that row, B -> the map
 # on 孤島, sv.cursor 9); AW_FARM on 魔王の城 金策 (the list on 金策); AW_GO on a locked row (0 tickets: the list);
-# AW_GO with a full bag (the list with the notice over it, as A on the row); the tower (its window); a command
+# AW_GO with a full bag (the list with the notice over it, as A on the row); the tower (its window; closed with
+# A on もどる the map stays: the map loop does not take the window's last key); a command
 # on another screen (the menu: DC_UNKNOWN); and AW_GO on 魔王の城 STAGE 7 into the battle (peeks map_area 14 / map_men 7).
 #!needs dbg_map_go
 #!mksave e1j.srm --open 15 --clear-all --coins 5000 --tickets 1 --dex 3
@@ -93,11 +94,20 @@ shot OUT/j16.ppm
 press B
 wait 40
 shot OUT/j16_back.ppm
+pokew dbg_arg 16 0 0 0
+poke dbg_cmd 23
+waitfor dbg_seq 8 3000
+wait 60
+press RIGHT
+wait 20
+press A
+wait 60
+shot OUT/j16_back_a.ppm
 press Y
 wait 60
 pokew dbg_arg 9 3 0 0
 poke dbg_cmd 23
-waitfor dbg_seq 8 3000
+waitfor dbg_seq 9 3000
 peek dbg_ack
 peek dbg_res 8
 wait 30
@@ -106,7 +116,7 @@ press B
 wait 60
 pokew dbg_arg 14 7 1 0
 poke dbg_cmd 23
-waitfor dbg_seq 9 3000
+waitfor dbg_seq 10 3000
 peek dbg_ack
 peek dbg_res 8
 wait 60
