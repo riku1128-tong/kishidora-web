@@ -394,7 +394,8 @@ key strings above; replay `使い方` is the root row.
   its `_mat_farm_of`, marked `via`.
 * **mat_per_wave** = Σ over the waves of `men_detail`: boss `mat_odds(boss, boss_like=true)`;
   `((zako_lo + zako_hi)/2 + escort/2) × mean(mat_odds(zako, false))`; lucky: `w.lucky × mean(lucky)` or, when the
-  stage allows luckies, `LUCKY_APPEAR_PCT/100 × mean(lucky)` (10 %) — divided by the wave count.
+  stage allows luckies, `LUCKY_APPEAR_PCT/100 × mean(lucky)` (10 %) — divided by the wave count. The luckies' mean
+  is taken with `money = is_money(area, men)` (castle men 20; shipped `adventure.gd:3308`, `_mean_odds(…, money)`).
   men_detail (surface): waves `MEN_STAGES` 3 / `CASTLE_STAGES` 5 / `SECRET_STAGES` 1 / `TREASURE_STAGES` 3 /
   `MONEY_STAGES` 5; zako per wave `MEN_ZAKO_MIN/MAX` [1,2,2,2,2]/[2,3,3,3,3], castle [1,1,2,2,2]/[2,2,2,3,3],
   `AR_ARCADIA` one enemy, `AREA_ENEMY_MAX` {AR_PLAIN: 2}; last wave boss: men 4 = mid, men 5 = boss, castle men
@@ -407,6 +408,21 @@ key strings above; replay `使い方` is the root row.
   else `MAT_CLAW_BOSS_PCT` 40) then ツメ 100; zako → ツメ `TSUME_DRAGON_ZAKO_PCT` 50. Other element monster, zako, not
   lucky → ツメ `TSUME_ELEM_ZAKO_PCT` 6. Then ベル (boss 1, lucky 3, else 0); from `AR_ISLET` on スーパー強化鉄 (boss 30,
   else 3); 強化鉄 (boss 50, lucky 50, zako 8).
+  **Money luckies** (shipped `battle_core.gd:3845-3853`, `if money and lucky: steps = money_mat_steps(g, w)`; not in
+  the decompile, so the prototype `farm.py` lacks it: PLAN conflict 33): a lucky of the money row uses only
+  ベル `MAT_BELL_LUCKY_PCT` 3, スーパー強化鉄 `MONEY_MAT_SKYOUKA_PCT` 15, 強化鉄 100 (surface; the sub worlds add
+  their rare / common materials). In `farm.py` terms:
+  ```
+  def mat_odds(area, mon, boss_like, money=False):
+      ...
+      if money and lucky:
+          steps = [['MAT_BELL', num('MAT_BELL_LUCKY_PCT')], ['MAT_SKYOUKA', T['MONEY_MAT_SKYOUKA_PCT']],
+                   ['MAT_KYOUKA', 100]]
+      else:
+          ...                      # the steps above, unchanged
+  # mat_per_wave: lucky = mean_odds(area, LUCKY, mat, money=(area == CASTLE and men == T['MONEY_MEN']))
+  ```
+  The battle side of the same rule is A1's (`battle_hit.c roll_mat`).
 * **Jump** (`map._go_farm`): only if the area is open; map, select the area, open its STAGE list with that row
   focused (scrolled to) and marked with the material icon + `おすすめ` (yellow).
 * **Merge window** (`_ask_mat_up` / `_mat_up_window`): fewer than 3 → `素材が足りない`; coins < 200 → `コインが足りない`;
@@ -425,12 +441,19 @@ The web computes `mat_farm` at run time from the save's open rows. The port prec
   (segment `BANKC0`): `farm_index` (14 × 4 × {.word offset, .byte count}, order material × (t·2 + m)), `farm_data`,
   and the absolute symbols `_farm_lo = .loword(farm_index)`, `_farm_bk = ^farm_index`; `data/gen/farm.h`:
   `N_FARM_MAT 14`, `FARM_LIST_MAX 6`, `FARM_DATA_OFF 168`, `N_FSTG 23`, `farm_stages[23][2]` (area, men). 441 B ROM + 46 B.
+  **With the money-lucky steps** (measured with `farm_gen.py` on the 17:41 web build, the S3 data): 56 lists,
+  **26 unique, 224 entries, ≤ 7 per list** (`FARM_LIST_MAX 7`: size the runtime list buffer from farm.h, not 6),
+  23 stages (魔王城の地下 is already one), 553 B in all. The money row (castle cleared) now gives
+  スーパー強化鉄 0.3730 per wave (2 luckies × 0.1455 + zako + guard; the best other row is 小島 宝の部屋 0.1551) and
+  強化鉄 1.7767 (was 1.0686).
 * Stage names `FSTG_0..22` (port style, like the STAGE list): `<area> <n>` (`小島 4`), `<area> 宝の部屋`, `魔王城の地下`.
   (The web's `小島４` / `小島のたからのSTAGE` would need 10 full-width digit glyphs and does not fit the via rows.)
 * Via strings `FARMV_<lower>` = `{blue}<lower name>のおすすめ：{s}` (7). Assert every farm text ≤ 232 px at x 14.
 * Examples (`plan/forge/text/farm_breakpoints.txt`): 強化鉄 t0 m0: f1 アーケディア城 1, f4 アーケディア城 4, f9 平原の村 4;
-  t1 from f36 小島 宝の部屋; m1 魔王城の地下. スーパー強化鉄 before 小島 via 強化鉄, then 小島 1 / 小島 4. ハイパー強化鉄 always via
-  スーパー強化鉄. 炎竜のツメ from f21 砂漠の遺跡群 1, f25 砂漠の遺跡群 5 (= the web autotest `evolve_farm`). 炎竜の剛爪 via ツメ
+  t1 from f36 小島 宝の部屋; m1 魔王城の地下. スーパー強化鉄 before 小島 via 強化鉄, then 小島 1 / 小島 4, and with m1 from f71
+  (魔王の城 1 open; in play m1 means f 81) **魔王城の地下** (was 小島 4 before the money-lucky steps). ハイパー強化鉄 always via
+  スーパー強化鉄 (so m1 → `スーパー強化鉄のおすすめ：魔王城の地下`). 強化鉄, ミラクルベル, ツメ and 剛爪 lists are unchanged by
+  the money-lucky steps. 炎竜のツメ from f21 砂漠の遺跡群 1, f25 砂漠の遺跡群 5 (= the web autotest `evolve_farm`). 炎竜の剛爪 via ツメ
   until 砂漠の遺跡群 5, then 灼熱の洞窟 5 (f70).
 
 Runtime (`adventure.c mat_farm(mat)`): `st = (tickets ? 2 : 0) | (castle cleared ? 1 : 0)`; `far_copy` the 3-byte

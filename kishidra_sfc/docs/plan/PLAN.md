@@ -11,7 +11,9 @@ Web reference: the **shipped** scripts decoded from `index.pck` in
 MON_089 → 17, `BOSS_FX` gains `CHAMPAGNE` (a sea special, not used on the surface, but it shifts generated
 `BFX_*` ids), `SPIN_POSES` is for sub-world enemy SUSTAIN specials, **not** the hero's ランページ (the hero still
 uses `ATTACK_POSES.RAMPAGE`, shipped `battle.gd:56`, so the boss_fx spin spec stands), mirage `form_swap` does
-`stage += 1; turns_stage = 0` (`battle_core.gd:5802-5804`)).
+`stage += 1; turns_stage = 0` (`battle_core.gd:5802-5804`), and **every lucky in 魔王城の地下 drops one
+material** (`roll_mat` → `_money_mat`, `battle_core.gd:3758-3840`; the decompile has no such branch, so no group
+spec had it: conflict 33 gives it to A1 / E2 / D2)).
 
 ---------------------------------------------------------------------------------------------------------------
 
@@ -88,6 +90,7 @@ uses `ATTACK_POSES.RAMPAGE`, shipped `battle.gd:56`, so the boss_fx spin spec st
 | 30 | **Pause chest icons**: chests suggests CHEST16 sprites in the pause; sortie shows text only (OBJ under a BG3 window cannot show) | text only: 「宝箱 ×n」 |
 | 31 | menus names the status tabs 装備 / 必殺技 / 特殊効果, shared_infra wrote ステータス / 必殺技 / 特殊効果 | menus' names (the owner); the screen title is ステータス |
 | 32 | sortie's bag-full check before 再挑戦 uses `mk_notice(T_INV_FULL…)`; inventory replaces those notices with `full_bag_dialog` | `full_bag_dialog` everywhere once C5 lands (E3 calls it when present) |
+| 33 | **A web rule with no owner** (found in the S3 review): the shipped build's `roll_mat` (`battle_core.gd:3758-3760`) starts with `if is_money() and e.is_lucky(): return _money_mat()`, and the money STAGE detail (`map.gd:1279-1282`) and the forge farm model (`adventure.gd:3302-3329` → `mat_odds(…, money)`, `battle_core.gd:3845-3853`; the detail's material line is `money_mat_text`, `adventure.gd:3332-3337`) follow it. The decompile predates it, so no spec has it; the port's `battle_hit.c roll_mat` gives a money lucky the plain lucky odds (ベル 3 %, スーパー強化鉄 2.91 %, 強化鉄 47.05 %, nothing 47.05 %) | split over the steps that own the code: **A1** the battle rule, **E2** the two STAGE-detail lines, **D2** the farm model (rows A1 / E2 / D2 of §6; detail in `sortie_battle.md` §2 and `forge.md` §3). Surface rule (`money_mat_steps(g, w)` 3820-3829 with `World.built(w)` false, `_money_mat` 3831-3840): steps in this order, the first hit wins, each through `mat_roll(miner(pct))` (miner is the identity on the surface: no surface effect has `FK_MINER`): ミラクルベル `MAT_BELL_LUCKY_PCT` 3, スーパー強化鉄 `MONEY_MAT_SKYOUKA_PCT` 15 (`T_MONEY_MAT_SKYOUKA_PCT`, generated since S3), 強化鉄 100. Odds 3 / 14.55 / 82.45 %, never nothing (FX_YOKUBARI's drop 150 % gives 4 / 21.12 / 74.88 %, still never nothing). No ツメ step and no `MAT_LATE_AREA` step for these luckies; zako and the guard keep the normal `roll_mat`; `roll_goods` (フエルスロット) unchanged. `T_MONEY_MAT_COMMON_PCT` and the world `rare` step are sub-world only |
 
 ---------------------------------------------------------------------------------------------------------------
 
@@ -363,7 +366,7 @@ as their `depends_on` are merged. `map.c` and `dex.c` are touched by several lan
 
 | id | step | files | depends | tests |
 |---|---|---|---|---|
-| **A1** | Core fixes + battle test commands: tower `form_swap` `++b_stage`; `b_turns_stage` (conflict 15); meat gift cap `D_ITEM_MAX + T_MEAT_GIFT_EXTRA_MAX` (15, was 20); `EV_ENEMY_BANG a` = special next; test commands special-now / clear-wave / set-HP; `FORCE_WAVE`, `FORCE_MIRAGE_WAVE` | battle_core.c, battle_hit.c, battle.h, battle_view.c | S1, S3 | `FORCE_MIRAGE_WAVE=15`, clear form 0 → WRAM `b_stage` 16 and est[15] stats, after form 2 → ペコラータ (18); meat gifts stop at 15 items; `b_turns_stage` equals turns since the WAVE start (castle 10-5 counts all forms); `abtest` other battles identical |
+| **A1** | Core fixes + battle test commands: tower `form_swap` `++b_stage`; `b_turns_stage` (conflict 15); meat gift cap `D_ITEM_MAX + T_MEAT_GIFT_EXTRA_MAX` (15, was 20); `EV_ENEMY_BANG a` = special next; test commands special-now / clear-wave / set-HP; `FORCE_WAVE`, `FORCE_MIRAGE_WAVE`; money-stage lucky material (conflict 33): `roll_mat` starts with `if (is_money() && foe_lucky(e))` → first of `mat_roll(D_MAT_BELL_LUCKY_PCT)` ベル, `mat_roll(T_MONEY_MAT_SKYOUKA_PCT)` スーパー強化鉄, `mat_roll(100)` 強化鉄, `++b_mats[m]` (cap 250), return | battle_core.c, battle_hit.c, battle.h, battle_view.c | S1, S3 | `FORCE_MIRAGE_WAVE=15`, clear form 0 → WRAM `b_stage` 16 and est[15] stats, after form 2 → ペコラータ (18); meat gifts stop at 15 items; `b_turns_stage` equals turns since the WAVE start (castle 10-5 counts all forms); 魔王城の地下 with test commands, every foe of the 5 WAVEs killed, luckies first (the web autotest `_auto_adv_money`) → Σ `b_mats` ≥ 10 at the victory; a TEST_HOOKS entry point rolling the money-lucky branch 10,000 times → none 0, ベル 300 ± 70, スーパー強化鉄 1,455 ± 141, 強化鉄 8,245 ± 152 (4σ); `abtest` other battles identical (the money stage may differ from its first lucky kill on: its materials, then the RNG) |
 | **A2** | `battle_ui.c` (bank 6): modal API (`bv_modal_open/show/close`, 416-tile windows, re-upload hook), pause contents, 状況 4 tabs; results 2 / 3 / 4 in main.c; `place_text` in adventure.c | battle_ui.{c,h}, battle_view.c, main.c, adventure.c, ui_battle.txt, build.py | A1, S6, S7 | sortie §4 (`t/battle.txt`): pause, 4 tabs, paging; one MAIN effect per class + a SUB effect; treasure note; tower buttons; tutorial / training やめる twice → map, no result; textcheck all pages; prof unchanged when closed |
 | **A3** | Info window (SELECT held) + tutorial とばす / timing advice (make_data `build_tutorial` TUTX_*) | battle_ui.c, battle_view.c, tools/make_data.py, main.c | A2 | sortie §5 + §7 (`t/battle.txt` end, `t/tut.txt`): enemy / skill + NEXT / hero states; release fires nothing; START → confirm → B back → 飛ばす → map without result; just lesson never gives up, miracle lesson gives up at 5 |
 | **A4** | Lucky entry burst + sparkle + first tip (`GDB_LUCKY`) + FX-strip star tiles | battle_view.c, battle_ui.c, tools/make_gfx.py fx() | A3, S5 | sortie §6 (`t/lucky.txt`); second treasure battle: no tip (`--guides 0` then the SRAM bit); money stage 60 s prof lag ≤ today + 0.5 % |
@@ -409,7 +412,7 @@ as their `depends_on` are merged. `map.c` and `dex.c` are touched by several lan
 | id | step | files | depends | tests |
 |---|---|---|---|---|
 | **D1** | 進化: `evolve_plan` (auto-make lower materials), 進化できる品だけ list, scrolling evolve page, in-page confirm | adventure.{c,h}, menu.c (`pick_evo`), forge.c, tools/make_data.py (FCR_*), ui_forge.txt | C2, S6 | forge §2: host `evoplan.c` vs `cmp_plan.py` 6,000 cases; harness g3 / g4 / g6 / g8 |
-| **D2** | 素材 screen: descriptions, where to farm (generated from `mendetail.py`, `farm.s` in TABLES), merge window, jump to the STAGE (`MA_FARM`) | forge.c, adventure.c (`mat_farm`), map.c (focus), game.h, menu.c, tools/make_data.py `build_farm` | D1, E2 | forge §3: `farm.py` reproduces the web autotests; g5 / g9 / g4 jumps; make_data asserts |
+| **D2** | 素材 screen: descriptions, where to farm (generated from `mendetail.py`; `mat_odds` with the money-lucky steps of conflict 33; `farm.s` in TABLES), merge window, jump to the STAGE (`MA_FARM`) | forge.c, adventure.c (`mat_farm`), map.c (focus), game.h, menu.c, tools/make_data.py `build_farm` | D1, E2 | forge §3: `farm.py` reproduces the web autotests; with the money-lucky steps (conflict 33, forge §3.1) スーパー強化鉄 and ハイパー強化鉄 (via) point to 魔王城の地下 once the castle is cleared, 強化鉄 / ミラクルベル / ツメ / 剛爪 unchanged, table 26 unique lists / 224 entries / `FARM_LIST_MAX` 7 / 553 B; g5 / g9 / g4 jumps; make_data asserts |
 | **D3** | 使い方 guides (強化 11 / 進化 9 steps), auto start, 強化鉄 gift | forge.c, tools/make_data.py `build_guides`, tools/data/guide_snes.py | D2, B2 | forge §1: g1 / g2 / g6 / g7 (`--guides 0 / 1 / 7`), WRAM `sv.guides`, START ends a guide, reopening does not restart |
 
 ### Lane map / sortie
@@ -417,7 +420,7 @@ as their `depends_on` are merged. `map.c` and `dex.c` are touched by several lan
 | id | step | files | depends | tests |
 |---|---|---|---|---|
 | **E1** | map.c refactor, no visual change: `open_area()`, `area_window(focus, AW_GO|AW_FARM)`, row-tag callback, extra list keys, sortie button table, `MA_*` codes | map.c, game.h | S3 | `abtest` map / area / sortie / mirage-window scripts identical |
-| **E2** | エリア / STAGE の詳細: `tools/data/mendetail.py` (shared web men_detail port), `plan.s` in TABLES + asm `plan_block`, `detail_scene` (X / Y), `dex_card_mon` | tools/data/mendetail.py, tools/make_data.py, src/asm/asset.s, map.c, dex.c, ui_sortie.txt (T_SD_*) | E1, S6 | sortie §2: all 84 blocks + 16 areas vs `plan_expected.txt` (WRAM `dl[]`), 月見の島 before clear inert, monster card walk, reward card; textcheck on the listed screens |
+| **E2** | エリア / STAGE の詳細: `tools/data/mendetail.py` (shared web men_detail port), `plan.s` in TABLES + asm `plan_block`, `detail_scene` (X / Y), `dex_card_mon`; the money block's material lines (conflict 33) | tools/data/mendetail.py, tools/make_data.py, src/asm/asset.s, map.c, dex.c, ui_sortie.txt (T_SD_*) | E1, S6 | sortie §2: all 84 blocks + 16 areas vs `plan_expected.txt` (WRAM `dl[]`; regenerated with the two money lines of conflict 33, `T_SD_MONEY_MAT` / `T_SD_MONEY_MATS`, which the prototype's copy lacks), 月見の島 before clear inert, monster card walk, reward card; textcheck on the listed screens |
 | **E3** | 再挑戦 (result R, red notes, list cap 5; map returns to the area and opens the sortie) | rewards.c, main.c, map.c, game.h | E1 | sortie §1 (`t/retry.txt`); treasure room with 1 ticket, bag 997, area-opening win, king / loss / 離脱 = no retry |
 
 ### Lane shop (chests / gacha)
@@ -473,6 +476,8 @@ parallel lanes: S5 with S2; S4 with S3; H1 right after S4; E1 after S3; B / C / 
 - The mirage snapshot must classify every battle variable added by A1-A14 (A15 is last on purpose).
 - 255 stream segments: 180 at full load.
 - Regeneration pulls in web changes: S3 is the only full regeneration; later steps regenerate their own outputs.
+  A new web build can also change **rules** in the scripts (not in the data): check the shipped scripts' diff
+  for surface rules and give each one an owner (S3 found one: conflict 33).
 - Downgrading a save to an older ROM loses it (README note).
 
 ## 9. Group specs (full per-item detail: web rules, strings, coordinates, measurements)

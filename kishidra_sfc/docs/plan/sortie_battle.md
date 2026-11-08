@@ -135,7 +135,7 @@ No save field.
 
 ## 2. エリア / STAGE の詳細
 
-### Web rules (map.gd `_open_men` 詳細 buttons, `_open_detail`, `_open_men_detail`, `_wave_text`, `_boss_title`, `_mon_grid`, `_item_line`; adventure.gd `area_detail`, `men_detail`, `_money_detail`, `drop_text`, `treasure_odds`, `money_lucky_coins`, `secret_hidden`)
+### Web rules (map.gd `_open_men` 詳細 buttons, `_open_detail`, `_open_men_detail`, `_wave_text`, `_boss_title`, `_mon_grid`, `_item_line`; adventure.gd `area_detail`, `men_detail`, `_money_detail`, `drop_text`, `treasure_odds`, `money_lucky_coins`, `money_mat_text`, `secret_hidden`)
 - Buttons: the area page has `詳細` (area detail); every STAGE row of kind men / treasure / money has `詳細`.
   Both are disabled while `secret_hidden(area)` (月見の島 not cleared). Tutorial / training rows have none.
 - **STAGE detail** (title `<STAGE名>の詳細`):
@@ -169,9 +169,13 @@ No save field.
   - drop_text (surface): `落とす品のレア度（雑魚）　N %d%%　R %d%%　SR %d%%` with rarity [n, r, sr] of the area;
     areas up to PHASE_EARLY_LAST (砂漠の遺跡群) show [n, r+sr, 0]. Treasure / money first add
     `落とす品　武器 %d%%　盾 %d%%` (95 / 5: TREASURE_SHIELD_PCT 5, MONEY_SHIELD_PCT 5).
-  - Money lines (surface): `ラッキーキャラ 1 体 %d コイン（コイン %d%%）` with EK_LUCKY coin_min 500 ×
-    castle coin_pct 400 / 100 × MONEY_COIN_PCT 160 / 100 = 3200, `%d 体全部で %d コイン` (10 体, 32000),
-    `見張りを先に倒すと、ターンの終わりにラッキーキャラは逃げる`.
+  - Money lines (surface, shipped `map.gd:1263-1284`): `ラッキーキャラ 1 体 %d コイン（コイン %d%%）` with EK_LUCKY
+    coin_min 500 × castle coin_pct 400 / 100 × MONEY_COIN_PCT 160 / 100 = 3200, `%d 体全部で %d コイン` (10 体,
+    32000), `ラッキーキャラは素材を必ず 1 つ落とす`, `money_mat_text` = `強化鉄・スーパー強化鉄 など`
+    (`"・".join([mat_name(MAT_KYOUKA), mat_name(MAT_SKYOUKA)]) + " など"`; the sub worlds add their common material),
+    `見張りを先に倒すと、ターンの終わりにラッキーキャラは逃げる`. The two material lines (12 px yellow on the web) are
+    in the shipped build only, not in the decompile this spec was first written from (PLAN conflict 33: the battle
+    rule is A1's, these lines E2's).
 - **Area detail** (`<エリア名>の詳細`): `出るモンスター（雑魚）` grid (zako_pool), `STAGE 4の中ボス`,
   `STAGE 5のボス` (`裏ボス` for 月見の島), castle `ボス（STAGE 1〜9・STAGE 10）` (CASTLE_BOSSES + CASTLE_FINAL,
   14), `手に入るもの` drop_text, `ボス・中ボスはレア度が上がりやすい`, reward `STAGE %dのボスを初めて倒すと必ず`
@@ -211,6 +215,11 @@ No save field.
     DK_ITEM `{yellow}<名前>` + `{yellow}（<RARN>）` at x 30.
   - 8-dot lines (gray, x 10, y+2): `T_DT_LUCKY` (184 px), `T_DT_TR_AREA` (140), `T_DT_MONEY_1` (156),
     `T_DT_MONEY_3` (232 px → x 10..242). `T_DT_MONEY_2` 12-dot yellow.
+  - Money material lines (PLAN conflict 33), between `T_DT_MONEY_2` and `T_DT_MONEY_3` as on the web, 12-dot
+    yellow like `T_DT_MONEY_2`: `T_DT_MONEY_MAT` `{yellow}ラッキーキャラは素材を必ず 1 つ落とす` (218 px with 落, which
+    this group adds anyway → at x 10 it ends at 228, clear of the ▼ at 236) and `T_DT_MONEY_MATS`
+    `{yellow}強化鉄・スーパー強化鉄 など` (160 px). make_data asserts `T_DT_MONEY_MATS` equals the web's
+    `money_mat_text` for the surface (from `MAT_NAMES`). The money block grows by 2 rows (about 26 of the 40 the list holds).
   - A on DK_MON → **the monster's dex card** (`dex_card_mon(m)`: dex.c `mon_card` found by monster id: the
     battle picture, a silhouette while unknown, race/element/size, weakness, places, kills, its battle BGM);
     ←→ / ↑↓ on the card step to the previous / next monster line of this detail (wrapping), B back to the
@@ -257,8 +266,11 @@ locals). VRAM / OAM: menu layout only (BG3 tiles 1-896); the dex card is its own
 3. 月見の島 before the clear: X / Y do nothing and the old keys line shows; after: both work.
 4. A on a monster → its card (picture, BGM), ←→ walks the monsters, B back on the same line. A on the
    reward → card with `スキルは手に入れたときに決まる`.
-5. textcheck on: アーケディア城 4, 魔王の城 10 (5 bosses), 魔王城の地下 (money lines), 小島 6 (treasure), 魔王の城
-   area (27 lines). Must be clean (the prototype had one: ▼ vs the weakness at x 140 → x 136).
+5. textcheck on: アーケディア城 4, 魔王の城 10 (5 bosses), 魔王城の地下 (money lines, including the two material
+   lines), 小島 6 (treasure), 魔王の城 area (27 lines). Must be clean (the prototype had one: ▼ vs the weakness at
+   x 140 → x 136).
+6. `plan_expected.txt` (and `gen_plan.py`, then `tools/data/mendetail.py`) carries the two money material lines
+   after `10 体全部で 32000 コイン`; the prototype's copy lacks them (PLAN conflict 33).
 
 ------------------------------------------------------------------------------------------------------------
 
