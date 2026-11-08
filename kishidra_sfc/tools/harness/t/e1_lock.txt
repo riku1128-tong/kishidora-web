@@ -1,0 +1,54 @@
+# E1: locked rows (gray STAGEs, 宝の部屋 without tickets: 「まだ行けない」), the cursor on the newest open
+# STAGE (孤島 3), the 漁師の里 list, then 孤島 STAGE 3 started from its sortie (RNG pinned; peeks map_area 9 /
+# map_men 3).  Save: areas 0..9 open, 孤島 STAGE 1-2 cleared, no tickets.
+#!mksave e1l.srm --open 9 --clear 9:3 --coins 5000 --dex 3
+loadsram e1l.srm
+wait 200
+press A
+wait 120
+shot OUT/map9.ppm
+press A
+wait 60
+shot OUT/list9.ppm
+press DOWN
+wait 20
+shot OUT/list9_4.ppm
+press A
+wait 60
+shot OUT/locked4.ppm
+press A
+wait 30
+shot OUT/locked4_back.ppm
+press DOWN
+wait 8
+press DOWN
+wait 8
+shot OUT/list9_tre.ppm
+press A
+wait 60
+shot OUT/locked_tre.ppm
+press B
+wait 30
+press B
+wait 30
+press LEFT
+wait 30
+press A
+wait 60
+shot OUT/list8.ppm
+press B
+wait 30
+press RIGHT
+wait 30
+press A
+wait 60
+shot OUT/list9_again.ppm
+press A
+wait 60
+shot OUT/sortie9.ppm
+pokew rnd_state 4660
+press A
+wait 240
+shot OUT/battle9_3.ppm
+peek map_area
+peek map_men

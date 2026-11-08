@@ -1,0 +1,81 @@
+# E1 (TEST_HOOKS ROM): the after-battle path of map_scene.  港町ポトス STAGE 5 (1-4 cleared) from its sortie,
+# won with the battle test commands (hero HP 9999, DC_CLEAR each WAVE), the result screen, then the map:
+# the area story, 「新しい場所に行けるようになった！」 and the map on the opened area.  RNG pinned.
+#!needs dbg_cmd
+#!mksave e1w.srm --open 3 --clear 3:15 --coins 5000 --dex 3
+loadsram e1w.srm
+wait 200
+press A
+wait 120
+shot OUT/map3.ppm
+press A
+wait 60
+shot OUT/list3.ppm
+press A
+wait 60
+shot OUT/sortie3.ppm
+pokew rnd_state 4660
+press A
+waitfor dbg_scr 1 900
+pokel b_hp_max 9999
+pokew dbg_arg 255 9999 0 0
+poke dbg_cmd 18
+waitfor dbg_seq 1 3000
+peek dbg_ack
+peek dbg_res 8
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 17
+waitfor dbg_seq 2 3000
+peek dbg_ack
+peek dbg_res 8
+pokew dbg_arg 255 9999 0 0
+poke dbg_cmd 18
+waitfor dbg_seq 3 3000
+peek dbg_ack
+peek dbg_res 8
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 17
+waitfor dbg_seq 4 3000
+peek dbg_ack
+peek dbg_res 8
+pokew dbg_arg 255 9999 0 0
+poke dbg_cmd 18
+waitfor dbg_seq 5 3000
+peek dbg_ack
+peek dbg_res 8
+pokew dbg_arg 0 0 0 0
+poke dbg_cmd 17
+waitfor dbg_seq 6 3000
+peek dbg_ack
+peek dbg_res 8
+waitfor b_phase 4 1500
+wait 120
+shot OUT/victory.ppm
+press A
+wait 150
+shot OUT/after0.ppm
+press A
+wait 150
+shot OUT/after1.ppm
+press A
+wait 150
+shot OUT/after2.ppm
+press A
+wait 150
+shot OUT/after3.ppm
+press A
+wait 150
+shot OUT/after4.ppm
+press A
+wait 150
+shot OUT/after5.ppm
+peek sv+12
+peek sv+14
+press A
+wait 60
+shot OUT/list_opened.ppm
+press B
+wait 30
+press LEFT
+wait 30
+shot OUT/map_left.ppm

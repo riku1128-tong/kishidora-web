@@ -118,7 +118,9 @@ python build.py rom
   （TEST_HOOKS: `sys.c` のテスト用の命令箱 `dbg_cmd`。製品の ROM は変わらない。`t/se_all.txt` は BGM を止めて
   効果音を 1 つずつ鳴らして録音する。`FORCE_WAVE=0,0,6`: ふつうの戦闘の WAVE をすべてこのモンスター〈番号〉にする、
   `FORCE_MIRAGE_WAVE=n`: 蜃気楼の斜塔を WAVE n から始める。TEST_HOOKS の ROM では `force_wave` / `force_mwave` を
-  戦闘の前に poke してもよい）
+  戦闘の前に poke してもよい。地図の上では `DC_AREA` でエリアへ飛べる〈`map.c goto_area`: そのエリアの STAGE の一覧を
+  ある STAGE の行から開く。`AW_GO` でそのまま出撃の窓へ〉。`t/e1_*.txt` は地図・STAGE の一覧・出撃の窓・蜃気楼の窓・
+  戦闘のあとの地図を一巡りする A/B 用、`t/e1_jump.txt` は `DC_AREA` の確かめ）
 - NMI の転送（OAM・パレット・BG マップ・転送キュー）は 1 フレーム 4864 バイトまでで、V ブランク内に収まる
   （残りは次のフレーム）。勇者・雑魚のポーズとスキルのアイコンの絵は、それを描く OAM と同じ NMI で送る
   （絵と並びがずれたフレームが出ない）。戦闘のメッセージ・コンボ・カードの文字は BG3 マップと同じ NMI で送る

@@ -112,10 +112,18 @@ u16 prof_line(void);
                                    * res2 b_turns_stage, res3 b_phase */
 #define DC_TALK 22                /* waits for a talk window that A would close, then closes it (as A) -> res0
                                    * the talk's text id */
+/* the world map (E1; tools/harness/t/e1_*.txt).  On the map itself only (dbg_scr DS_MAP: the frames of
+ * map_scene's own loop, not of a window or screen opened from it; elsewhere the ack is DC_UNKNOWN) */
+#define DC_AREA 23                /* a jump (map.c goto_area) after this frame: the map scrolls to area arg0 and
+                                   * opens it (the stage list, or the tower window) with the cursor on STAGE
+                                   * arg1 (0 = the newest open STAGE), AW_* flags arg2 (1 AW_GO: straight to the
+                                   * sortie of that STAGE, 2 AW_FARM) -> res0 1 */
 #define DC_UNKNOWN 0xff          /* dbg_ack of a command no one knows */
 #define DS_NONE 0                 /* dbg_scr: screens that take commands set their DS_ id */
 #define DS_BATTLE 1               /* battle_scene (DC_SPECIAL .. DC_FOE, DC_CALM, DC_TALK) */
+#define DS_MAP 2                  /* map_scene's loop (DC_AREA) */
 extern u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
+extern u8 dbg_map_go;             /* DC_AREA: set for map_scene, which runs the jump with dbg_arg[0..2] */
 extern u16 dbg_arg[4], dbg_res[4];
 extern u16 dbg_buf[32];
 #define DBG_SCREEN(s) (dbg_scr = (s))

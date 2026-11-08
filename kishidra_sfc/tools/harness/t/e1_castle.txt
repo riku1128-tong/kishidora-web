@@ -1,0 +1,31 @@
+# E1: the castle before its clear (STAGE 1..10, 魔王 label, no 金策) and the tutorial started from its row
+# (no sortie; RNG pinned; peeks map_area / map_men).
+#!mksave e1c.srm --open 14 --coins 5000 --dex 3
+loadsram e1c.srm
+wait 200
+press A
+wait 120
+shot OUT/map14.ppm
+press A
+wait 60
+shot OUT/list14.ppm
+press UP
+wait 20
+shot OUT/list14_9.ppm
+press B
+wait 30
+press RIGHT
+wait 30
+shot OUT/map_wrap0.ppm
+press A
+wait 60
+shot OUT/list0.ppm
+press DOWN
+wait 20
+shot OUT/list0_tut.ppm
+pokew rnd_state 4660
+press A
+wait 300
+shot OUT/tutorial.ppm
+peek map_area
+peek map_men

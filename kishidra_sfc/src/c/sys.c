@@ -194,6 +194,7 @@ u16 prof_marks[16];
  * screen checks dbg_scr (the screen sets it with DBG_SCREEN) and calls that screen's handler
  * (a non-static function: a direct call works across banks, a function pointer does not) */
 u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;
+u8 dbg_map_go;
 u16 dbg_arg[4], dbg_res[4];
 u16 dbg_buf[32];
 
@@ -295,6 +296,11 @@ static void dbg_poll(void) {
     break;
   case DC_MONEYMAT:
     dbg_money_mat(a0, a1);
+    break;
+  case DC_AREA:                 /* (map.c runs it when this frame_wait returns: the args stay put) */
+    if (dbg_scr != DS_MAP) { c = DC_UNKNOWN; break; }
+    dbg_map_go = 1;
+    dbg_res[0] = 1;
     break;
   default:
     c = DC_UNKNOWN;

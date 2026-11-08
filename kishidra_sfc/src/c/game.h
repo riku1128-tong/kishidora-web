@@ -4,10 +4,11 @@
 #include "ui.h"
 
 enum { SC_TITLE, SC_NEWGAME, SC_MAP, SC_BATTLE, SC_RESULT, SC_ENDING };
-/* map actions */
-enum { MA_NONE, MA_BATTLE, MA_TITLE, MA_REDRAW };
+/* map actions (results of map_scene, menu_scene and the map's windows).  MA_FARM (menu_scene): open
+ * the stage list of area map_area with the cursor on STAGE map_men (the forge's farm jump) */
+enum { MA_NONE, MA_BATTLE, MA_TITLE, MA_REDRAW, MA_FARM };
 enum { MS_NORMAL, MS_AFTER, MS_NEWGAME };
-extern u8 map_area, map_men;
+extern u8 map_area, map_men;   /* map.c: the chosen stage (MA_BATTLE, MA_FARM) */
 u8 map_scene(u8 mode);
 u8 menu_scene(void);
 void equip_scene(void);
