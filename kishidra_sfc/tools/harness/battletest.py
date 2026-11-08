@@ -48,11 +48,24 @@ GEN = os.path.join(ROOT, 'data', 'gen')
 sys.path.insert(0, HERE)
 import hrun  # noqa: E402
 
-DC_UNKNOWN = 0xff
-DS_BATTLE = 1
-DC_SPECIAL, DC_CLEAR, DC_SETHP, DC_FOE, DC_MONEYMAT, DC_CALM, DC_TALK = 16, 17, 18, 19, 20, 21, 22
-PH_FIGHT, PH_VICTORY, PH_TALK, PH_REWARD = 2, 4, 7, 9
-ST_WINDUP = 4
+def c_values():
+    """the command numbers of sys.h and the battle.h phase / enemy-step enums (later steps may add to them)"""
+    sysh = open(os.path.join(ROOT, 'src', 'c', 'sys.h')).read()
+    out = {m.group(1): int(m.group(2), 0) for m in re.finditer(r'#define\s+((?:DC|DS)_\w+)\s+(0x[0-9a-fA-F]+|\d+)', sysh)}
+    bh = re.sub(r'/\*.*?\*/', '', open(os.path.join(ROOT, 'src', 'c', 'battle.h')).read(), flags=re.S)
+    for first in ('PH_WARN', 'ST_NONE'):
+        names = [n.strip() for n in re.search(r'enum \{\s*(%s\b[^}]*)\}' % first, bh).group(1).split(',') if n.strip()]
+        assert not any('=' in n for n in names), names
+        out.update((n, i) for i, n in enumerate(names))
+    return out
+
+
+_C = c_values()
+DC_UNKNOWN, DS_BATTLE = _C['DC_UNKNOWN'], _C['DS_BATTLE']
+DC_SPECIAL, DC_CLEAR, DC_SETHP, DC_FOE, DC_MONEYMAT, DC_CALM, DC_TALK = (
+    _C[k] for k in ('DC_SPECIAL', 'DC_CLEAR', 'DC_SETHP', 'DC_FOE', 'DC_MONEYMAT', 'DC_CALM', 'DC_TALK'))
+PH_FIGHT, PH_VICTORY, PH_TALK, PH_REWARD = (_C[k] for k in ('PH_FIGHT', 'PH_VICTORY', 'PH_TALK', 'PH_REWARD'))
+ST_WINDUP = _C['ST_WINDUP']
 HERO = 255
 BIG_HP = 9999                  # the hero survives every hit of the tests (b_hp_max poked; 4 digits fit the HP box)
 fails = []
@@ -192,9 +205,9 @@ def events(out, name):
     """the event ring read by Script.evlog -> [(type, enemy, a, b)], oldest first"""
     if name not in out:
         return []
-    n, b = out[name + '.n'][0], out[name]
-    k = min(n, 32)
-    return [tuple(b[((n - k + i) & 31) * 4:((n - k + i) & 31) * 4 + 4]) for i in range(k)]
+    n, b = out[name + '.n'][0], out[name]   # (dbg_evn is a u8 that wraps: slots never written have type 0)
+    l = [tuple(b[((n + i) & 31) * 4:((n + i) & 31) * 4 + 4]) for i in range(32)]
+    return [e for e in l if e[0]]
 
 
 def last_ev(ctx, out, name, ev):

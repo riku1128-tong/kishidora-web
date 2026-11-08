@@ -1333,6 +1333,7 @@ u8 dbg_battle(u8 c, u16 a0, u16 a1, u16 a2) {
     for (pass = 0; pass < 2; ++pass)
       for (i = 0, e = b_e; i < b_ne; ++i, ++e)
         if ((!a0 || (a0 & (1 << i))) && foe_targetable(e) && foe_lucky(e) == !pass) { dbg_kill(e); ++n; }
+    if (n) ev_post(EV_DBG_HP, 255, 0, 0, 0, 0);   /* the top bar, as a blow's EV_NUMBER redraws it */
     dbg_res[0] = n;
     break;
   case DC_SETHP:
