@@ -3,7 +3,7 @@
 {
 "label": "bgm",
 "file": "audio/bgm.brr",
-"size": 1925793,
+"size": 5867163,
 "kind": "stream",
 "unit": 9,
 "min": 64,
@@ -57,6 +57,126 @@
 "first": 207785,
 "blocks": 6192,
 "loop": null
+},
+{
+"name": "BGM_ZAKO_MID",
+"first": 213977,
+"blocks": 24217,
+"loop": 0
+},
+{
+"name": "BGM_DRAGON",
+"first": 238194,
+"blocks": 17605,
+"loop": 0
+},
+{
+"name": "BGM_B_CAVE",
+"first": 255799,
+"blocks": 24898,
+"loop": 0
+},
+{
+"name": "BGM_B_DESERT",
+"first": 280697,
+"blocks": 17605,
+"loop": 0
+},
+{
+"name": "BGM_B_ICE",
+"first": 298302,
+"blocks": 24288,
+"loop": 0
+},
+{
+"name": "BGM_B_VOLCANO",
+"first": 322590,
+"blocks": 24214,
+"loop": 0
+},
+{
+"name": "BGM_ZAKO_LATE",
+"first": 346804,
+"blocks": 22009,
+"loop": 0
+},
+{
+"name": "BGM_ZAKO_CASTLE",
+"first": 368813,
+"blocks": 24309,
+"loop": 0
+},
+{
+"name": "BGM_B_MARGOS",
+"first": 393122,
+"blocks": 18127,
+"loop": 0
+},
+{
+"name": "BGM_B_OSHALSIAS",
+"first": 411249,
+"blocks": 22929,
+"loop": 0
+},
+{
+"name": "BGM_B_PICHARUS",
+"first": 434178,
+"blocks": 19814,
+"loop": 0
+},
+{
+"name": "BGM_B_MIMIKKUN",
+"first": 453992,
+"blocks": 30021,
+"loop": 0
+},
+{
+"name": "BGM_B_NAZOKIMOS",
+"first": 484013,
+"blocks": 26419,
+"loop": 0
+},
+{
+"name": "BGM_B_WASHARAS",
+"first": 510432,
+"blocks": 13563,
+"loop": 0
+},
+{
+"name": "BGM_B_KIRANOS",
+"first": 523995,
+"blocks": 22007,
+"loop": 0
+},
+{
+"name": "BGM_B_YAMIJAS",
+"first": 546002,
+"blocks": 24216,
+"loop": 0
+},
+{
+"name": "BGM_B_DARKNESS",
+"first": 570218,
+"blocks": 23668,
+"loop": 0
+},
+{
+"name": "BGM_B_DOTARK",
+"first": 593886,
+"blocks": 24771,
+"loop": 0
+},
+{
+"name": "BGM_ENDING",
+"first": 618657,
+"blocks": 20178,
+"loop": 0
+},
+{
+"name": "BGM_CASTLE_WAVES",
+"first": 638835,
+"blocks": 13072,
+"loop": 0
 }
 ]
 }

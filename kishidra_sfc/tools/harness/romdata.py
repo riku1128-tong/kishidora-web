@@ -3,7 +3,7 @@
 string of text_table, the fonts, the enemy stat tables, the SPC image and SE tables, and each BGM
 track as the stream reader of src/asm/sound.s walks it (start and loop, block by block).
 
-usage: romdata.py [--gen-a DIR] [--gen-b DIR] [-v] ROM_A [ROM_B]
+usage: romdata.py [--gen-a DIR] [--gen-b DIR] [--tracks N] [-v] ROM_A [ROM_B]
 
   Symbols come from each ROM's .lbl (build.py writes it), placed labels from its .place.txt when
   there is one (build/kishidra.place.txt: their real bank; a label in a code bank $81-$9F has a bank 0
@@ -11,6 +11,8 @@ usage: romdata.py [--gen-a DIR] [--gen-b DIR] [-v] ROM_A [ROM_B]
   and the older bgm_banks with 3640 blocks per bank.  The counts (assets, strings, glyphs, tracks,
   enemy-stat rows) come from data/gen (or --gen-a / --gen-b for a ROM built from other data).
   With one ROM: the BGM walk is checked against data/gen/audio/bgm.brr and data/gen/place/bgm.json.
+  --tracks N: compare only the first N BGM tracks (and not the track counts), e.g. a ROM built from a
+  copy whose stream was cut to the first tracks (tools/harness/test_romplace.py).
 Exit status 0 when everything compared is identical."""
 import argparse
 import hashlib
@@ -117,10 +119,10 @@ def spc(r):
     return [img, r.label('se_dir', n), r.label('se_vol', n), r.label('se_thr', 2 * n)]
 
 
-def bgm_tracks(r):
-    """[(name, start blocks, loop blocks)] as sound.s streams them"""
+def bgm_tracks(r, limit=None):
+    """[(name, start blocks, loop blocks)] as sound.s streams them (the first limit tracks)"""
     gen_audio = open(os.path.join(r.gen, 'audio.h')).read()
-    names = re.findall(r'#define TRACK_(\w+) \d+', gen_audio)
+    names = re.findall(r'#define TRACK_(\w+) \d+', gen_audio)[:limit]
     new = 'bgm_seg_bank' in r.sym
 
     def seg(k):
@@ -161,6 +163,7 @@ def main():
     ap.add_argument('rom_b', nargs='?')
     ap.add_argument('--gen-a', default=os.path.join(ROOT, 'data', 'gen'))
     ap.add_argument('--gen-b', default=os.path.join(ROOT, 'data', 'gen'))
+    ap.add_argument('--tracks', type=int)
     ap.add_argument('-v', action='store_true')
     a = ap.parse_args()
     ra = Rom(a.rom_a, a.gen_a)
@@ -174,13 +177,13 @@ def main():
             print('%-22s %5d / %5d  %s' % (what, len(xa), len(xb), 'same' if not diff else
                                             'DIFF %d (first %s)' % (len(diff), diff[:8])))
             bad += bool(diff)
-        ta, tb = bgm_tracks(ra), bgm_tracks(rb)
+        ta, tb = bgm_tracks(ra, a.tracks), bgm_tracks(rb, a.tracks)
         for (na, sa, la), (nb, sb, lb) in zip(ta, tb):
             same = na == nb and sa == sb and la == lb
             bad += not same
             print('BGM %-18s start %7d blocks %s  loop %s  %s' % (
                 na, len(sa) // 9, h(sa), h(la), 'same' if same else 'DIFF (%s %s / %s %s)' % (h(sa), h(la), h(sb), h(lb))))
-        if len(ta) != len(tb):
+        if len(ta) != len(tb) and a.tracks is None:
             print('BGM tracks %d / %d DIFF' % (len(ta), len(tb)))
             bad += 1
     else:

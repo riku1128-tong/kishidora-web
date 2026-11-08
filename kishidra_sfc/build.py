@@ -9,7 +9,7 @@
 必要なもの: Python 3.9+、cc65 (cc65 / ca65 / ld65)。データの作り直しには Pillow と
 zstandard（pip install pillow zstandard）、BGM の変換には ffmpeg も使う。
 
-出力: build/kishidra.sfc（LoROM / FastROM / 4MB / SRAM 32KB。ROM_MB=6 / 8 で ExLoROM）、build/kishidra.map と
+出力: build/kishidra.sfc（ExLoROM / FastROM / 8MB / SRAM 32KB。ROM_MB=4 で LoROM 4MB）、build/kishidra.map と
 build/kishidra.lbl（リンクの記号。tools/harness の runrom などが読む）、build/kishidra.place.txt
 （データの置き場所）
 
@@ -21,7 +21,11 @@ build/kishidra.lbl（リンクの記号。tools/harness の runrom などが読�
 manifest で "long": true にする（ビルドのとき check_far_reads() が調べる）
 
 ROM の大きさ（環境変数 ROM_MB）:
-    ROM_MB=4                 既定。LoROM 4MB（$80-$FF、FastROM）
+    ROM_MB=8                 既定。BGM（28 曲、5.6MB）は 8MB でないと入らない
+    ROM_MB=4                 LoROM 4MB（$80-$FF、FastROM）
+    ROM_MB=6                 ExLoROM 6MB
+                             （4MB と 6MB には今の data/gen の BGM が入らず「ROM が足りない: bgm」で止まる。
+                             データを減らして試すとき用）
     ROM_MB=6 / ROM_MB=8      ExLoROM 6MB / 8MB。ファイルの先頭 4MB は 4MB の ROM と同じ並び（$80-$FF）、
                              その先が $00-$3F / $00-$7D:8000-FFFF（SlowROM。データと BGM のストリームだけ、
                              コードは置かない）。$00 は $80 の写し（リセット・割り込みの入口とヘッダー）、
@@ -51,12 +55,13 @@ OBJ = os.path.join(ROOT, 'build', 'obj')
 OUT = os.path.join(ROOT, 'build', 'kishidra.sfc')
 
 ROM_BANKS = 128          # 4MB LoROM: banks $80-$FF
-# ROM_MB=4 (LoROM) | 6 | 8 (ExLoROM).  ExLoROM: file 0-4 MB = banks $80-$FF (FastROM, the same as the
-# 4 MB ROM), file 4 MB+ = banks $00-$3F / $00-$7D:8000-FFFF (SlowROM: placed data and the BGM stream
-# only, never code).  Bank $00 is a copy of bank $80 (the CPU takes the vectors and runs the reset /
-# NMI / IRQ / BRK entry code there, crt0.s STARTUP), so nothing is placed in it.  File 0x7F0000-0x7FFFFF
-# (8 MB) is not reachable (banks $7E / $7F are WRAM): $FF.
-ROM_MB = os.environ.get('ROM_MB', '4') or '4'
+# ROM_MB=4 (LoROM) | 6 | 8 (ExLoROM; 8 is the default: the 28-track BGM stream needs it).  ExLoROM:
+# file 0-4 MB = banks $80-$FF (FastROM, the same as the 4 MB ROM), file 4 MB+ = banks $00-$3F /
+# $00-$7D:8000-FFFF (SlowROM: placed data and the BGM stream only, never code).  Bank $00 is a copy
+# of bank $80 (the CPU takes the vectors and runs the reset / NMI / IRQ / BRK entry code there, crt0.s
+# STARTUP), so nothing is placed in it.  File 0x7F0000-0x7FFFFF (8 MB) is not reachable (banks $7E /
+# $7F are WRAM): $FF.
+ROM_MB = os.environ.get('ROM_MB', '8') or '8'
 if ROM_MB not in ('4', '6', '8'):
     sys.exit('ROM_MB は 4 / 6 / 8')
 ROM_SIZE = int(ROM_MB) << 20

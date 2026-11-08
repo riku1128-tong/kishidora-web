@@ -3,7 +3,10 @@
 
 usage: test_romplace.py            unit tests of romplace.place() on made-up banks (no build)
        test_romplace.py --build    + builds of a copy of the port (in $TMPDIR) with fake blobs added
-                                   through an extra manifest: a 30 KB 'any' blob must land in a FastROM
+                                   through an extra manifest (the copy's BGM stream cut to its first 8
+                                   tracks, 1.9 MB, so that it fits a 4 MB ROM; the whole 28-track stream
+                                   needs ROM_MB=8; first the normal build/kishidra.sfc must serve every
+                                   track of data/gen/audio/bgm.brr): a 30 KB 'any' blob must land in a FastROM
                                    bank, a 'long' blob in $A0-$FF, a 'fast' one in FastROM; the data the
                                    ROM serves (romdata.py) must equal the normal build's.  Then the same
                                    at ROM_MB=8 (ExLoROM): the fakes where they were, the BGM stream in
@@ -180,10 +183,32 @@ def foff(bank, addr):
     return (bank & 0x7f) * 0x8000 + (addr & 0x7fff) + (0x400000 if bank < 0x80 else 0)
 
 
-def romdata(a, b):
-    r = subprocess.run([sys.executable, os.path.join(HERE, 'romdata.py'), a, b], capture_output=True, text=True)
-    print('  romdata %s vs %s: %s' % (os.path.basename(a), os.path.basename(b), (r.stdout.strip().splitlines() or [r.stderr])[-1]))
+def romdata(a, b=None, extra=()):
+    r = subprocess.run([sys.executable, os.path.join(HERE, 'romdata.py')] + list(extra) + [a] + ([b] if b else []),
+                       capture_output=True, text=True)
+    print('  romdata %s%s: %s' % (os.path.basename(a), ' vs %s' % os.path.basename(b) if b else '',
+                                  (r.stdout.strip().splitlines() or [r.stderr])[-1]))
     return r.returncode == 0
+
+
+SHORT_BGM = 8      # tracks kept in the copy: the stream before the 8 MB tracks (1,925,793 B; fits 4 MB)
+
+
+def cut_bgm(dst, n=SHORT_BGM):
+    """the copy's BGM: the first n tracks only (place/bgm.json and the TRACK_ list of audio.h; bgm.brr
+    keeps its bytes, the manifest only names the first part)"""
+    gen = os.path.join(dst, 'data', 'gen')
+    ents = json.load(open(os.path.join(gen, 'place', 'bgm.json'), encoding='utf-8'))['entries']
+    e = ents[0]
+    e['tracks'] = e['tracks'][:n]
+    e['size'] = (e['tracks'][-1]['first'] + e['tracks'][-1]['blocks']) * e['unit']
+    romplace.write_manifest(gen, 'bgm', ents)
+    h = os.path.join(gen, 'audio.h')
+    txt = open(h).read()
+    txt = re.sub(r'#define N_BGM_TRACKS \d+', '#define N_BGM_TRACKS %d' % n, txt)
+    txt = re.sub(r'#define TRACK_\w+ (\d+)\n', lambda m: m.group(0) if int(m.group(1)) < n else '', txt)
+    open(h, 'w').write(txt)
+    return gen
 
 
 def build_copy(dst, rom_mb, tag, fakes):
@@ -237,18 +262,22 @@ def build_test(keep=None):
     tmp = tempfile.mkdtemp(prefix='placetest_', dir=os.environ.get('TMPDIR'))
     dst = os.path.join(tmp, 'kishidra_sfc')
     shutil.copytree(ROOT, dst, ignore=shutil.ignore_patterns('build', '__pycache__', 'runrom'))
+    gen = cut_bgm(dst)
+    cg = ['--gen-a', gen, '--gen-b', gen]           # romdata of two ROMs built from the copy
+    ref = os.path.join(ROOT, 'build', 'kishidra.sfc')
+    ok = True
+    if os.path.exists(ref):
+        ok &= romdata(ref)                           # the normal build serves every track of bgm.brr
     fakes = {'fake_any30k': (30 * 1024, 'any', False), 'fake_long': (2000, 'fast', True),
              'fake_fast': (5000, 'fast', False)}
-    ok = True
     # 4 MB
     rom4, _ = build_copy(dst, 4, 'fake4', fakes)
     if not rom4:
         return False
     k, w4 = check_fakes(dst, rom4, fakes)
     ok &= k
-    ref = os.path.join(ROOT, 'build', 'kishidra.sfc')
     if os.path.exists(ref):
-        ok &= romdata(ref, rom4)
+        ok &= romdata(ref, rom4, ['--gen-b', gen, '--tracks', str(SHORT_BGM)])
     # 8 MB: the same placement of the whole blobs, the stream in the slow banks
     rom8, free8 = build_copy(dst, 8, 'fake8', fakes)
     if not rom8:
@@ -260,7 +289,7 @@ def build_test(keep=None):
     slow_ok = all(0x01 <= b <= 0x7d for b in segs)
     print('  whole blobs where they were at 4 MB: %s; BGM %d segments in $%02X-$%02X: %s' % (
         'OK' if same else 'DIFFER', len(segs), segs[0], segs[-1], 'OK (slow banks)' if slow_ok else 'NOT ALL SLOW'))
-    ok &= same and slow_ok and romdata(rom4, rom8)
+    ok &= same and slow_ok and romdata(rom4, rom8, cg)
     # 8 MB with FastROM full: one 32 KB 'any' filler per empty FastROM bank, + 2
     empty = 0
     for a, z, n in re.findall(r'\$([0-9A-F]{2})(?:-\$([0-9A-F]{2}))?:(\d+)', free8.split('slow')[-1]):
@@ -285,7 +314,7 @@ def build_test(keep=None):
     print('  %d empty FastROM banks, %d fillers: %d blobs in slow banks (%d of them real gfx, e.g. %s), largest FastROM '
           'gap left %d B: %s' % (empty, empty + 2, len(slow), len(real), ', '.join(sorted(real)[:3]), fast_free,
                                  'OK' if slow and not bad else 'WRONG: %s' % (bad or 'none in slow banks')))
-    ok &= bool(slow) and not bad and romdata(rom8, romf)
+    ok &= bool(slow) and not bad and romdata(rom8, romf, cg)
     if keep:
         os.makedirs(keep, exist_ok=True)
         for tag in ('fake4', 'fake8', 'fill8'):

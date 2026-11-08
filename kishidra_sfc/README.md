@@ -52,9 +52,10 @@ python build.py rom
 
 `data/gen/` に変換済みのデータが入っているので、ROM を作るだけならこれだけで足ります。
 
-ROM の大きさは環境変数 `ROM_MB` で選べます（既定は 4）。`ROM_MB=8 python build.py rom` で ExLoROM 8MB
-（`ROM_MB=6` で 6MB）。先頭 4MB は 4MB の ROM と同じ並びで、その先（8MB はバンク $01〜$7D、6MB は $01〜$3F。SlowROM）には BGM と
-DMA で読む絵だけを置きます。ExLoROM が動くのは snes9x 1.54 以降（RetroArch の snes9x コアを含む）、bsnes v115 / ares、
+ROM の大きさは環境変数 `ROM_MB` で選べます。既定は 8（ExLoROM 8MB）で、BGM 28 曲（5.6MB）が入るのは 8MB だけです
+（`ROM_MB=4` の LoROM 4MB と `ROM_MB=6` の 6MB は「ROM が足りない: bgm」で止まります）。先頭 4MB は 4MB の ROM と
+同じ並びで、その先（8MB はバンク $01〜$7D、6MB は $01〜$3F。SlowROM）には BGM と DMA で読む絵だけを置きます。
+ExLoROM が動くのは snes9x 1.54 以降（RetroArch の snes9x コアを含む）、bsnes v115 / ares、
 FXPak Pro / SD2SNES（ファームウェア 1.8.0 以降）、MiSTer。Mesen2、Super EverDrive、snes9x 1.50〜1.53（6MB なら可）、
 Wii・ゲームキューブ版 snes9x（6MB まで）、bsnes-mercury では動きません。セーブ（SRAM）の形はどの大きさでも同じです。
 
@@ -97,6 +98,9 @@ python build.py rom
   2 つの ROM で同じ操作をして画面・音・メモリを比べる `abtest.py`（`t/reg1.txt` が画面、`t/reg2.txt` が音の一巡り。
   セーブはスクリプトの `#!mksave` 行から作る）、録音を少しの時間のずれを許して区間ごとに比べる `wavcmp.py`、
   2 つの ROM が読むデータ（アセット・文字列・フォント・敵の能力・SPC・BGM を流す順）を比べる `romdata.py`、
+  BGM のループのつなぎ目を聞くための短い音（ループの終わり 4 秒 + 頭 4 秒、ROM が流す BRR から）を書き、
+  つなぎ目のリズムのずれ（小節で切った曲は 12 ms 以内）とストリームが元の曲のその部分であることを調べる `bgmjoin.py`
+  （`-o DIR`、`--check`。ループの位置は `make_audio.py` が書く `data/gen/audio/bgm_loops.json`）、
   2 つの data/gen の絵をアセットごとに比べ、変わったスプライトのポーズを描いて並べる `gfxdiff.py`（`-o` で PNG）、
   置き場所のテスト `test_romplace.py`（`--build` で偽のデータを足してビルド。4MB と 8MB）、ラグの計測 `lag.py`、
   ROM のヘッダー・バンク $00 の写し・チェックサムと、snes9x・bsnes / ares・FXPak Pro・Mesen2 がどの形と読むかの検査
