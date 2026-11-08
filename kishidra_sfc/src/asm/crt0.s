@@ -1173,7 +1173,9 @@ irq_dummy:
   rti
 .ifdef PROFILE
 ; profiling build (PROFILE=1 python build.py rom): a V-IRQ every 16 lines stores the
-; interrupted PC/PB in a ring at $7F:F000 (index at $7F:DBFC; the text check log ends at $7F:EFFF) for tools/harness/prof.py
+; interrupted PC/PB and the two return addresses above it on the stack (the caller of a runtime
+; helper) in a ring of 512 x 8 bytes at $7F:F000 (index at $7F:DBFC; the text check log ends at
+; $7F:EFFF) for tools/harness/prof.py
 irq_prof:
   rep #$30
   .a16
@@ -1181,16 +1183,20 @@ irq_prof:
   pha
   phx
   lda f:$7fdbfc
-  and #$0ffc
+  and #$0ff8
   tax
   lda 6,s
   sta f:$7ff000,x
   lda 8,s
   and #$00ff
   sta f:$7ff002,x
+  lda 9,s
+  sta f:$7ff004,x
+  lda 11,s
+  sta f:$7ff006,x
   txa
   clc
-  adc #4
+  adc #8
   sta f:$7fdbfc
   sep #$20
   .a8

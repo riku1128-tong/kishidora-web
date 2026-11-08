@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Text check: run runrom scripts on a profiling ROM (PROFILE=1 python build.py rom) and list the text
 that leaves its box, sits on a window frame, shares an 8x8 tile with text of another colour, or is
-drawn over other text.  (text.s logs glyphs and lines at $7F:E000; see text_check there.)
+drawn over other text.  (text.s logs glyphs and lines at $7F:E000, and the rows of a box zeroed
+to draw a part of it again; see text_check there.)
 
 usage: [ROM=x.sfc] textcheck.py SCRIPT ...   (each script is run from power-on; WRAM snapshots are
                                                taken every 10 frames while it runs; the log ring
@@ -128,10 +129,13 @@ def check(script, names, td):
             x = e[4] | e[5] << 8
             y = e[6]
             j = (j + 8) & 0xffff
-            if kind not in KIND and kind not in (6, 7, 9):
+            if kind not in KIND and kind not in (6, 7, 9, 10):
                 continue                          # not written yet
             if kind == 7:
                 lines_in[box] = []
+                continue
+            if kind == 10:                        # rows y .. y + e[7] zeroed: their lines are gone
+                lines_in[box] = [l for l in lines_in.get(box, []) if not (y <= l[2] < y + e[7])]
                 continue
             if kind in (6, 9):
                 hgt = 12 if kind == 6 else 7

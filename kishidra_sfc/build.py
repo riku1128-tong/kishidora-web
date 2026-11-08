@@ -71,6 +71,7 @@ C_BANKS = {
 }
 C_BANK_LAST = 31          # banks $81..$9F can hold C code
 DBG = ['-g'] if os.environ.get('PROFILE') else []   # symbols in build/kishidra.dbg for the profiler
+CDBG = ['--debug-info'] if os.environ.get('PROFILE') else []   # ... and C source lines (prof.py LINES=1)
 
 
 def c_functions(path):
@@ -116,7 +117,7 @@ def build_rom():
         for f in bank_funcs[b]:
             if f != 'main':
                 defs += ['-D', '%s=%s__b' % (f, f)]
-        run([tool('cc65'), '-O', '-Oirs', '-Cl', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b] + DBG + [
+        run([tool('cc65'), '-O', '-Oirs', '-Cl', '-t', 'none', '--cpu', '65sc02', '--code-name', 'CODE%d' % b] + DBG + CDBG + [
              '--rodata-name', 'RODATA', '--bss-name', 'BSS', '--data-name', 'DATA', '-o', s] + inc + defs + [c])
         run([tool('ca65'), '--cpu', '65816'] + DBG + ['-o', o, s])
         objs.append(o)

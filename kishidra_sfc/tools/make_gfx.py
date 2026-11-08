@@ -186,7 +186,7 @@ class Gfx:
                         o = st * 2048 + (tr * 16 + slot * 4 + tc) * 32
                         strips[o:o + 32] = t
                 pieces.append((dx, dy, ci))
-            aid = self.a.add('%s_%s' % (name, pn), strips)
+            aid = self.a.add('%s_%s' % (name, pn), strips, tiles=True)   # unpacked by DMA (fast)
             desc += struct.pack('<BHBB', POSE_CODE.get(pn, 0), aid, nstrips, len(pieces))
             for dx, dy, ci in pieces:
                 desc += struct.pack('<bbB', max(-128, min(127, dx)), max(-128, min(127, dy)), ci)

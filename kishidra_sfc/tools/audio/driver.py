@@ -258,6 +258,7 @@ def build(n_se):
     a.mov_dp_dp(0xF3, BGM_VOL)
     a.dsp_imm(0x7C, 0x00)            # clear ENDX
     a.mov_a_dp(0xFF)                 # restart the block clock
+    a.mov_dp_imm(TICKS, 0)           # (and drop the ticks counted during the prefill's burst)
     a.dsp_imm(0x4C, 0x01)            # KON voice 0
     a.mov_dp_imm(PLAYING, 1)
     a.ret()

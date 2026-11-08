@@ -923,8 +923,7 @@ static void attack_hero(void) {
 static void enemies_update(void) {
   u8 i, normal = 0;
   Foe *e;
-  for (i = 0; i < b_ne; ++i) {
-    e = &b_e[i];
+  for (i = 0, e = b_e; i < b_ne; ++i, ++e) {
     if (e->dying) {
       if (i == b_form_who || b_talk_req == TALK_DEFEAT || b_talk_req == TALK_MAOU_DEFEAT) continue;
       if (--e->dying == 0) { e->gone = 1; ev_post(EV_GONE, i, 0, 0, 0, 0); }
@@ -932,15 +931,11 @@ static void enemies_update(void) {
       if (--e->fleeing == 0) { e->gone = 1; ev_post(EV_GONE, i, 0, 0, 0, 0); }
     }
   }
-  for (i = 0; i < b_ne; ++i) {
-    e = &b_e[i];
+  for (i = 0, e = b_e; i < b_ne && !normal; ++i, ++e)
     if ((foe_targetable(e) && !foe_lucky(e)) || i == b_form_who) normal = 1;
-  }
   if (!normal) {
-    for (i = 0; i < b_ne; ++i) {
-      e = &b_e[i];
+    for (i = 0, e = b_e; i < b_ne; ++i, ++e)
       if (foe_lucky(e) && foe_targetable(e) && e->count > 1) e->count = 1;
-    }
   }
   if (b_turn != TURN_ENEMY) return;
   if (b_step_timer) --b_step_timer;
@@ -1179,7 +1174,7 @@ static void fight_frame(void) {
     ev_post(EV_GAMEOVER, 0, 0, 0, 0, 0);
     return;
   }
-  for (i = 0; i < b_ne; ++i) if (!b_e[i].gone) left = 1;
+  { Foe *e = b_e; for (i = 0; i < b_ne; ++i, ++e) if (!e->gone) left = 1; }   /* (pointers: indexing Foe multiplies) */
   if (!left) {
     b_phase = PH_CLEAR;
     b_phase_timer = D_STAGE_CLEAR_FRAMES;

@@ -34,6 +34,10 @@ extern u16 text_small;         /* msg_width measures in the 8-dot font */
 extern u16 hero_name[8];
 
 void tb_open(u8 box);
+#ifdef PROFILE
+void tc_rows(void);               /* text check (text.s): ea0 box, ea1 first tile row, ea2 rows zeroed */
+#endif
+void tb_free(u8 box);           /* waits until no queued upload is part way through the box's canvas */
 void tb_clear(u8 box);         /* waits until no queued upload reads the box's canvas */
 void canvas_wait(u16 t0, u16 n);   /* until no queued upload reads BG3 tiles t0..t0+n-1 (their canvas) */
 u8 canvas_busy(u16 t0, u16 n);

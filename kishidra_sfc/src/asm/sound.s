@@ -2,7 +2,7 @@
 ; (protocol: tools/audio/driver.py)
 .include "snes.inc"
 
-.import bgm_table, bgm_banks, spc_image, se_dir, se_vol, _ea
+.import bgm_table, bgm_banks, spc_image, se_dir, se_vol, _ea, _frame
 .import SPC_IMAGE_LEN_LO, SPC_IMAGE_LEN_HI, SPC_BOOT_LEN, SPC_SPLIT_END, se_thr
 .export spc_boot_far, stream_idle
 
@@ -15,8 +15,8 @@ RING_BLOCKS = 1813
 PREFILL = 640
 PER_FRAME = 13          ; blocks per frame while the ring is nearly full (11.5 are played)
 PER_FRAME_MAX = 24      ; ... and while it is low (after slow frames)
-LOAD_BLOCKS = 64       ; sound effect upload after boot: at most this many 9-byte blocks per frame
-LOAD_STOP = 212        ; ...and none once the beam reaches this scanline (the NMI comes at 225)
+LOAD_PER = 48           ; sample blocks per count of the ring (stream_idle; 11 ms)
+QUIET = 32              ; lines (2 ms) after a block: the driver has left its burst (1.3 ms) and updated port 2
 SPC_IMAGE_LEN = SPC_IMAGE_LEN_LO + SPC_IMAGE_LEN_HI * 65536
 
 .segment "ENGZP": zeropage
@@ -34,7 +34,11 @@ s_tail:  .res 2
 s_p2:    .res 1
 s_p3:    .res 1
 s_cnt:   .res 2
-s_allow: .res 1        ; blocks the ring still takes this frame (stream_idle)
+s_allow: .res 1        ; blocks the ring still takes (sound_tick, stream_idle)
+s_rf:    .res 2        ; _frame when s_allow was set
+s_sf:    .res 2        ; _frame and scanline of the last block sent
+s_sl:    .res 2
+s_lall:  .res 1        ; sample blocks that may go before the next count
 s_ready: .res 1
 s_lleft: .res 2        ; bytes of samples still to upload (0 = sound effects ready)
 
@@ -164,12 +168,10 @@ spc_boot_far:
   bne :-
 .endmacro
 
-; upload sound effect samples (raw load, type 2): two blocks, then more while the frame has time
-load_some:
+; one block of the sound effect samples (raw load, type 2; A8 I16, DB $80)
+load_one:
   .a8
   .i16
-  ldx #LOAD_BLOCKS
-@l:
   lda s_seq
   and #$fc
   ora #2
@@ -178,6 +180,7 @@ load_some:
   XFER s_lptr
   XFER s_lptr
   XFER s_lptr
+  jsr mark
   A16
   lda s_lptr
   clc
@@ -193,28 +196,104 @@ load_some:
   lda s_lleft
   sec
   sbc #9
+  bcs :+
+  lda #0               ; (all loaded)
+:
   sta s_lleft
   A8
-  beq @done            ; all loaded
-  dex
-  beq @done
-  cpx #LOAD_BLOCKS - 1
-  bcs @next            ; the first two blocks always
-  lda $2137            ; latch the beam position
-  lda $213F            ; (resets the counter read order)
-  lda $213D
+  rts
+
+; s_allow = what the ring takes, from the driver's free count (A8 I16, DB $80).  The driver
+; updates port 2 only between bursts of blocks, so the count is taken once no block has gone for
+; QUIET lines; until then what is left of the last count stands (the space only grows meanwhile).
+; Taken when the last count is used up, and once a frame.  At most 255.
+refresh:
+  .a8
+  .i16
+  lda s_allow
+  beq :+
+  ldx _frame
+  cpx s_rf
+  beq @r
+:
+  jsr quiet
+  bcc @r
+  ldx _frame
+  stx s_rf
+  lda APU2             ; free blocks / 8 reported by the driver
+  cmp #32
+  bcc :+
+  lda #$ff
+  bra :++
+:
+  asl
+  asl
+  asl
+:
+  sta s_allow
+  lda #LOAD_PER
+  sta s_lall
+@r:
+  rts
+
+; carry set when no block has gone for QUIET lines (A8 I16)
+quiet:
+  .a8
+  .i16
+  A16
+  lda _frame
+  sec
+  sbc s_sf
+  beq @same
+  cmp #2
+  bcs @yes             ; two frames on
+  jsr vline
+  clc
+  adc #262             ; one frame on
+  bra @cmp
+@same:
+  jsr vline
+@cmp:
+  sec
+  sbc s_sl
+  cmp #QUIET
+  A8
+  rts
+@yes:
+  A8
+  sec
+  rts
+
+; A16 = lines since the NMI that started this _frame (0..261; A16 I16).  _frame goes up in the
+; NMI (line 225), and the game runs only outside it, so line 225 starts a frame here
+vline:
+  .a16
+  A8
+  lda SLHV
+  lda STAT78
+  lda OPVCT
   xba
-  lda $213D
+  lda OPVCT
   and #1
-  bne @next            ; line 256+: vblank, the next NMI is a frame away
   xba
-  cmp #LOAD_STOP
-  bcc @next
-  cmp #225
-  bcc @done            ; close to the NMI: leave the rest for the next frame
-@next:
-  jmp @l
-@done:
+  A16
+  sec
+  sbc #225
+  bcs :+
+  adc #262             ; (carry clear: + 262)
+:
+  rts
+
+; a block went: when (A8 I16)
+mark:
+  .a8
+  .i16
+  ldx _frame
+  stx s_sf
+  A16
+  jsr vline
+  sta s_sl
+  A8
   rts
 
 ; ---------------------------------------------------------------- transactions (A8 I16, DBR $80)
@@ -250,7 +329,7 @@ send_block:
   XFER s_ptr
   XFER s_ptr
   XFER s_ptr
-  rts
+  jmp mark
 
 send_silence:
   .a8
@@ -272,7 +351,7 @@ send_silence:
   cmp APU0
   bne :-
   .endrep
-  rts
+  jmp mark
 
 ; load the stream position from bgm_table + X (+0 = start, +8 = loop)
 load_pos:
@@ -460,26 +539,18 @@ CFUNC sound_tick
   pha
   plb
   lda s_ready
-  beq @out
+  beq @done            ; (no sound chip)
   lda s_on
   beq @out
-  ; what this frame may send: the driver's free count, read once (it does not update port 2
-  ; while blocks arrive), at most PER_FRAME_MAX
-  lda APU2             ; free blocks / 8 reported by the driver
-  cmp #3
-  bcc :+
-  lda #PER_FRAME_MAX / 8
-:
-  asl
-  asl
-  asl
-  sta s_allow
+  jsr refresh
+  ; the stream goes while wait_frame waits (stream_idle): sending it here, before the wait, makes
+  ; a pass that nearly fills a frame take two.  Only a ring that runs low gets blocks now.
   lda APU2
-  cmp #146
-  bcs @max             ; 1168+ free (under 0.9 s left in the ring): catch up
-  cmp #100
-  bcs @norm            ; 800+ free (under 1.5 s left): the frame's share now
-  lda #0               ; else wait_frame sends them while the CPU waits (stream_idle)
+  cmp #180
+  bcs @max             ; 1440+ free (under 0.53 s left in the ring of 2.6 s): catch up
+  cmp #160
+  bcs @norm            ; 1280+ free (under 0.76 s left): the frame's share now
+  lda #0
   bra @set
 @norm:
   lda #PER_FRAME
@@ -504,31 +575,41 @@ CFUNC sound_tick
   lda s_on
   bne @l
 @out:
+  ldx s_lleft          ; sound effect samples: two blocks a pass even with no time to wait
+  beq @done
+  jsr load_one
   ldx s_lleft
-  beq :+
-  jsr load_some
-:
+  beq @done
+  jsr load_one
+@done:
   plb
   plp
   rtl
 
-; one block of the stream while wait_frame waits for the next frame, while the ring has room
-; (jsl, A8 I16, DB $80).  The frame's music then costs the game loop nothing; sound_tick still
-; sends it before the wait when the ring runs low (no idle time).
+; called again and again while wait_frame waits for the next frame (jsl, A8 I16, DB $80): one
+; block of the stream while the ring has room, else one of the sound effect samples still to
+; upload.  Every wait feeds the music, whoever waits; sound_tick sends before the wait only when
+; the ring runs low (a pass that has no time left to wait).
 stream_idle:
   .a8
   .i16
   lda s_ready
   beq @no
+  jsr refresh
   lda s_on
-  beq @no
-  lda s_lleft          ; sound effect samples still uploading: sound_tick does both
-  ora s_lleft+1
-  bne @no
-  lda s_allow          ; what the ring takes this frame (sound_tick read the driver's count)
-  beq @no
+  beq @load
+  lda s_allow
+  beq @load
   dec s_allow
   jsr stream_one
+  rtl
+@load:
+  lda s_lall           ; (a few: the driver updates its count only once they stop)
+  beq @no
+  ldx s_lleft
+  beq @no
+  dec s_lall
+  jsr load_one
 @no:
   rtl
 

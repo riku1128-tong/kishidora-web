@@ -5,7 +5,7 @@
 
 .importzp sp
 .import _oam, _oam_next, _ea
-.export _oam_used
+.export _oam_used, _oam_top
 
 .segment "LOWBSS"
 o_x:    .res 2
@@ -17,6 +17,7 @@ m_n:    .res 2
 o_acc:  .res 2          ; high-table bits of the current group of 4 slots (filled from bit 7 down)
 o_tmp:  .res 2
 _oam_used: .res 2       ; slots that may show something (multiple of 4); oam_finish hides up to here
+_oam_top:  .res 2       ; slots from here on are kept (a screen's fixed sprites), 128 = none (oam_clear)
 
 .segment "ENGINE"
 
@@ -43,7 +44,7 @@ put_spr:
   bcs @out
   lda _oam_next
   and #$00ff
-  cmp #128
+  cmp _oam_top
   bcs @out
   phx
   tay                  ; slot
@@ -422,6 +423,8 @@ CFUNC oam_clear
   cpx #544
   bcc @h
   stz _oam_used
+  lda #128
+  sta _oam_top
   sep #$20
   .a8
   stz _oam_next

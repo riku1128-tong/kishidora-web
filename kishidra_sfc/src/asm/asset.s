@@ -50,6 +50,11 @@ unpack7f:
   .a16
   .i16
   lda asset_flags
+  and #2
+  beq :+
+  jmp tileruns
+:
+  lda asset_flags
   and #1
   bne lz
   ; raw copy
@@ -135,6 +140,161 @@ lz:
   lda lz_len
   rts
 
+; tile runs (flags bit 1, sprite pose tiles): raw size (u16), run count (u8), per run its first
+; tile and its count of tiles (u8, u8), then those tiles.  The empty tiles are zero-filled and the
+; runs copied by DMA through the WRAM port (channel 3; the NMI uses 0, assets 1, box_clear 2,
+; HDMA 6-7), in pieces of at most 256 bytes: a DMA holds off the NMI, which must not start late.
+; A16 I16, X = destination offset in $7F; returns A = raw size.
+tileruns:
+  .a16
+  .i16
+  txa
+  sta f:WMADDL         ; + WMADDM
+  A8
+  lda #$7f
+  sta f:WMADDH
+  lda #<WMDATA
+  sta f:DMAP0+$31      ; B bus
+  A16
+  lda [lz_src]
+  sta lz_len           ; raw size
+  lsr
+  lsr
+  lsr
+  lsr
+  lsr
+  sta lz_end           ; tiles
+  ldy #2
+  lda [lz_src],y
+  and #$00ff
+  sta lz_cnt           ; runs
+  asl
+  clc
+  adc #3
+  adc lz_src
+  sta lz_bp            ; the tiles (same bank)
+  A8
+  lda lz_src+2
+  sta lz_bp+2
+  A16
+  stz lz_tmp           ; tile position
+  ldy #3
+@run:
+  lda lz_cnt
+  beq @tail
+  dec lz_cnt
+  lda [lz_src],y       ; first tile (low byte), count (high byte)
+  iny
+  iny
+  pha
+  and #$00ff
+  sec
+  sbc lz_tmp
+  jsr tr_zero          ; the empty tiles before the run
+  pla
+  pha
+  and #$00ff
+  sta lz_tmp
+  pla
+  xba
+  and #$00ff
+  pha
+  clc
+  adc lz_tmp
+  sta lz_tmp           ; after the run
+  pla
+  jsr tr_copy
+  bra @run
+@tail:
+  lda lz_end
+  sec
+  sbc lz_tmp
+  jsr tr_zero
+  lda lz_len
+  rts
+
+; A16: A = empty tiles to write at the WRAM port
+tr_zero:
+  .a16
+  asl
+  asl
+  asl
+  asl
+  asl
+  beq @done
+  sta lz_ctrl          ; bytes left
+  A8
+  lda #$08             ; fixed source, one register
+  sta f:DMAP0+$30
+  lda #^tr_zero_byte
+  sta f:DMAP0+$34
+  A16
+  lda #.loword(tr_zero_byte)
+  sta f:DMAP0+$32
+@piece:
+  lda lz_ctrl
+  cmp #257
+  bcc :+
+  lda #256
+:
+  sta f:DMAP0+$35
+  sta lz_bits
+  A8
+  lda #$08
+  sta f:MDMAEN
+  A16
+  lda lz_ctrl
+  sec
+  sbc lz_bits
+  sta lz_ctrl
+  bne @piece
+@done:
+  rts
+
+; A16: A = tiles to copy from lz_bp (advanced past them) to the WRAM port
+tr_copy:
+  .a16
+  asl
+  asl
+  asl
+  asl
+  asl
+  beq @done
+  sta lz_ctrl
+  A8
+  lda #$00             ; incrementing source, one register
+  sta f:DMAP0+$30
+  lda lz_bp+2
+  sta f:DMAP0+$34
+  A16
+@piece:
+  lda lz_bp
+  sta f:DMAP0+$32
+  lda lz_ctrl
+  cmp #257
+  bcc :+
+  lda #256
+:
+  sta f:DMAP0+$35
+  sta lz_bits
+  A8
+  lda #$08
+  sta f:MDMAEN
+  A16
+  lda lz_bp
+  clc
+  adc lz_bits
+  sta lz_bp
+  lda lz_ctrl
+  sec
+  sbc lz_bits
+  sta lz_ctrl
+  bne @piece
+@done:
+  rts
+
+tr_zero_byte: .byte 0
+
 ; u16 asset_unpack(void): ea0 = asset id, ea1 = destination offset in $7F -> unpacked size
 CFUNC asset_unpack
   php
@@ -166,7 +326,7 @@ CFUNC asset_vram
   lda _ea+0
   jsr asset_find
   lda asset_flags
-  and #1
+  and #3
   bne @packed
   ; stored raw: DMA straight from ROM
   A8

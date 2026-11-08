@@ -26,11 +26,45 @@ static u8 label_off;            /* a window covers the map: the label stays hidd
 
 static u8 mirage_open(void) { return area_done(AR_CASTLE) || (sv.story & ST_DEBUG_OPEN); }
 
+/* the markers and the dotted path change only with the save: made here, drawn every frame
+   (computing the dots took several frames of multiplies and divides per frame) */
+#define MAX_DOTS 120
+static u8 node_t[N_AREA];
+static s16 node_x[N_AREA], node_y[N_AREA];
+static s16 dot_x[MAX_DOTS], dot_y[MAX_DOTS];
+static u8 ndots;
+
+static void make_dots(void) {
+  u8 i, k, n;
+  s16 x0, y0, dx, dy;
+  ndots = 0;
+  for (i = 0; i + 1 <= sv.area_open && i + 1 < AR_MIRAGE; ++i) {
+    x0 = areas[i].x; y0 = areas[i].y;
+    dx = (s16)areas[i + 1].x - x0; dy = (s16)areas[i + 1].y - y0;
+    n = (u8)((MAX(dx < 0 ? -dx : dx, dy < 0 ? -dy : dy)) / 10);
+    for (k = 1; k < n && ndots < MAX_DOTS; ++k) {
+      dot_x[ndots] = x0 + dx * k / n - 4;
+      dot_y[ndots] = y0 + dy * k / n - 4;
+      ++ndots;
+    }
+  }
+}
+
 static void make_nodes(void) {
-  u8 a;
+  u8 a, i;
   nnodes = 0;
   for (a = 0; a <= sv.area_open && a < AR_MIRAGE; ++a) nodes[nnodes++] = a;
   if (mirage_open()) nodes[nnodes++] = AR_MIRAGE;
+  for (i = 0; i < nnodes; ++i) {
+    a = nodes[i];
+    if (a == AR_MIRAGE) node_t[i] = MK_T_MARK + 3;
+    else if (area_done(a)) node_t[i] = MK_T_MARK + 2;
+    else if (a == sv.area_open) node_t[i] = MK_T_MARK + 0;
+    else node_t[i] = MK_T_MARK + 1;
+    node_x[i] = (s16)areas[a].x - 4;
+    node_y[i] = (s16)areas[a].y - 4;
+  }
+  make_dots();
 }
 
 static u8 node_index(u8 a) {
@@ -40,8 +74,8 @@ static u8 node_index(u8 a) {
 }
 
 static void map_sprites(void) {
-  u8 i, a, t, k, n;
-  s16 x0, y0, x1, y1, dx, dy, x, y;
+  u8 i;
+  s16 x, y, *px, *py;
   /* selection ring (16x16 = 4 tiles), blinking */
   x = areas[sel].x - 8; y = areas[sel].y - 8 - scroll_y;
   if ((frame >> 4) & 1) {
@@ -51,26 +85,16 @@ static void map_sprites(void) {
     spr_add(x + 8, y + 8, MK_ATTR(MK_T_RING + 17, MK_PAL_MENU, 2), 0);
   }
   for (i = 0; i < nnodes; ++i) {
-    a = nodes[i];
-    if (a == AR_MIRAGE) t = MK_T_MARK + 3;
-    else if (area_done(a)) t = MK_T_MARK + 2;
-    else if (a == sv.area_open) t = MK_T_MARK + 0;
-    else t = MK_T_MARK + 1;
-    y = areas[a].y - 4 - scroll_y;
+    y = node_y[i] - scroll_y;
     if (y < VIEW_TOP - 4 || y > VIEW_TOP + VIEW_H) continue;
-    spr_add(areas[a].x - 4, y, MK_ATTR(t, MK_PAL_MENU, 2), 0);
+    spr_add(node_x[i], y, MK_ATTR(node_t[i], MK_PAL_MENU, 2), 0);
   }
   /* dotted path along the open areas */
-  for (i = 0; i + 1 <= sv.area_open && i + 1 < AR_MIRAGE && oam_next < 120; ++i) {
-    x0 = areas[i].x; y0 = areas[i].y; x1 = areas[i + 1].x; y1 = areas[i + 1].y;
-    dx = x1 - x0; dy = y1 - y0;
-    n = (u8)((MAX(dx < 0 ? -dx : dx, dy < 0 ? -dy : dy)) / 10);
-    for (k = 1; k < n && oam_next < 120; ++k) {
-      x = x0 + dx * k / n - 4;
-      y = y0 + dy * k / n - 4 - scroll_y;
-      if (y < VIEW_TOP - 4 || y > VIEW_TOP + VIEW_H) continue;
-      spr_add(x, y, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 2), 0);
-    }
+  px = dot_x; py = dot_y;
+  for (i = 0; i < ndots && oam_next < 120; ++i, ++px, ++py) {
+    y = *py - scroll_y;
+    if (y < VIEW_TOP - 4 || y > VIEW_TOP + VIEW_H) continue;
+    spr_add(*px, y, MK_ATTR(MK_T_DOT, MK_PAL_MENU, 2), 0);
   }
 }
 

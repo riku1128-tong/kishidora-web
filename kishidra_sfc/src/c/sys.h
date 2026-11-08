@@ -38,6 +38,7 @@ void wram_zero(void);        /* ea0 address, ea1 bank, ea2 length */
 void mem_copy(void);         /* ea0 source, ea1 destination, ea2 length (bank $7E) */
 extern u8 oam_next;
 extern u16 oam_used;          /* sprite.s: slots oam_finish still has to hide */
+extern u16 oam_top;           /* sprite.s: slots from here on are kept (fixed sprites); 128 none */
 void spr_add(s16 x, s16 y, u16 tile_attr, u8 large);
 void oam_finish(void);
 void spr_list(void);         /* ea0 entries (s16 x, s16 y, u16 tile_attr, u16 large), ea1 count */
@@ -63,6 +64,9 @@ u8   rnd_pct(u16 p);              /* true with p% */
 /* misc */
 u16  mul_pct16(u16 v, u16 p);
 u32  mul_pct(u32 v, u16 p);
+extern u16 pa[2], pp;           /* math.s: 32-bit argument / result, percentage */
+void pct_now(void);             /* pa = (pa * pp) / 100 */
+u8   div10_now(void);           /* pa /= 10, returns the remainder */
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 

@@ -5,13 +5,51 @@
     a.write()        -> data/gen/gfx.s, data/gen/gfx.h, data/gen/gfx/*.bin
 
 Each asset gets an id ASSET_<NAME>; the asm table `<prefix>_table` has 6 bytes per
-asset: address (2), bank (1), flags (1: bit0 = LZSS), size (2, stored size).
+asset: address (2), bank (1), flags (1: bit0 = LZSS, bit1 = tile runs), size (2, stored size).
+
+Tile runs (sprite pose tiles, most 32-byte tiles empty): raw size (u16), number of runs (u8), per
+run the first tile and the count of non-empty tiles (u8, u8), then those tiles.  src/asm/asset.s
+unpacks it with DMA (a few hundred microseconds; LZSS took up to a frame).
 """
 import os
 import re
 import struct
 
 from snesgfx import lzss
+
+
+def tile_runs(raw):
+    """raw 4bpp tiles -> the tile-runs format (see the module doc)"""
+    assert len(raw) % 32 == 0 and len(raw) <= 0xffff
+    tiles = [raw[i:i + 32] for i in range(0, len(raw), 32)]
+    runs, data, i = [], bytearray(), 0
+    while i < len(tiles):
+        if tiles[i] == bytes(32):
+            i += 1
+            continue
+        j = i
+        while j < len(tiles) and tiles[j] != bytes(32) and j - i < 255:
+            j += 1
+        runs.append((i, j - i))
+        for t in tiles[i:j]:
+            data += t
+        i = j
+    assert len(runs) < 256 and len(tiles) <= 256
+    out = bytearray(struct.pack('<HB', len(raw), len(runs)))
+    for a, n in runs:
+        out += bytes((a, n))
+    return bytes(out + data)
+
+
+def untile_runs(blob):
+    n, k = struct.unpack_from('<HB', blob, 0)
+    out = bytearray(n)
+    p = 3 + 2 * k
+    for r in range(k):
+        a, c = blob[3 + 2 * r], blob[4 + 2 * r]
+        out[a * 32:(a + c) * 32] = blob[p:p + c * 32]
+        p += c * 32
+    return bytes(out)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GEN = os.path.normpath(os.path.join(HERE, '..', '..', 'data', 'gen'))
@@ -25,12 +63,16 @@ class Assets:
         self.names = set()
         self.consts = []
 
-    def add(self, name, data, compress=True):
+    def add(self, name, data, compress=True, tiles=False):
         name = re.sub(r'[^A-Za-z0-9_]', '_', name).upper()
         assert name not in self.names, name
         self.names.add(name)
         flags = 0
         blob = bytes(data)
+        if tiles:
+            blob = tile_runs(blob)
+            flags |= 2
+            compress = False
         if compress and len(blob) > 64:
             z = lzss(blob)
             if len(z) < len(blob):

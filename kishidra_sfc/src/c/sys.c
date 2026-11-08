@@ -43,10 +43,10 @@ void spr_put(u8 k, u16 vaddr, u16 src, u8 bank, u16 size) {
 }
 
 u16 spr_bytes(void) {         /* (with the NMI's set-up time of each, crt0.s VQ_ENTRY) */
-  u8 k;
+  u8 k, *e = spr_q;
   u16 n = 0, z;
   if (!spr_on) return 0;      /* the NMI took them all */
-  for (k = 0; k < SPR_SLOTS; ++k) if ((z = spr_q[k * 8 + 5] | ((u16)spr_q[k * 8 + 6] << 8)) != 0) n += z + 80;
+  for (k = SPR_SLOTS; k; --k, e += 8) if ((z = e[5] | ((u16)e[6] << 8)) != 0) n += z + 80;
   return n;
 }
 
@@ -162,13 +162,18 @@ u8 rnd_pct(u16 p) {
   return p > 0 && rnd_range(0, 99) < p;
 }
 
+/* (v * p) / 100 as before, by the hardware multiplier and divider (math.s) */
 u16 mul_pct16(u16 v, u16 p) {
-  return (u16)(((u32)v * p) / 100);
+  pa[0] = v; pa[1] = 0; pp = p;
+  pct_now();
+  return pa[0];
 }
 
 u32 mul_pct(u32 v, u16 p) {
   if (p == 100) return v;
-  return (v * p) / 100;
+  pa[0] = (u16)v; pa[1] = (u16)(v >> 16); pp = p;
+  pct_now();
+  return pa[0] | ((u32)pa[1] << 16);
 }
 
 #ifdef PROFILE

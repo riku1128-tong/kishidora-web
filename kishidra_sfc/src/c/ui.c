@@ -43,20 +43,20 @@ void tb_flush(u8 id) {
  * colour (or shown again) never shows the old text in the new colours, or the new in the old.
  * At most MQ_CAP bytes wait at a time (the map's 2KB and these fit in one NMI). */
 #define MQ_CAP 2272
-static u16 q_size(u8 *q, u8 k) { return q[k * 8 + 5] | ((u16)q[k * 8 + 6] << 8); }
+#define Q_SIZE(e) ((e)[5] | ((u16)(e)[6] << 8))   /* bytes of a queue entry (0 = free) */
 
 #define MQ_ENTRY 80             /* the NMI's time to set up an entry, in bytes (crt0.s VQ_ENTRY) */
 u16 mq_bytes(void) {
-  u8 k;
+  u8 k, *e = mq;
   u16 n = 0, z;
   if (!mq_on) return 0;
-  for (k = 0; k < MQ_SLOTS; ++k) if ((z = q_size(mq, k)) != 0) n += z + MQ_ENTRY;
+  for (k = MQ_SLOTS; k; --k, e += 8) if ((z = Q_SIZE(e)) != 0) n += z + MQ_ENTRY;
   return n;
 }
 
 u8 mq_fits(u16 bytes) {           /* (sprite tiles waiting for the same NMI count too) */
-  u8 k;
-  for (k = 0; k < MQ_SLOTS; ++k) if (!q_size(mq, k)) return mq_bytes() + spr_bytes() + bytes + MQ_ENTRY <= MQ_CAP;
+  u8 k, *e = mq;
+  for (k = MQ_SLOTS; k; --k, e += 8) if (!(e[5] | e[6])) return mq_bytes() + spr_bytes() + bytes + MQ_ENTRY <= MQ_CAP;
   return 0;
 }
 
@@ -66,11 +66,11 @@ void mq_room(u16 bytes) {
 }
 
 static u8 mq_add(u16 vaddr, u16 src, u16 size) {
-  u8 k, *e, f = 255;
-  for (k = 0; k < MQ_SLOTS; ++k) {
-    e = &mq[k * 8];
-    if (!q_size(mq, k)) { if (f == 255) f = k; continue; }
-    if ((e[0] | ((u16)e[1] << 8)) == vaddr && q_size(mq, k) == size) return 1;   /* sent from WRAM then */
+  u8 k, *e = mq, f = 255;
+  u16 z;
+  for (k = 0; k < MQ_SLOTS; ++k, e += 8) {
+    if (!(z = Q_SIZE(e))) { if (f == 255) f = k; continue; }
+    if ((e[0] | ((u16)e[1] << 8)) == vaddr && z == size) return 1;   /* sent from WRAM then */
   }
   if (f == 255 || mq_bytes() + size + MQ_ENTRY > MQ_CAP) return 0;
   e = &mq[f * 8];
@@ -106,11 +106,12 @@ u8 vq_busy(u16 lo, u16 hi) {
 
 /* the canvas of tiles t0..t0+n-1 is not in VRAM yet (queued, or waiting with the map) */
 u8 canvas_busy(u16 t0, u16 n) {
-  u8 k;
-  u16 lo = t0 * 16, hi = (t0 + n) * 16, s;
-  if (mq_on) for (k = 0; k < MQ_SLOTS; ++k) {
-    s = mq[k * 8 + 2] | ((u16)mq[k * 8 + 3] << 8);
-    if (q_size(mq, k) && s < hi && s + q_size(mq, k) > lo) return 1;
+  u8 k, *e = mq;
+  u16 lo = t0 * 16, hi = (t0 + n) * 16, s, z;
+  if (mq_on) for (k = MQ_SLOTS; k; --k, e += 8) {
+    if (!(z = Q_SIZE(e))) continue;
+    s = e[2] | ((u16)e[3] << 8);
+    if (s < hi && s + z > lo) return 1;
   }
   return vq_busy(lo, hi);
 }
@@ -128,6 +129,11 @@ static void canvas_free(u16 t0, u16 n) {
 void tb_rect(u8 id, u16 x, u8 y, u16 w, u8 h, u8 colour) {
   ea[0] = x; ea[1] = y; ea[2] = w; ea[3] = h | ((u16)colour << 8);
   tb_rect_now(id);
+}
+
+void tb_free(u8 id) {               /* before drawing into a box without clearing it */
+  u8 *b = &tb[id * 8];
+  canvas_free(b[4] | ((u16)b[5] << 8), (u16)b[2] * b[3]);
 }
 
 void tb_clear(u8 id) {
@@ -186,23 +192,18 @@ void say_center(u8 id, u16 py, u16 msg) {
 void box_pal(u8 id, u8 tx, u8 ty, u8 tw, u8 th, u8 pal) {
   u8 *b = &tb[id * 8];
   u8 x, y;
-  u16 i;
-  for (y = 0; y < th; ++y) {
-    i = ((u16)(b[1] + ty + y) << 5) + b[0] + tx;
-    for (x = 0; x < tw; ++x, ++i) bg3map[i] = (bg3map[i] & 0xe3ff) | ((u16)pal << 10);
-  }
+  u16 pb = (u16)pal << 10, *p, *row = &bg3map[((u16)(b[1] + ty) << 5) + b[0] + tx];
+  for (y = th; y; --y, row += 32)
+    for (x = tw, p = row; x; --x, ++p) *p = (*p & 0xe3ff) | pb;
   bgmap_dirty |= 4;
 }
 
 void box_hide(u8 id) {
   u8 *b = &tb[id * 8];
-  u8 x, y;
-  u16 i;
+  u8 y;
+  u16 n = (u16)b[2] * 2, *row = &bg3map[((u16)b[1] << 5) + b[0]];
   tb_fresh &= ~(1 << id);
-  for (y = 0; y < b[3]; ++y) {
-    i = ((u16)(b[1] + y) << 5) + b[0];
-    for (x = 0; x < b[2]; ++x) bg3map[i++] = 0;
-  }
+  for (y = b[3]; y; --y, row += 32) memset(row, 0, n);
   bgmap_dirty |= 4;
 }
 

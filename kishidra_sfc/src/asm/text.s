@@ -694,42 +694,20 @@ CFUNC tb_rect_now
   bne :+
   jmp @done
 :
-  lda _ea+2
-  sta t_py
-@row:
   lda _ea+4
-  sta t_tx1            ; columns left
   bne :+
   jmp @done
 :
-  lda _ea+0
-  sta t_px
-@px:
-  lda t_px             ; the pixel's bit
-  and #7
-  tax
-  sep #$20
-  .a8
-  lda f:rect_bit,x
-  sta t_tmp2
-  eor #$ff
-  sta t_tmp2+1
-  rep #$20
-  .a16
-  ; canvas byte of (t_px, t_py): ((base + (py >> 3) * w + (px >> 3)) * 16) + (py & 7) * 2
-  lda t_py
+  lda _ea+2
+  sta t_py
+  ; a row at a time, a tile column (up to 8 pixels, one mask) at a time
+@row:
+  lda t_py             ; byte of the row in the first tile column: ((base + (py >> 3) * w) * 16) + (py & 7) * 2
   lsr
   lsr
   lsr
   ldx t_w
   jsr mul16x8
-  sta t_tmp
-  lda t_px
-  lsr
-  lsr
-  lsr
-  clc
-  adc t_tmp
   clc
   adc t_base
   asl
@@ -739,6 +717,48 @@ CFUNC tb_rect_now
   sta t_tmp
   lda t_py
   and #7
+  asl
+  clc
+  adc t_tmp
+  sta t_tmp            ; + (px >> 3) * 16 below
+  lda _ea+0
+  sta t_px
+  lda _ea+4
+  sta t_tx1            ; pixels left in the row
+@col:
+  lda t_px
+  and #7
+  tay                  ; first bit in the tile
+  eor #$ffff
+  sec
+  adc #8               ; 8 - first bit
+  cmp t_tx1
+  bcc :+
+  lda t_tx1
+:
+  sta t_tmp3           ; pixels in this tile column
+  ; mask: bits first .. first + n - 1 (bit 7 = pixel 0) = lmask[first] & ~lmask[first + n]
+  tya
+  clc
+  adc t_tmp3
+  tax
+  sep #$20
+  .a8
+  lda rect_lmask,x     ; (DB = $80, the table is in this bank)
+  eor #$ff
+  and rect_lmask,y
+  sta t_tmp2           ; the bits
+  eor #$ff
+  sta t_tmp2+1         ; the rest
+  rep #$20
+  .a16
+  lda t_px
+  lsr
+  lsr
+  lsr
+  asl
+  asl
+  asl
   asl
   clc
   adc t_tmp
@@ -764,11 +784,15 @@ CFUNC tb_rect_now
   sta f:$7f0001,x
   rep #$20
   .a16
-  inc t_px
-  dec t_tx1
-  beq :+
-  jmp @px
-:
+  lda t_px
+  clc
+  adc t_tmp3
+  sta t_px
+  lda t_tx1
+  sec
+  sbc t_tmp3
+  sta t_tx1
+  bne @col
   inc t_py
   dec t_ty1
   beq @done
@@ -777,6 +801,7 @@ CFUNC tb_rect_now
   plb
   plp
   rtl
+rect_lmask: .byte $ff, $7f, $3f, $1f, $0f, $07, $03, $01, $00
 rect_bit: .byte $80, $40, $20, $10, $08, $04, $02, $01
 
 ; tb_flush is in ui.c (chunked uploads through queue_vram)
@@ -1795,7 +1820,8 @@ shl_tab:
 ; Logs glyphs that leave their box and glyphs whose 8x8 tiles already hold text of another colour
 ; (a tile has one palette).  Entries of 8 bytes at $7F:E000 (512; bytes written at $7F:DBFE):
 ;   type (1 right, 2 bottom, 3 colour, 4 left, 5 top), box, text id (2), x (2), y, old pal << 4 | new pal
-;   type 6: a line drawn (x = its start, extra = width), type 7: the box was cleared
+;   type 6: a line drawn (x = its start, extra = width), type 7: the box was cleared,
+;   type 10: rows of the box zeroed (tc_rows: y = first pixel row, extra = height)
 ; $7F:DC00 + tile = palette of the text already in that tile ($FF none); box_clear resets it.
 .segment "ENGINE"
 TC_INK = $7fdc00       ; 1024 tiles
@@ -2030,6 +2056,61 @@ tc_extent:
   rts
 
 ; box_clear: no text in the box's tiles any more (logged as type 7)
+; void tc_rows(void): ea0 = box, ea1 = first tile row, ea2 = rows: those rows of the box were
+; zeroed (a part of it drawn again); logged as type 10 (y = first pixel row, extra = height)
+CFUNC tc_rows
+  php
+  phb
+  AXY16
+  A8
+  lda #$80
+  pha
+  plb
+  A16
+  lda _ea+0
+  jsr box_load
+  lda _ea+2
+  asl
+  asl
+  asl
+  sta t_py
+  stz t_px
+  lda #$ffff
+  sta t_msg
+  lda _ea+4
+  asl
+  asl
+  asl
+  sta t_tmp2
+  lda #10
+  jsr tc_log
+  lda _ea+4
+  ldx t_w
+  jsr mul16x8
+  sta t_tmp
+  lda _ea+2
+  ldx t_w
+  jsr mul16x8
+  clc
+  adc t_base
+  tax
+  ldy t_tmp
+  beq @r
+  sep #$20
+  .a8
+  lda #$ff
+@l:
+  sta f:TC_INK,x
+  inx
+  dey
+  bne @l
+  rep #$20
+  .a16
+@r:
+  plb
+  plp
+  rtl
+
 tc_clear:
   .a16
   .i16
