@@ -290,6 +290,9 @@ void dbg_loadout(u8 c, u16 n, u16 a1) {
     for (t = 0, n = 0; t < sv.ninv; ++t) if (inv_solo(&sv.inv[t])) ++n;
     dbg_res[1] = n;
     break;
+  case DC_POOL:
+    for (t = 0; t < n; ++t) p[t] = solo_pool_id(t);
+    break;
   }
 }
 #endif

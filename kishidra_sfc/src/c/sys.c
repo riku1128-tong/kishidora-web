@@ -279,7 +279,7 @@ static void dbg_poll(void) {
   case DC_NUMSPR:
     dbg_res[0] = dbg_numspr((s16)a0, (s16)a1, (s16)a2, (u8)a3, (u8 *)dbg_buf);
     break;
-  case DC_SOLO: case DC_REACH: case DC_REACH_EQ: case DC_FX: case DC_SOLOALL:
+  case DC_SOLO: case DC_REACH: case DC_REACH_EQ: case DC_FX: case DC_SOLOALL: case DC_POOL:
     dbg_loadout(c, a0, a1);
     break;
   case DC_RND:

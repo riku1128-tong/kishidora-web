@@ -24,6 +24,10 @@ u8 sp_reach_equipped(u8 *out, u8 *scratch);   /* MAIN, SUB, THIRD of sv.equip */
 u8 __fastcall__ solo_eval(const u8 *sk);
 u8 solo_ok_sk(const u8 *sk, u8 *kick);        /* 1 = sk[0..2] alone fires a special; *kick = kick-only */
 void __fastcall__ solo_bag(Inv *it, u16 n);   /* loadout.s: the INV_SOLO bit of n items from it on */
+/* the 必殺10連 pool (make_data build_solo; in the ROM blob, so read through loadout.s): item id i of
+ * the pool, i = SOLO_OFF_r + k with k < SOLO_CNT_r for the rarity SOLO_RAR_r (gdata.h) */
+u8 __fastcall__ solo_byte(u16 off);           /* loadout.s: byte off of the blob solo_data */
+#define solo_pool_id(i) solo_byte(SOLO_POOL + (i))
 
 /* the INV_SOLO bit of a bag item (Inv.slots bit 6): valid while sv.story & ST_SOLO.  inv_add sets it,
  * save_load runs inv_solo_all once for a save without ST_SOLO; code that changes the skills of an item
@@ -50,7 +54,7 @@ u8 fx_state(const Inv *const *lo, u8 k);
 u8 fx_state_of(const Inv *const *lo, u8 k, u8 fx);
 
 #ifdef TEST_HOOKS
-void dbg_loadout(u8 c, u16 n, u16 a1);         /* sys.c DC_SOLO .. DC_SOLOALL (records in ovl + DBG_IO) */
+void dbg_loadout(u8 c, u16 n, u16 a1);         /* sys.c DC_SOLO .. DC_SOLOALL, DC_POOL (records in ovl + DBG_IO) */
 #endif
 
 #endif

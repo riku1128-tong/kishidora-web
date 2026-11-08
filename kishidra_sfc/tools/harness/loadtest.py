@@ -11,7 +11,7 @@ Python (no ROM):
           sequences, mixed)
   solo    the solo table == the web BFS on all 120,100 lists of 1-3 distinct skills and all 127,550 with
           repeats, and == (snes_reach of that one weapon != 0); kick-only == battle_core.gd kick_only
-ROM (sys.c test commands DC_SOLO .. DC_MATH, records in ovl):
+ROM (sys.c test commands DC_SOLO .. DC_POOL, records in ovl):
   solo    every list that fires a special (1,691) + 400 others + kick lists: solo_ok_sk (fires, kick-only),
           sp_reach(nw = 1) (its specials) and the INV_SOLO bit inv_add gives a sword / a weapon / a shield
           with that list == the models
@@ -20,7 +20,8 @@ ROM (sys.c test commands DC_SOLO .. DC_MATH, records in ovl):
   fx      fx_state_of for the 86 effects x 4 slots x 6 loadouts + fx_state (the items' own effects):
           state, note text, target slots == desc.gd fx_state (loadout_model.fx_state)
   rnd     500 rnd(), rnd_range of 6 ranges (both paths), rnd_below, rnd_pct == the C of before S7
-  math    mul_now, div_now, pct_now, rnd_mul8 on 200 random arguments each == Python
+  math    mul_now, div_now, pct_now, rnd_mul8 on 100 random arguments each == Python
+  pool    solo_pool_id (the 必殺10連 pool in the ROM blob) == the web solo_gacha_cands per rarity
   bag     a v1 save of 999 items: after the load every INV_SOLO bit == the model, ST_SOLO set, the
           save written back (seq 2 in slot B); inv_solo_all on that bag (DC_SOLOALL) <= 10 frames
 Exit status 0 when every check passes."""
@@ -47,7 +48,7 @@ import textwidth  # noqa: E402
 
 fails = []
 DBG_IO = 512
-DC_SOLO, DC_REACH, DC_REACH_EQ, DC_FX, DC_SOLOALL, DC_RND, DC_MATH = 8, 9, 10, 11, 12, 13, 14
+DC_SOLO, DC_REACH, DC_REACH_EQ, DC_FX, DC_SOLOALL, DC_RND, DC_MATH, DC_POOL = 8, 9, 10, 11, 12, 13, 14, 15
 ST_SOLO, INV_SOLO = 8, 0x40
 STORY = 107                  # offset of sv.story (save.h)
 
@@ -402,6 +403,11 @@ def rom_checks(c, rom, out):
         S.poke_bytes('ovl', DBG_IO, [v for x, p in recs for v in (x & 0xffff, x >> 16, p, 0)], w=2)
         S.cmd(DC_MATH, [len(recs), mode])
         S.dump('math_%d.bin' % mode, 'ovl+%d' % DBG_IO, 8 * len(recs))
+    # the 必殺10連 pool
+    gdefs = {mm.group(1): int(mm.group(2)) for mm in re.finditer(
+        r'#define\s+(SOLO_\w+)\s+(\d+)', open(os.path.join(ROOT, 'data', 'gen', 'gdata.h')).read())}
+    S.cmd(DC_POOL, [gdefs['SOLO_POOL_N']])
+    S.dump('pool.bin', 'ovl+%d' % DBG_IO, gdefs['SOLO_POOL_N'])
     # the bag again, timed
     S.cmd(DC_SOLOALL, [])
     S.dump('bag_after.bin', 'sv', mksave.V2_SIZE)
@@ -526,6 +532,18 @@ def rom_checks(c, rom, out):
         check(bad == 0, '%s on %d arguments == Python (%d differ)' % (['mul_now', 'div_now', 'pct_now', 'rnd_mul8'][mode], len(recs), bad))
         ci += 1
 
+    print('rom: the 必殺10連 pool (DC_POOL)')
+    got = rd('pool.bin')
+    want, ok_defs = [], True
+    for r, (rar, w) in enumerate(c.s.tuning['SOLO_GACHA_RATES']['surface']):
+        ids = [c.item_ids.index(k) for k in solo_cands(c.s, rar)]
+        ok_defs &= (gdefs['SOLO_OFF_%d' % r], gdefs['SOLO_CNT_%d' % r]) == (len(want), len(ids))
+        want += ids
+    check(ok_defs and list(got) == want and len(want) == gdefs['SOLO_POOL_N'],
+          'solo_pool_id(0 .. %d) == the web solo_gacha_cands of each rarity in order (SOLO_OFF_r / SOLO_CNT_r %s)' % (
+              len(want) - 1, 'right' if ok_defs else 'WRONG'))
+    ci += 1
+
     print('rom: the bag of a v1 save (999 items)')
     sv = open(os.path.join(out, 'after_load.bin'), 'rb').read()
     o = hrun.addr(syms, 'sv')
@@ -567,6 +585,22 @@ def rom_checks(c, rom, out):
         got = [x for x in range(16) if r2[1] >> x & 1]
         check(rr.returncode == 0 and got == want and r2[0] == len(want),
               'save %d: %s (%d frames)' % (k, got, r2[2]))
+
+
+WEB_RARITY_IDS = ['RARE_N', 'RARE_NP', 'RARE_R', 'RARE_RP', 'RARE_SR', 'RARE_SRP', 'RARE_SSR', 'RARE_SSRP', 'RARE_UR',
+                  'RARE_URP', 'RARE_USR', 'RARE_USRP', 'RARE_LR', 'RARE_LRP', 'RARE_LSR', 'RARE_LSRP', 'RARE_MR']   # rarity.gd IDS
+
+
+def solo_cands(s, rarity):
+    """adventure.gd solo_gacha_cands('surface', rarity): DexData.weapon_order (WEAPON_TABLE without the
+    material items, sword / spear / hammer, below SSR, by type, rarity, atk, id) of that rarity"""
+    mats = {r['item'] for r in s.tables['MAT_TABLE'] if r.get('item')}
+    tord = {'WT_SWORD': 0, 'WT_SPEAR': 1, 'WT_HAMMER': 2}
+    ranks = WEB_RARITY_IDS
+    rows = [w for w in s.tables['WEAPON_TABLE'] if w['id'] not in mats and w['wtype'] in tord
+            and ranks.index(s.weapons[w['id']]['rarity']) < ranks.index('RARE_SSR')]
+    rows.sort(key=lambda w: (tord[w['wtype']], ranks.index(w['rarity']), int(w['atk']), w['id']))
+    return [w['id'] for w in rows if s.weapons[w['id']]['rarity'] == rarity]
 
 
 def mksave_run(path, *args):

@@ -537,15 +537,19 @@ class Gen:
         m = loadout_model.Model(s)
         assert m.skill_ids == self.skill_ids
         st = loadout_model.SoloTable(m)
-        n = bad = pos = 0
+        n = bad = badk = pos = 0
         for k in (1, 2, 3):
             for l in itertools.product(range(len(self.skill_ids)), repeat=k):
                 ref = bool(m.web_reach([list(l)]))
                 n += 1
                 pos += ref
-                if st.lookup(l)[0] != ref:
+                fires, kick = st.lookup(l)
+                if fires != ref:
                     bad += 1
+                if kick != m.kick_only(l):        # (needs SK_KICK to have a class of its own)
+                    badk += 1
         assert not bad, 'solo table: %d of %d skill lists differ from the web BFS' % (bad, n)
+        assert not badk, 'solo table: kick-only differs from battle_core.gd kick_only on %d of %d lists' % (badk, n)
         blob = bytearray(512)
         blob[0] = st.cls[m.kick]
         for i, c in enumerate(st.cls):

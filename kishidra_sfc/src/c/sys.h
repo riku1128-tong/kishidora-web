@@ -89,6 +89,7 @@ u16 prof_line(void);
                                    * rnd_state before / after */
 #define DC_MATH 14                /* n records of 8 B [u32 x, u16 p, u16 0] -> u32 over x: arg1 mode 0 mul_now
                                    * (x & 0xffff, p), 1 div_now, 2 pct_now, 3 rnd_mul8(x & 0xffff, p) */
+#define DC_POOL 15                /* the 必殺10連 pool: n = arg0 bytes solo_pool_id(0 ..) -> the records */
 #define DC_UNKNOWN 0xff          /* dbg_ack of a command no one knows */
 #define DS_NONE 0                 /* dbg_scr: screens that take commands set their DS_ id */
 extern u8 dbg_cmd, dbg_ack, dbg_seq, dbg_scr;

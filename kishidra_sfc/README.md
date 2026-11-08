@@ -75,7 +75,8 @@ python build.py rom
 - `src/c/` ゲーム本体（cc65）。`battle_core.c` / `battle_hit.c` が Safari 版 battle_core.gd の移植、`battle_view.c` が戦闘画面、
   `map.c` `menu.c` `gacha.c` `forge.c` `story.c` `rewards.c` が冒険部分、`save.c` `adventure.c` がセーブとルール、
   `loadout.c` が装備の共通ルール（その装備で出せる必殺技 `sp_reach`、武器 1 本で必殺技が出せるか `solo_ok_sk`
-  〈表は `src/asm/loadout.s` が ROM から読む〉と持ち物のその印 `INV_SOLO`、特殊効果のようす `fx_state`）。
+  〈表は `src/asm/loadout.s` が ROM から読む。必殺10連の武器の一覧も同じ所から `solo_pool_id`〉と持ち物のその印 `INV_SOLO`、
+  特殊効果のようす `fx_state`）。
   `ovl.h` は戦闘と画面が交代で使う作業領域 `ovl[1536]`
 - `tools/make_data.py` `tools/make_gfx.py` `tools/make_audio.py` 変換スクリプト、`tools/audio/` SPC700 ドライバとアセンブラ・BRR 変換
 - `src/text/ui.txt` 画面の文章（id と文）。make_data.py は `ui.txt` を読んでから `ui_*.txt` を名前の順に読む
@@ -121,7 +122,7 @@ python build.py rom
   ドライバの空き数（ポート 2）はブロックの連続受信中は更新されないので、最後のブロックから 32 ライン空けて読む。
   起動後の効果音サンプルの転送も待ち時間に行う（タイトルで約 3 秒）
 - ダメージ計算の百分率（`mul_pct`）と数字の桁分解はハードウェアの乗除算器で行う（`src/asm/math.s`、結果は C と同一）。
-  乱数（`rnd`、範囲の乱数 `rnd_range` / `rnd_below`）も math.s（前の C と同じ列）
+  乱数（`rnd`、範囲の乱数 `rnd_below`、`rnd_range` が使う乗算 `rnd_mul8`）も math.s（前の C と同じ列）
 - 戦闘パネルのスプライト（アイコン・コストの札）は OAM の 96〜127 番に置き、変わったときだけ書き直す
 
 フォントは東雲フォント（パブリックドメイン、`tools/font/SHINONOME_COPYRIGHT.txt`）と、戦闘パネルの小さい文字に

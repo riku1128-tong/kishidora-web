@@ -93,6 +93,22 @@ CFUNC solo_bag
   plp
   rtl
 
+; u8 __fastcall__ solo_byte(u16 off): byte off of the blob, for C (the 必殺10連 pool: solo_pool_id in
+; loadout.h, off = SOLO_POOL + i of gdata.h).  A / X = off.
+CFUNC solo_byte
+  php
+  sta so_ix
+  stx so_ix+1
+  AXY16
+  ldx so_ix
+  A8
+  lda f:solo_data,x
+  plp
+  .a8
+  .i8
+  ldx #0
+  rtl
+
 ; the flags of the list at $7E:so_p (A16 I16 in and out): A = bit 0 fires, bit 1 kick-only
 so_eval:
   .a16
